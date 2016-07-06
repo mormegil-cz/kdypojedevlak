@@ -1,0 +1,21 @@
+﻿@model IEnumerable<KeyValuePair<string, string>>
+@{
+    ViewData["Title"] = "Výběr místa";
+}
+@using (Html.BeginForm(FormMethod.Get))
+{
+    <label for="search">Vyberte místo:</label>
+    @Html.TextBox("search", null, new { id = "search" })
+    <input type="submit" value="Hledat" />
+}
+
+@if (Model != null)
+{
+    <h3>Nalezené výsledky</h3>
+    <ul>
+    @foreach (var result in Model)
+    {
+        <li>@Html.ActionLink(result.Value, "Nearest", new { id = result.Key })</li>
+    }
+    </ul>
+}

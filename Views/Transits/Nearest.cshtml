@@ -1,0 +1,15 @@
+﻿@model IEnumerable<KdyPojedeVlak.Engine.TrainRoutePoint>
+@{
+    ViewData["Title"] = "Nejbližší vlaky";
+}
+<ul>
+@foreach(var train in Model)
+{
+    <li>
+    @train.ScheduledTime
+    @Html.ActionLink(train.Train.TrainType + " " + train.Train.TrainNumber, "Detail", "Train", new { id = train.Train.ID })
+    @Html.ActionLink(train.Calendar.ID, "Detail", "Calendar", new { id = train.Calendar.ID })
+    train.Calendar.Description
+    </li>
+}
+</ul>
