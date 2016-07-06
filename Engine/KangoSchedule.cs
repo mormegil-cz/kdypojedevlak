@@ -101,8 +101,8 @@ namespace KdyPojedeVlak.Engine
                     Bitmap = g.Last().Row[1].Select(c => c == '1').ToArray()
                 });
 
-            calendars.Add("0", new TrainCalendar { ID = "0", Description = "jede pp", Bitmap = null });
-            calendars.Add("1", new TrainCalendar { ID = "1", Description = "", Bitmap = null });
+            calendars.Add("0", new TrainCalendar { ID = "0", Description = "jede pp", Bitmap = new bool[553] });
+            calendars.Add("1", new TrainCalendar { ID = "1", Description = "", Bitmap = Enumerable.Range(1, 553).Select(_ => true).ToArray() });
 
             LoadKangoData(path, "HLV")
                 .IntoDictionary(trains, t => t[0], t => new Train
@@ -208,6 +208,7 @@ namespace KdyPojedeVlak.Engine
 
         private static TimeSpan GetTimeFromRow(string[] row)
         {
+            // TODO: Over-midnight trains
             //var dd = GetNumberFromRow(row, 7, 13, false);
             var dd = new int?(0);
             var hh = GetNumberFromRow(row, 8, 14, true);
