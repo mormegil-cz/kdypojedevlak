@@ -62,7 +62,7 @@ namespace KdyPojedeVlak.Engine
 
     public class KangoSchedule
     {
-        private static readonly string[] trainTypesByQuality = { "IC", "EN", "EC", "Ex", "R", "Sp", "Os" };
+        private static readonly string[] trainTypesByQuality = { "SC", "IC", "EN", "EC", "Ex", "R", "Sp", "Os" };
         private readonly string path;
         private readonly Dictionary<string, RoutingPoint> points = new Dictionary<string, RoutingPoint>();
         private readonly Dictionary<string, Train> trains = new Dictionary<string, Train>();
@@ -90,8 +90,9 @@ namespace KdyPojedeVlak.Engine
 
             // TODO: Use per-position train types
             // TODO: Use "Sv" as indicator of non-passenger train movements
+            // TODO: Display only KDV train type names
             var trainTypes = new Dictionary<string, string>();
-            foreach (var tt in LoadKangoData(path, "DVL"))
+            foreach (var tt in LoadKangoData(path, "DVL").Concat(LoadKangoData(path, "KDV")))
             {
                 string trainType = tt[9];
                 string currType;
