@@ -61,8 +61,10 @@ namespace KdyPojedeVlak.Engine
         private readonly string path;
         private readonly Dictionary<string, RoutingPoint> points = new Dictionary<string, RoutingPoint>();
         private readonly Dictionary<string, Train> trains = new Dictionary<string, Train>();
+        private readonly Dictionary<string, Train> trainsByNumber = new Dictionary<string, Train>();
 
         public Dictionary<string, RoutingPoint> Points { get { return points; } }
+        public Dictionary<string, Train> Trains { get { return trainsByNumber; } }
 
         public KangoSchedule(string path)
         {
@@ -112,7 +114,8 @@ namespace KdyPojedeVlak.Engine
                     TrainType = trainTypes[t[0]],
                     TrainName = t[1]
                 });
-
+            trains.Values
+                .IntoDictionary(trainsByNumber, t => t.TrainNumber, t => t);
 
             string[] lastTimeRow = null;
             Train currTrain = null;

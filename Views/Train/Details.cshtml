@@ -1,0 +1,23 @@
+﻿@using KdyPojedeVlak.Engine
+@model Train
+@{
+    ViewData["Title"] = "Vlak " + Model.TrainType + " " + Model.TrainNumber + " " + Model.TrainName;
+    TrainCalendar lastCalendar = null;
+}
+
+<h2>Vlak @Model.TrainType @Model.TrainNumber @Model.TrainName</h2>
+
+<ul>
+    @foreach (var point in Model.Route)
+    {
+        <li>
+            @point.ScheduledTime
+            @point.Point.Name
+            @if (lastCalendar != point.Calendar)
+            {
+                lastCalendar = point.Calendar;
+                <em>@lastCalendar.Description</em>
+            }
+        </li>
+    }
+</ul>

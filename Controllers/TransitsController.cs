@@ -7,10 +7,16 @@ namespace KdyPojedeVlak.Controllers
 {
     public class TransitsController : Controller
     {
+        public IActionResult Index()
+        {
+            return RedirectToAction("ChoosePoint");
+        }
+
         public IActionResult ChoosePoint(string search)
         {
             if (String.IsNullOrEmpty(search)) return View();
 
+            // TODO: Proper (indexed) search
             var searchResults = Program.Schedule.Points
                 .Where(p => p.Value.Name.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0)
                 .Select(p => new KeyValuePair<string, string>(p.Key, p.Value.Name))

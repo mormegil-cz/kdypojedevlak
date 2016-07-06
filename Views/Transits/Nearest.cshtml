@@ -7,7 +7,7 @@
 {
     <li>
     @train.ScheduledTime
-    @Html.ActionLink(train.Train.TrainType + " " + train.Train.TrainNumber, "Detail", "Train", new { id = train.Train.ID })
+    @Html.ActionLink(train.Train.TrainType + " " + train.Train.TrainNumber, "Details", "Train", new { id = train.Train.TrainNumber })
     </li>
 }
 </ul>
