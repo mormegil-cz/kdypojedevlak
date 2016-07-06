@@ -32,13 +32,17 @@ namespace KdyPojedeVlak.Engine
     {
         public RoutingPoint Point { get; set; }
         public Train Train { get; set; }
-        public TimeSpan ScheduledTime { get; set; }
+        //public TimeSpan ScheduledTime { get; set; }
         public TrainCalendar Calendar { get; set; }
+        public TimeSpan? ScheduledArrival { get; set; }
+        public TimeSpan? ScheduledDeparture { get; set; }
+
+        public TimeSpan AnyScheduledTime { get { return ScheduledArrival ?? ScheduledDeparture.GetValueOrDefault(); } }
 
         public int CompareTo(TrainRoutePoint other)
         {
             if (other == null) return +1;
-            var timeResult = ScheduledTime.CompareTo(other.ScheduledTime);
+            var timeResult = AnyScheduledTime.CompareTo(other.AnyScheduledTime);
             if (timeResult != 0) return timeResult;
             return Train.ID.CompareTo(other.Train.ID);
         }
@@ -117,30 +121,29 @@ namespace KdyPojedeVlak.Engine
             trains.Values
                 .IntoDictionary(trainsByNumber, t => t.TrainNumber, t => t);
 
-            string[] lastTimeRow = null;
             Train currTrain = null;
             TrainCalendar currCalendar = null;
             foreach (var row in LoadKangoData(path, "TRV"))
             {
                 if (row[0] != currTrain?.ID)
                 {
-                    lastTimeRow = null;
                     currCalendar = null;
                     currTrain = trains[row[0]];
                 }
-                if (!String.IsNullOrEmpty(row[8]) || !String.IsNullOrEmpty(row[14])) lastTimeRow = row;
+                var arrival = !String.IsNullOrEmpty(row[8]) ? GetTimeFromRow(row, 7) : new TimeSpan?();
+                var departure = !String.IsNullOrEmpty(row[14]) ? GetTimeFromRow(row, 13) : new TimeSpan?();
                 if (!String.IsNullOrEmpty(row[37])) currCalendar = calendars[row[37]];
 
-                if (lastTimeRow == null) throw new NotSupportedException(String.Format("{0}: No time", currTrain));
+                if (arrival == null && departure == null) throw new NotSupportedException(String.Format("{0}: No time", currTrain));
 
                 var routingPoint = points[BuildPointId(row, 1)];
-                var time = GetTimeFromRow(lastTimeRow);
                 var trainRoutePoint = new TrainRoutePoint
                 {
                     Train = currTrain,
                     Point = routingPoint,
                     Calendar = currCalendar,
-                    ScheduledTime = time
+                    ScheduledArrival = arrival,
+                    ScheduledDeparture = departure
                 };
                 currTrain.Route.Add(trainRoutePoint);
                 routingPoint.PassingTrains.Add(trainRoutePoint);
@@ -184,7 +187,7 @@ namespace KdyPojedeVlak.Engine
             return String.Concat(row[start + 0], "-", row[start + 1], "-", row[start + 2]);
         }
 
-        private static int? GetNumberFromRow(string[] row, int col1, int col2, bool isRequired)
+        private static int? GetNumberFromRowAlt(string[] row, int col1, int col2, bool isRequired)
         {
             int result;
             if (String.IsNullOrEmpty(row[col1]))
@@ -209,14 +212,32 @@ namespace KdyPojedeVlak.Engine
             return result;
         }
 
-        private static TimeSpan GetTimeFromRow(string[] row)
+        private static int? GetNumberFromRow(string[] row, int col, bool isRequired)
+        {
+            int result;
+            if (String.IsNullOrEmpty(row[col]))
+            {
+                if (isRequired) throw new FormatException(String.Format("No data at {0}", col));
+                return null;
+            }
+            else
+            {
+                if (!Int32.TryParse(row[col], out result))
+                {
+                    throw new FormatException(String.Format("Bad data at {0}: '{1}'", col, row[col]));
+                }
+            }
+            return result;
+        }
+
+        private static TimeSpan GetTimeFromRow(string[] row, int start)
         {
             // TODO: Over-midnight trains
             //var dd = GetNumberFromRow(row, 7, 13, false);
             var dd = new int?(0);
-            var hh = GetNumberFromRow(row, 8, 14, true);
-            var mm = GetNumberFromRow(row, 9, 15, true);
-            var ss = GetNumberFromRow(row, 10, 16, false);
+            var hh = GetNumberFromRow(row, start + 1, true);
+            var mm = GetNumberFromRow(row, start + 2, true);
+            var ss = GetNumberFromRow(row, start + 3, false);
 
             return new TimeSpan(dd.GetValueOrDefault(), hh.GetValueOrDefault(), mm.GetValueOrDefault(), ss.GetValueOrDefault() * 30);
         }

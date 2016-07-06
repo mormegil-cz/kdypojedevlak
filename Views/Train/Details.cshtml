@@ -2,22 +2,46 @@
 @model Train
 @{
     ViewData["Title"] = "Vlak " + Model.TrainType + " " + Model.TrainNumber + " " + Model.TrainName;
-    TrainCalendar lastCalendar = null;
+
+    var mainCalendar = Model.Route.Aggregate(new Dictionary<TrainCalendar, int>(), (counters, point) =>
+    {
+        int count;
+        counters.TryGetValue(point.Calendar, out count);
+        ++count;
+        counters[point.Calendar] = count;
+        return counters;
+    }).Aggregate(new KeyValuePair<TrainCalendar, int>(null, 0), (max, calendar) => calendar.Value > max.Value ? calendar : max).Key;
+    var firstPoint = true;
 }
 
 <h2>Vlak @Model.TrainType @Model.TrainNumber @Model.TrainName</h2>
 
-<ul>
-    @foreach (var point in Model.Route)
-    {
-        <li>
-            @point.ScheduledTime
-            @point.Point.Name
-            @if (lastCalendar != point.Calendar)
-            {
-                lastCalendar = point.Calendar;
-                <em>@lastCalendar.Description</em>
-            }
-        </li>
-    }
-</ul>
+<div>@mainCalendar.Description</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Bod</th>
+            <th>Příjezd</th>
+            <th>Odjezd</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var point in Model.Route)
+        {
+            <tr class="@((firstPoint || point.ScheduledArrival != null) && point.ScheduledDeparture != null ? "majorpoint" : "minorpoint")">
+                <td>@point.Point.Name</td>
+                <td>@point.ScheduledArrival</td>
+                <td>@point.ScheduledDeparture</td>
+                <td>
+                    @if (point.Calendar != mainCalendar)
+                    {
+                        <em>@point.Calendar.Description</em>
+                    }
+                </td>
+            </tr>
+            firstPoint = false;
+        }
+    </tbody>
+</table>

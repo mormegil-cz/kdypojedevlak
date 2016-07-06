@@ -6,7 +6,7 @@
 @foreach(var train in Model)
 {
     <li>
-    @train.ScheduledTime
+    @train.AnyScheduledTime
     @Html.ActionLink(train.Train.TrainType + " " + train.Train.TrainNumber, "Details", "Train", new { id = train.Train.TrainNumber })
     </li>
 }

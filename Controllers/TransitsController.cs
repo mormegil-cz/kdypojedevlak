@@ -44,9 +44,9 @@ namespace KdyPojedeVlak.Controllers
             var bitmapIndex = (int) now.Subtract(new DateTime(2015, 12, 13)).TotalDays;
             // TODO: Wrapping over midnight
             var data = passes
-                .SkipWhile(p => p.ScheduledTime < startTime)
+                .SkipWhile(p => p.AnyScheduledTime < startTime)
                 .Where(p => p.Calendar.Bitmap == null || p.Calendar.Bitmap[bitmapIndex])
-                .TakeWhile((pt, idx) => idx < 5 || pt.ScheduledTime < nowTime);
+                .TakeWhile((pt, idx) => idx < 5 || pt.AnyScheduledTime < nowTime);
 
             return View(data);
         }

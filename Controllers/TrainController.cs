@@ -22,8 +22,9 @@ namespace KdyPojedeVlak.Controllers
             Train train;
             if (!Program.Schedule.Trains.TryGetValue(id, out train))
             {
+                return NotFound();
                 // TODO: Error message
-                return RedirectToAction("Index");
+                //return RedirectToAction("Index");
             }
             return View(train);
         }
