@@ -62,6 +62,7 @@ namespace KdyPojedeVlak.Engine
 
     public class KangoSchedule
     {
+        private static readonly string[] trainTypesByQuality = { "IC", "EN", "EC", "Ex", "R", "Sp", "Os" };
         private readonly string path;
         private readonly Dictionary<string, RoutingPoint> points = new Dictionary<string, RoutingPoint>();
         private readonly Dictionary<string, Train> trains = new Dictionary<string, Train>();
@@ -88,13 +89,16 @@ namespace KdyPojedeVlak.Engine
                 });
 
             // TODO: Use per-position train types
+            // TODO: Use "Sv" as indicator of non-passenger train movements
             var trainTypes = new Dictionary<string, string>();
             foreach (var tt in LoadKangoData(path, "DVL"))
             {
                 string trainType = tt[9];
                 string currType;
-                if (trainTypes.TryGetValue(tt[0], out currType)) trainType = currType + "/" + trainType;
-                trainTypes[tt[0]] = trainType;
+                if (!trainTypes.TryGetValue(tt[0], out currType) || IsBetterTrainType(trainType, currType))
+                {
+                    trainTypes[tt[0]] = trainType;
+                }
             }
 
             var calendars = LoadKangoData(path, "KVL")
@@ -123,18 +127,21 @@ namespace KdyPojedeVlak.Engine
 
             Train currTrain = null;
             TrainCalendar currCalendar = null;
+            TimeSpan? lastTime = null;
             foreach (var row in LoadKangoData(path, "TRV"))
             {
                 if (row[0] != currTrain?.ID)
                 {
                     currCalendar = null;
                     currTrain = trains[row[0]];
+                    lastTime = null;
                 }
                 var arrival = !String.IsNullOrEmpty(row[8]) ? GetTimeFromRow(row, 7) : new TimeSpan?();
                 var departure = !String.IsNullOrEmpty(row[14]) ? GetTimeFromRow(row, 13) : new TimeSpan?();
                 if (!String.IsNullOrEmpty(row[37])) currCalendar = calendars[row[37]];
 
-                if (arrival == null && departure == null) throw new NotSupportedException(String.Format("{0}: No time", currTrain));
+                lastTime = arrival ?? departure ?? lastTime;
+                if (lastTime == null) throw new NotSupportedException(String.Format("{0}: No time", currTrain));
 
                 var routingPoint = points[BuildPointId(row, 1)];
                 var trainRoutePoint = new TrainRoutePoint
@@ -143,7 +150,7 @@ namespace KdyPojedeVlak.Engine
                     Point = routingPoint,
                     Calendar = currCalendar,
                     ScheduledArrival = arrival,
-                    ScheduledDeparture = departure
+                    ScheduledDeparture = departure ?? lastTime
                 };
                 currTrain.Route.Add(trainRoutePoint);
                 routingPoint.PassingTrains.Add(trainRoutePoint);
@@ -185,6 +192,16 @@ namespace KdyPojedeVlak.Engine
         private static string BuildPointId(string[] row, int start)
         {
             return String.Concat(row[start + 0], "-", row[start + 1], "-", row[start + 2]);
+        }
+
+        private static bool IsBetterTrainType(string type1, string type2)
+        {
+            var idx1 = Array.IndexOf(trainTypesByQuality, type1);
+            if (idx1 < 0) return false;
+            var idx2 = Array.IndexOf(trainTypesByQuality, type2);
+            if (idx2 < 0) return true;
+
+            return idx1 < idx2;
         }
 
         private static int? GetNumberFromRowAlt(string[] row, int col1, int col2, bool isRequired)
