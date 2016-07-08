@@ -71,6 +71,11 @@ namespace KdyPojedeVlak.Engine
         public Dictionary<string, RoutingPoint> Points { get { return points; } }
         public Dictionary<string, Train> Trains { get { return trainsByNumber; } }
 
+        static KangoSchedule()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
         public KangoSchedule(string path)
         {
             this.path = path;
@@ -178,8 +183,7 @@ namespace KdyPojedeVlak.Engine
         {
             using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                using (var reader = new StreamReader(stream, Encoding.ASCII))
-                    #warning TODO: Encoding.GetEncoding(1250)))
+                using (var reader = new StreamReader(stream, Encoding.GetEncoding(1250)))
                 {
                     string line;
                     while ((line = reader.ReadLine()) != null)

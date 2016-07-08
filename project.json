@@ -20,7 +20,8 @@
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
     "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
-    "BundlerMinifier.Core": "2.1.258"
+    "BundlerMinifier.Core": "2.1.258",
+    "System.Text.Encoding.CodePages": "4.0.1"
   },
 
   "tools": {
