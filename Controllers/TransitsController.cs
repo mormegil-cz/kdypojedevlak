@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KdyPojedeVlak.Engine;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KdyPojedeVlak.Controllers
@@ -32,8 +33,12 @@ namespace KdyPojedeVlak.Controllers
                 return RedirectToAction("ChoosePoint");
             }
 
-            var passes = Program.Schedule.GetPassesThrough(id);
-            if (passes == null) return NotFound();
+            RoutingPoint point;
+            if (!Program.Schedule.Points.TryGetValue(id, out point))
+            {
+                // TODO: Error message?
+                return NotFound();
+            }
 
             // TODO: dynamic selection of previous trains
             var now = at ?? DateTime.Now;
@@ -41,14 +46,19 @@ namespace KdyPojedeVlak.Controllers
             var nowTime = now.TimeOfDay;
             var startTime = start.TimeOfDay;
 
-            var bitmapIndex = (int) now.Subtract(new DateTime(2015, 12, 13)).TotalDays;
-            // TODO: Wrapping over midnight
-            var data = passes
+            var data = point.PassingTrains.Concat(point.PassingTrains)
                 .SkipWhile(p => p.AnyScheduledTime < startTime)
-                .Where(p => p.Calendar.Bitmap == null || p.Calendar.Bitmap[bitmapIndex])
+                .Where(p => p.Calendar.Bitmap == null || p.Calendar.Bitmap[GetBitmapIndex(now, p.AnyScheduledTime.Days)])
                 .TakeWhile((pt, idx) => idx < 5 || pt.AnyScheduledTime < nowTime);
 
+            // TODO: Create proper view model
+            ViewData["Place"] = point.Name;
             return View(data);
+        }
+
+        private static int GetBitmapIndex(DateTime day, int dayOffset)
+        {
+            return (int)day.AddDays(-dayOffset).Subtract(new DateTime(2015, 12, 13)).TotalDays;
         }
     }
 }
