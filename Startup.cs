@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using KdyPojedeVlak.Engine;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -59,7 +56,15 @@ namespace KdyPojedeVlak
 
 
             Program.Schedule = new KangoSchedule(@"App_Data");
-            Program.Schedule.Load();
+            try
+            {
+                Program.Schedule.Load();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Error loading schedule: {0}", ex.Message);
+                throw;
+            }
         }
     }
 }

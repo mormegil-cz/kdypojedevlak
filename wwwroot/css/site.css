@@ -24,3 +24,7 @@ textarea {
 .minorpoint {
     font-size: smaller;
 }
+
+.past {
+    color: gray;
+}
