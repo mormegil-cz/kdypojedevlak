@@ -1,0 +1,17 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Výběr vlaku";
+}
+<h3>Jízdní řád vlaku</h3>
+
+@if (Model != null)
+{
+    <p class="alert alert-warning">@Model</p>
+}
+
+@using (Html.BeginForm(FormMethod.Get))
+{
+    <label for="search">Zadejte číslo vlaku:</label>
+    @Html.TextBox("search", null, new { id = "search" })
+    <input type="submit" value="Hledat" />
+}
