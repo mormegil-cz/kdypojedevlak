@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KdyPojedeVlak.Engine;
+using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KdyPojedeVlak.Controllers
@@ -15,7 +16,7 @@ namespace KdyPojedeVlak.Controllers
 
         public IActionResult ChoosePoint(string search)
         {
-            if (String.IsNullOrEmpty(search)) return View();
+            if (String.IsNullOrEmpty(search)) return View(Enumerable.Empty<KeyValuePair<string, string>>());
 
             // TODO: Proper (indexed) search
             var searchResults = Program.Schedule.Points
@@ -51,9 +52,7 @@ namespace KdyPojedeVlak.Controllers
                 .Where(p => p.Calendar.Bitmap == null || p.Calendar.Bitmap[GetBitmapIndex(now, p.AnyScheduledTime.Days)])
                 .TakeWhile((pt, idx) => idx < 5 || pt.AnyScheduledTime < nowTime);
 
-            // TODO: Create proper view model
-            ViewData["Place"] = point.Name;
-            return View(data);
+            return View(new NearestTransits(point, data));
         }
 
         private static int GetBitmapIndex(DateTime day, int dayOffset)

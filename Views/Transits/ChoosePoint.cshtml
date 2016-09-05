@@ -3,6 +3,12 @@
     ViewData["Title"] = "Výběr místa průjezdu";
 }
 <h3>Průjezdy vlaku daným místem</h3>
+
+@if (Model == null)
+{
+    <div class="alert alert-success" role="alert">Požadované místo nebylo nalezeno, zkuste něco jiného.</div>
+}
+
 @using (Html.BeginForm(FormMethod.Get))
 {
     <label for="search">Zadejte místo:</label>

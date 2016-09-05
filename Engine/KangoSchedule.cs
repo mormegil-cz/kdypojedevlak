@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace KdyPojedeVlak.Engine
 {
@@ -13,7 +12,7 @@ namespace KdyPojedeVlak.Engine
         public string TrainNumber { get; set; }
         public string TrainType { get; set; }
         public string TrainName { get; set; }
-        public List<TrainRoutePoint> Route { get; private set; }
+        public List<TrainRoutePoint> Route { get; }
 
         public Train()
         {
@@ -52,11 +51,13 @@ namespace KdyPojedeVlak.Engine
     {
         public string ID { get; set; }
         public string Name { get; set; }
-        public SortedSet<TrainRoutePoint> PassingTrains { get; private set; }
+        public SortedSet<TrainRoutePoint> PassingTrains { get; }
+        public HashSet<RoutingPoint> NeighboringPoints { get; }
 
         public RoutingPoint()
         {
             PassingTrains = new SortedSet<TrainRoutePoint>();
+            NeighboringPoints = new HashSet<RoutingPoint>();
         }
     }
 
@@ -134,6 +135,7 @@ namespace KdyPojedeVlak.Engine
             Train currTrain = null;
             TrainCalendar currCalendar = null;
             TimeSpan? lastTime = null;
+            RoutingPoint lastRoutingPoint = null;
             foreach (var row in LoadKangoData(path, "TRV"))
             {
                 if (row[0] != currTrain?.ID)
@@ -141,6 +143,7 @@ namespace KdyPojedeVlak.Engine
                     currCalendar = null;
                     currTrain = trains[row[0]];
                     lastTime = null;
+                    lastRoutingPoint = null;
                 }
                 var arrival = !String.IsNullOrEmpty(row[8]) ? GetTimeFromRow(row, 7) : new TimeSpan?();
                 var departure = !String.IsNullOrEmpty(row[14]) ? GetTimeFromRow(row, 13) : new TimeSpan?();
@@ -158,6 +161,19 @@ namespace KdyPojedeVlak.Engine
                     ScheduledArrival = arrival,
                     ScheduledDeparture = departure ?? lastTime
                 };
+                if (lastRoutingPoint != null)
+                {
+                    if (routingPoint == lastRoutingPoint)
+                    {
+                        lastRoutingPoint = routingPoint;
+                    }
+                    else
+                    {
+                        lastRoutingPoint.NeighboringPoints.Add(routingPoint);
+                        routingPoint.NeighboringPoints.Add(lastRoutingPoint);
+                    }
+                }
+                lastRoutingPoint = routingPoint;
                 currTrain.Route.Add(trainRoutePoint);
                 routingPoint.PassingTrains.Add(trainRoutePoint);
             }
