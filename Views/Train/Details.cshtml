@@ -16,7 +16,25 @@
 
 <h2>Vlak @Model.TrainType @Model.TrainNumber @Model.TrainName</h2>
 
-<div>@mainCalendar.Description</div>
+<div class="row">
+    <div class="col-md-11">
+        <div>@mainCalendar.Description</div>
+    </div>
+    <div class="col-md-1">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Nástroje <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a href="http://www.zelpage.cz/razeni/16/vlaky/cd-@Model.TrainNumber">Řazení vlaku</a></li>
+                <li><a href="http://www.cd.cz/cd-online/poloha-vlaku/?train=@Model.TrainNumber">Poloha vlaku</a></li>
+                <li><a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.TrainNumber">Zpoždění vlaku</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz/@Url.Action("Details", new { id = Model.ID })">Sdílet na Facebook</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
 
 <table class="table table-striped">
     <thead>
