@@ -1,4 +1,4 @@
-﻿@model IEnumerable<KeyValuePair<string, string>>
+﻿@model IList<KeyValuePair<string, string>>
 @{
     ViewData["Title"] = "Výběr místa průjezdu";
 }
@@ -16,7 +16,7 @@
     <input type="submit" value="Hledat" />
 }
 
-@if (Model != null)
+@if (Model != null && Model.Count != 0)
 {
     <h3>Nalezené výsledky</h3>
     <ul>
