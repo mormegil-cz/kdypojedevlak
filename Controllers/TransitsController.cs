@@ -47,12 +47,12 @@ namespace KdyPojedeVlak.Controllers
             var nowTime = now.TimeOfDay;
             var startTime = start.TimeOfDay;
 
-            var data = point.PassingTrains.Concat(point.PassingTrains)
-                .SkipWhile(p => p.AnyScheduledTime < startTime)
-                .Where(p => p.Calendar.Bitmap == null || p.Calendar.Bitmap[GetBitmapIndex(now, p.AnyScheduledTime.Days)])
-                .TakeWhile((pt, idx) => idx < 5 || pt.AnyScheduledTime < nowTime);
+            var data = point.PassingTrains.Select(t => new { Day = 0, Train = t }).Concat(point.PassingTrains.Select(t => new { Day = 1, Train = t }))
+                .SkipWhile(p => p.Train.AnyScheduledTime < startTime)
+                .Where(p => p.Train.Calendar.Bitmap == null || p.Train.Calendar.Bitmap[GetBitmapIndex(now, p.Day + p.Train.AnyScheduledTime.Days)])
+                .TakeWhile((pt, idx) => idx < 5 || (pt.Train.AnyScheduledTime < nowTime && pt.Day == 0));
 
-            return View(new NearestTransits(point, data));
+            return View(new NearestTransits(point, data.Select(t => t.Train)));
         }
 
         private static int GetBitmapIndex(DateTime day, int dayOffset)
