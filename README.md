@@ -9,4 +9,4 @@ Užitečné mimo jiné pro rodiny s dětmi, které mají rády vláčky.
 Projekt je ve vývoji a do finální podoby má zatím daleko. Pokud vás projekt zaujal
 nebo máte nějaké dotazy, můžete psát na mormegil-zavináč-centrum-tečka-cz.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/lmncfnwq716jjfk6?svg=true)](https://ci.appveyor.com/project/mormegil-cz/kdypojedevlak)
+[![Build status](https://ci.appveyor.com/api/projects/status/lmncfnwq716jjfk6/branch/master?svg=true)](https://ci.appveyor.com/project/mormegil-cz/kdypojedevlak/branch/master)
