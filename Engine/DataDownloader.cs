@@ -45,8 +45,7 @@ namespace KdyPojedeVlak.Engine
                 .Where(f => f.Match.Success)
                 .OrderByDescending(f => f.Match.Groups[1].Value)
                 .FirstOrDefault();
-            if (newest == null) return null;
-            return newest.Match.Groups[1].Value;
+            return newest?.Match.Groups[1].Value;
         }
 
         public async Task<Tuple<string, long>> DownloadZip(string version, string destinationFilename)

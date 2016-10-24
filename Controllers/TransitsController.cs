@@ -9,6 +9,7 @@ namespace KdyPojedeVlak.Controllers
 {
     public class TransitsController : Controller
     {
+        private static readonly IList<KeyValuePair<string, string>> emptyPointList = new KeyValuePair<string, string>[0];
         public IActionResult Index()
         {
             return RedirectToAction("ChoosePoint");
@@ -16,7 +17,7 @@ namespace KdyPojedeVlak.Controllers
 
         public IActionResult ChoosePoint(string search)
         {
-            if (String.IsNullOrEmpty(search)) return View(Enumerable.Empty<KeyValuePair<string, string>>());
+            if (String.IsNullOrEmpty(search)) return View(emptyPointList);
 
             // TODO: Proper (indexed) search
             var searchResults = Program.Schedule.Points

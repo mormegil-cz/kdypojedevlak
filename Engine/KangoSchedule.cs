@@ -36,14 +36,14 @@ namespace KdyPojedeVlak.Engine
         public TimeSpan? ScheduledArrival { get; set; }
         public TimeSpan? ScheduledDeparture { get; set; }
 
-        public TimeSpan AnyScheduledTime { get { return ScheduledArrival ?? ScheduledDeparture.GetValueOrDefault(); } }
+        public TimeSpan AnyScheduledTime => ScheduledArrival ?? ScheduledDeparture.GetValueOrDefault();
 
         public int CompareTo(TrainRoutePoint other)
         {
             if (other == null) return +1;
             var timeResult = AnyScheduledTime.CompareTo(other.AnyScheduledTime);
             if (timeResult != 0) return timeResult;
-            return Train.ID.CompareTo(other.Train.ID);
+            return String.CompareOrdinal(Train.ID, other.Train.ID);
         }
     }
 
@@ -69,8 +69,8 @@ namespace KdyPojedeVlak.Engine
         private readonly Dictionary<string, Train> trains = new Dictionary<string, Train>();
         private readonly Dictionary<string, Train> trainsByNumber = new Dictionary<string, Train>();
 
-        public Dictionary<string, RoutingPoint> Points { get { return points; } }
-        public Dictionary<string, Train> Trains { get { return trainsByNumber; } }
+        public Dictionary<string, RoutingPoint> Points => points;
+        public Dictionary<string, Train> Trains => trainsByNumber;
 
         static KangoSchedule()
         {
@@ -138,7 +138,7 @@ namespace KdyPojedeVlak.Engine
             RoutingPoint lastRoutingPoint = null;
             foreach (var row in LoadKangoData(path, "TRV"))
             {
-                if (row[0] != currTrain?.ID)
+                if (currTrain == null || row[0] != currTrain.ID)
                 {
                     currCalendar = null;
                     currTrain = trains[row[0]];
