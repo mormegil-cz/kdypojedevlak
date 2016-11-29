@@ -58,7 +58,7 @@ namespace KdyPojedeVlak.Controllers
 
         private static int GetBitmapIndex(DateTime day, int dayOffset)
         {
-            return (int)day.AddDays(-dayOffset).Subtract(new DateTime(2015, 12, 13)).TotalDays;
+            return (int)day.AddDays(-dayOffset).Subtract(KangoSchedule.BitmapBaseDate).TotalDays;
         }
     }
 }

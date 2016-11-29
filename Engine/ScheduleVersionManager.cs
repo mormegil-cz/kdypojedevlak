@@ -23,7 +23,7 @@ namespace KdyPojedeVlak.Engine
             this.basePath = basePath;
         }
 
-        public async Task<string> TryUpdate()
+        public async Task<ScheduleVersionInfo> TryUpdate()
         {
             // 1. find current newest version
             var currentNewestVersion = GetCurrentNewestVersion();
@@ -76,7 +76,7 @@ namespace KdyPojedeVlak.Engine
                 }
             }
 
-            return Path.Combine(basePath, dataDirectoryPrefix + currentNewestVersion);
+            return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataDirectoryPrefix + currentNewestVersion), lastUpdateDate);
         }
 
         private DateTime GetLastUpdateDate()

@@ -8,6 +8,7 @@ namespace KdyPojedeVlak
     {
         // TODO: Dependency injection
         public static KangoSchedule Schedule;
+        public static ScheduleVersionInfo ScheduleVersionInfo;
 
         public static void Main(string[] args)
         {

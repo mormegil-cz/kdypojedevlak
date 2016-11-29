@@ -54,11 +54,10 @@ namespace KdyPojedeVlak
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            string currentSchedulePath;
             try
             {
                 var scheduleVersionManager = new ScheduleVersionManager(@"App_Data");
-                currentSchedulePath = scheduleVersionManager.TryUpdate().Result;
+                Program.ScheduleVersionInfo = scheduleVersionManager.TryUpdate().Result;
             }
             catch(Exception ex)
             {
@@ -66,7 +65,7 @@ namespace KdyPojedeVlak
                 throw;
             }
 
-            Program.Schedule = new KangoSchedule(currentSchedulePath);
+            Program.Schedule = new KangoSchedule(Program.ScheduleVersionInfo.CurrentPath);
             try
             {
                 Program.Schedule.Load();
