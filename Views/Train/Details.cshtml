@@ -30,7 +30,7 @@
                 <li><a href="http://www.cd.cz/cd-online/poloha-vlaku/?train=@Model.TrainNumber">Poloha vlaku</a></li>
                 <li><a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.TrainNumber">Zpoždění vlaku</a></li>
                 <li role="separator" class="divider"></li>
-                <li><a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz/@Url.Action("Details", new { id = Model.ID })">Sdílet na Facebook</a></li>
+                <li><a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.ID }))">Sdílet na Facebook</a></li>
             </ul>
         </div>
     </div>
