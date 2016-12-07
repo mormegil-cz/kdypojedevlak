@@ -14,7 +14,8 @@ namespace KdyPojedeVlak.Engine
         private const string clientName = "KdyPojedeVlak/CoreFTP";
         private static readonly Uri serverBaseUri = new Uri(@"ftp://ftp.cisjr.cz/draha/celostatni/");
         private const string filenameFormat = "VS_{0}.ZIP";
-        private static readonly Regex reFilename = new Regex(@"^VS_([0-9_-]+)\.ZIP$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        // TODO: HOTFIX Year
+        private static readonly Regex reFilename = new Regex(String.Format(@"^VS_({0}[0-9_-]+)\.ZIP$", DateTime.Now.Year), RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
         private const int BUFF_SIZE = 10240;
 
