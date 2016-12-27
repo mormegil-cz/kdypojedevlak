@@ -99,8 +99,7 @@ namespace KdyPojedeVlak.Engine
 
         private string GetCurrentNewestVersion()
         {
-            // TODO: HOTFIX Year
-            var newestDirectory = Directory.EnumerateDirectories(basePath, dataDirectoryPrefix + DateTime.Now.Year + "*").OrderByDescending(n => n).FirstOrDefault();
+            var newestDirectory = Directory.EnumerateDirectories(basePath, dataDirectoryPrefix + "*").OrderByDescending(n => n).FirstOrDefault();
             return newestDirectory == null ? null : Path.GetFileName(newestDirectory).Substring(dataDirectoryPrefix.Length);
         }
 

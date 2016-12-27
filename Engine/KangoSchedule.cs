@@ -64,7 +64,7 @@ namespace KdyPojedeVlak.Engine
     public class KangoSchedule
     {
         // TODO: Fixed? Defined somewhere?
-        public static readonly DateTime BitmapBaseDate = new DateTime(2015, 12, 13);
+        public static readonly DateTime BitmapBaseDate = new DateTime(2016, 12, 11);
 
         private static readonly string[] trainTypesByQuality = { "SC", "IC", "EN", "EC", "Ex", "R", "Sp", "Os" };
         private readonly string path;
