@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using KdyPojedeVlak.Engine;
 
 namespace KdyPojedeVlak.Models
@@ -6,12 +7,14 @@ namespace KdyPojedeVlak.Models
     public class NearestTransits
     {
         public RoutingPoint Point { get; }
+        public DateTime StartDate { get; }
         public IEnumerable<TrainRoutePoint> Transits { get; }
 
-        public NearestTransits(RoutingPoint point, IEnumerable<TrainRoutePoint> transits)
+        public NearestTransits(RoutingPoint point, DateTime startDate, IEnumerable<TrainRoutePoint> transits)
         {
-            this.Point = point;
-            this.Transits = transits;
+            Point = point;
+            Transits = transits;
+            StartDate = startDate;
         }
     }
 }

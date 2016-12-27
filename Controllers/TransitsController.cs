@@ -50,15 +50,18 @@ namespace KdyPojedeVlak.Controllers
 
             var data = point.PassingTrains.Select(t => new { Day = 0, Train = t }).Concat(point.PassingTrains.Select(t => new { Day = 1, Train = t }))
                 .SkipWhile(p => p.Train.AnyScheduledTime < startTime)
-                .Where(p => p.Train.Calendar.Bitmap == null || p.Train.Calendar.Bitmap[GetBitmapIndex(now, p.Day + p.Train.AnyScheduledTime.Days)])
+                .Where(p => CheckInBitmap(p.Train.Calendar.Bitmap, now, p.Day + p.Train.AnyScheduledTime.Days))
                 .TakeWhile((pt, idx) => idx < 5 || (pt.Train.AnyScheduledTime < nowTime && pt.Day == 0));
 
-            return View(new NearestTransits(point, data.Select(t => t.Train)));
+            return View(new NearestTransits(point, now, data.Select(t => t.Train)));
         }
 
-        private static int GetBitmapIndex(DateTime day, int dayOffset)
+        private static bool CheckInBitmap(bool[] bitmap, DateTime day, int dayOffset)
         {
-            return (int)day.AddDays(-dayOffset).Subtract(KangoSchedule.BitmapBaseDate).TotalDays;
+            if (bitmap == null) return true;
+            var offset = (int)day.AddDays(-dayOffset).Subtract(KangoSchedule.BitmapBaseDate).TotalDays;
+            if (offset < 0 || offset >= bitmap.Length) return false;
+            return bitmap[offset];
         }
     }
 }
