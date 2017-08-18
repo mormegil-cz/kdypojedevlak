@@ -11,7 +11,16 @@ namespace KdyPojedeVlak.Engine
         {
             foreach(var item in source)
             {
-                destination.Add(keySelector(item), valueSelector(item));
+                var key = keySelector(item);
+                if (destination.ContainsKey(key))
+                {
+                    // WTF?
+                    Console.WriteLine($"Duplicate key '{key}' when preparing dictionary");
+                }
+                else
+                {
+                    destination.Add(keySelector(item), valueSelector(item));
+                }
             }
         }
     }

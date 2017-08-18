@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using KdyPojedeVlak.Engine;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,6 +31,7 @@ namespace KdyPojedeVlak
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        [DebuggerNonUserCode]
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
