@@ -25,6 +25,8 @@ namespace KdyPojedeVlak.Engine
         public string ID { get; set; }
         public string Description { get; set; }
         public bool[] Bitmap { get; set; }
+        public DateTime ValidFrom { get; set; }
+        public DateTime ValidTo { get; set; }
     }
 
     public class TrainRoutePoint : IComparable<TrainRoutePoint>
@@ -63,9 +65,6 @@ namespace KdyPojedeVlak.Engine
 
     public class KangoSchedule
     {
-        // TODO: Fixed? Defined somewhere?
-        public static readonly DateTime BitmapBaseDate = new DateTime(2016, 12, 11);
-
         private static readonly string[] trainTypesByQuality = { "SC", "IC", "EN", "EC", "Ex", "R", "Sp", "Os" };
         private readonly string path;
         private readonly Dictionary<string, RoutingPoint> points = new Dictionary<string, RoutingPoint>();
@@ -74,6 +73,8 @@ namespace KdyPojedeVlak.Engine
 
         public Dictionary<string, RoutingPoint> Points => points;
         public Dictionary<string, Train> Trains => trainsByNumber;
+
+        public DateTime BitmapBaseDate { get; private set; }
 
         static KangoSchedule()
         {
@@ -118,8 +119,12 @@ namespace KdyPojedeVlak.Engine
                 {
                     ID = g.Last().Row[0],
                     Description = g.Last().Row[2] + g.Last().Row[3],
+                    ValidFrom = GetDateFromRow(g.First().Row, 0),
+                    ValidTo = GetDateFromRow(g.First().Row, 3),
                     Bitmap = g.Last().Row[1].Select(c => c == '1').ToArray()
                 });
+
+            BitmapBaseDate = calendars.Values.Min(c => c.ValidFrom);
 
             calendars.Add("0", new TrainCalendar { ID = "0", Description = "jede pp", Bitmap = new bool[553] });
             calendars.Add("1", new TrainCalendar { ID = "1", Description = "", Bitmap = Enumerable.Range(1, 553).Select(_ => true).ToArray() });
@@ -281,6 +286,15 @@ namespace KdyPojedeVlak.Engine
             var ss = GetNumberFromRow(row, start + 3, false);
 
             return new TimeSpan(dd.GetValueOrDefault(), hh.GetValueOrDefault(), mm.GetValueOrDefault(), ss.GetValueOrDefault() * 30);
+        }
+
+        private static DateTime GetDateFromRow(string[] row, int start)
+        {
+            var dd = GetNumberFromRow(row, start, true);
+            var mm = GetNumberFromRow(row, start + 1, true);
+            var yy = GetNumberFromRow(row, start + 2, true);
+
+            return new DateTime(yy.GetValueOrDefault(), mm.GetValueOrDefault(), dd.GetValueOrDefault());
         }
     }
 }
