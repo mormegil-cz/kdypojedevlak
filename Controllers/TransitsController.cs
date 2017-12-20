@@ -10,6 +10,7 @@ namespace KdyPojedeVlak.Controllers
     public class TransitsController : Controller
     {
         private static readonly IList<KeyValuePair<string, string>> emptyPointList = new KeyValuePair<string, string>[0];
+
         public IActionResult Index()
         {
             return RedirectToAction("ChoosePoint");
@@ -21,8 +22,9 @@ namespace KdyPojedeVlak.Controllers
 
             // TODO: Proper (indexed) search
             var searchResults = Program.Schedule.Points
-                .Where(p => p.Value.Name.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0)
-                .Select(p => new KeyValuePair<string, string>(p.Key, p.Value.Name))
+                .Where(p => p.Value.Name.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0 ||
+                            p.Value.LongName.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0)
+                .Select(p => new KeyValuePair<string, string>(p.Key, p.Value.LongName))
                 .Take(100)
                 .ToList();
             return View(searchResults.Count == 0 ? null : searchResults);
@@ -48,7 +50,7 @@ namespace KdyPojedeVlak.Controllers
             var nowTime = now.TimeOfDay;
             var startTime = start.TimeOfDay;
 
-            var data = point.PassingTrains.Select(t => new { Day = 0, Train = t }).Concat(point.PassingTrains.Select(t => new { Day = 1, Train = t }))
+            var data = point.PassingTrains.Select(t => new {Day = 0, Train = t}).Concat(point.PassingTrains.Select(t => new {Day = 1, Train = t}))
                 .SkipWhile(p => p.Train.AnyScheduledTime < startTime)
                 .Where(p => CheckInCalendar(p.Train.Calendar, Program.Schedule.BitmapBaseDate, now.Date, p.Day + p.Train.AnyScheduledTime.Days))
                 .TakeWhile((pt, idx) => idx < 5 || (pt.Train.AnyScheduledTime < nowTime && pt.Day == 0));
@@ -63,7 +65,7 @@ namespace KdyPojedeVlak.Controllers
             var bitmap = calendar.Bitmap;
             if (bitmap == null) return true;
 
-            var offset = (int)day.AddDays(-dayOffset).Subtract(baseDate).TotalDays;
+            var offset = (int) day.AddDays(-dayOffset).Subtract(baseDate).TotalDays;
             if (offset < 0 || offset >= bitmap.Length) return false;
             return bitmap[offset];
         }

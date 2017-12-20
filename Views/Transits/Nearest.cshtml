@@ -3,7 +3,7 @@
     ViewData["Title"] = String.Format("Nejbližší vlaky v „{0}“", Model.Point.Name);
     var now = Model.StartDate.TimeOfDay;
 }
-<h3>Nejbližší průjezdy vlaku místem „@Model.Point.Name“</h3>
+<h3>Nejbližší průjezdy vlaku místem „@Model.Point.LongName“</h3>
 <ul>
 @foreach(var train in Model.Transits)
 {

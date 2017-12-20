@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CoreFtp.Infrastructure.Extensions;
 
 namespace KdyPojedeVlak.Engine
 {
@@ -32,9 +33,12 @@ namespace KdyPojedeVlak.Engine
     public class TrainRoutePoint : IComparable<TrainRoutePoint>
     {
         public RoutingPoint Point { get; set; }
+
         public Train Train { get; set; }
+
         //public TimeSpan ScheduledTime { get; set; }
         public TrainCalendar Calendar { get; set; }
+
         public TimeSpan? ScheduledArrival { get; set; }
         public TimeSpan? ScheduledDeparture { get; set; }
 
@@ -53,6 +57,7 @@ namespace KdyPojedeVlak.Engine
     {
         public string ID { get; set; }
         public string Name { get; set; }
+        public PointCodebookEntry CodebookEntry { get; set; }
         public SortedSet<TrainRoutePoint> PassingTrains { get; }
         public HashSet<RoutingPoint> NeighboringPoints { get; }
 
@@ -61,11 +66,41 @@ namespace KdyPojedeVlak.Engine
             PassingTrains = new SortedSet<TrainRoutePoint>();
             NeighboringPoints = new HashSet<RoutingPoint>();
         }
+
+        public string LongName
+        {
+            get { return CodebookEntry.LongName; }
+        }
+
+        public PointType Type
+        {
+            get { return CodebookEntry.Type; }
+        }
+    }
+
+    public class PointCodebookEntry
+    {
+        public string ID { get; set; }
+        public string LongName { get; set; }
+        public string ShortName { get; set; }
+        public PointType Type { get; set; }
+    }
+
+    public enum PointType
+    {
+        Unknown,
+        Stop,
+        Station,
+        InnerBoundary,
+        StateBoundary,
+        Crossing,
+        Siding,
+        Point
     }
 
     public class KangoSchedule
     {
-        private static readonly string[] trainTypesByQuality = { "SC", "IC", "EN", "EC", "Ex", "R", "Sp", "Os" };
+        private static readonly string[] trainTypesByQuality = {"SC", "IC", "EN", "EC", "Ex", "R", "Sp", "Os"};
         private readonly string path;
         private readonly Dictionary<string, RoutingPoint> points = new Dictionary<string, RoutingPoint>();
         private readonly Dictionary<string, Train> trains = new Dictionary<string, Train>();
@@ -90,12 +125,30 @@ namespace KdyPojedeVlak.Engine
         {
             if (points.Count > 0) throw new InvalidOperationException("Already loaded");
 
+            var pointCodebook = new Dictionary<string, PointCodebookEntry>();
+            LoadCsvData(Path.Combine(path, @"..\"), @"SR70-2017-12-10.csv")
+                .Select(r => new {ID = "0054-" + r[0].PadLeft(6, '0') + "-00", Row = r})
+                .IntoDictionary(pointCodebook, r => r.ID, r => new PointCodebookEntry
+                {
+                    ID = r.Row[0],
+                    LongName = r.Row[1],
+                    ShortName = r.Row[2],
+                    Type = ParsePointType(r.Row[5])
+                });
+
             LoadKangoData(path, "DB")
-                .Select(b => new { ID = BuildPointId(b, 0), Name = b[3] })
+                .Select(b => new {ID = BuildPointId(b, 0), Name = b[3]})
                 .IntoDictionary(points, b => b.ID, b => new RoutingPoint
                 {
                     ID = b.ID,
-                    Name = b.Name
+                    Name = b.Name,
+                    CodebookEntry = pointCodebook.GetValueOrDefault(b.ID) ?? new PointCodebookEntry
+                    {
+                        ID = b.ID,
+                        LongName = b.Name,
+                        ShortName = b.Name,
+                        Type = PointType.Unknown
+                    }
                 });
 
             // TODO: Use per-position train types
@@ -105,15 +158,14 @@ namespace KdyPojedeVlak.Engine
             foreach (var tt in LoadKangoData(path, "DVL").Concat(LoadKangoData(path, "KDV")))
             {
                 string trainType = tt[9];
-                string currType;
-                if (!trainTypes.TryGetValue(tt[0], out currType) || IsBetterTrainType(trainType, currType))
+                if (!trainTypes.TryGetValue(tt[0], out var currType) || IsBetterTrainType(trainType, currType))
                 {
                     trainTypes[tt[0]] = trainType;
                 }
             }
 
             var calendars = LoadKangoData(path, "KVL")
-                .Select((row, idx) => new { Row = row, Index = idx / 2 })
+                .Select((row, idx) => new {Row = row, Index = idx / 2})
                 .GroupBy(row => row.Index)
                 .ToDictionary(g => g.Last().Row[0], g => new TrainCalendar
                 {
@@ -126,8 +178,14 @@ namespace KdyPojedeVlak.Engine
 
             BitmapBaseDate = calendars.Values.Min(c => c.ValidFrom);
 
-            calendars.Add("0", new TrainCalendar { ID = "0", Description = "jede pp", Bitmap = new bool[553] });
-            calendars.Add("1", new TrainCalendar { ID = "1", Description = "", Bitmap = Enumerable.Range(1, 553).Select(_ => true).ToArray() });
+            calendars.Add("0", new TrainCalendar {ID = "0", Description = "jede pp", Bitmap = new bool[553]});
+            calendars.Add("1",
+                new TrainCalendar
+                {
+                    ID = "1",
+                    Description = "",
+                    Bitmap = Enumerable.Range(1, 553).Select(_ => true).ToArray()
+                });
 
             LoadKangoData(path, "HLV")
                 .IntoDictionary(trains, t => t[0], t => new Train
@@ -191,6 +249,12 @@ namespace KdyPojedeVlak.Engine
             foreach (var ep in emptyPoints) points.Remove(ep);
         }
 
+        private static PointType ParsePointType(string typeStr)
+        {
+            PointType type;
+            return !pointTypePerName.TryGetValue(typeStr, out type) ? PointType.Unknown : type;
+        }
+
         public IEnumerable<TrainRoutePoint> GetPassesThrough(string pointID)
         {
             RoutingPoint point;
@@ -213,6 +277,36 @@ namespace KdyPojedeVlak.Engine
                     while ((line = reader.ReadLine()) != null)
                     {
                         yield return line.Split('|');
+                    }
+                }
+            }
+        }
+
+        private IEnumerable<string[]> LoadCsvData(string path, string fileName)
+        {
+            using (var stream = new FileStream(Path.Combine(path, fileName), FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                using (var reader = new StreamReader(stream, Encoding.GetEncoding(1250)))
+                {
+                    string line;
+                    bool firstLine = true;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        /*
+                        TODO: Real CSV processing
+                        if (line.Contains('"'))
+                        {
+                        }
+                        else
+                        */
+                        {
+                            if (firstLine)
+                            {
+                                firstLine = false;
+                                continue;
+                            }
+                            yield return line.Split(';');
+                        }
                     }
                 }
             }
@@ -285,7 +379,8 @@ namespace KdyPojedeVlak.Engine
             var mm = GetNumberFromRow(row, start + 2, true);
             var ss = GetNumberFromRow(row, start + 3, false);
 
-            return new TimeSpan(dd.GetValueOrDefault(), hh.GetValueOrDefault(), mm.GetValueOrDefault(), ss.GetValueOrDefault() * 30);
+            return new TimeSpan(dd.GetValueOrDefault(), hh.GetValueOrDefault(), mm.GetValueOrDefault(),
+                ss.GetValueOrDefault() * 30);
         }
 
         private static DateTime GetDateFromRow(string[] row, int start)
@@ -296,5 +391,49 @@ namespace KdyPojedeVlak.Engine
 
             return new DateTime(yy.GetValueOrDefault(), mm.GetValueOrDefault(), dd.GetValueOrDefault());
         }
+
+        private static readonly Dictionary<string, PointType> pointTypePerName = new Dictionary<string, PointType>(StringComparer.OrdinalIgnoreCase)
+        {
+            {"Automatické hradlo", PointType.Point},
+            {"Automatické hradlo a zastávka", PointType.Stop},
+            {"Automatické hradlo, nákladiště a zastávka", PointType.Stop},
+            {"Dopr.body na cizím území (blíže neurčené)", PointType.Point},
+            {"Dopravna D3", PointType.Point},
+            {"Dopravna radiobloku", PointType.Point},
+            {"Hláska", PointType.Point},
+            {"Hláska a zastávka", PointType.Stop},
+            {"Hláska, nákladiště a zastávka", PointType.Stop},
+            {"Hradlo", PointType.Point},
+            {"Hradlo a zastávka", PointType.Stop},
+            {"Hranice infrastruktur", PointType.InnerBoundary},
+            {"Hranice oblastí", PointType.InnerBoundary},
+            {"Hranice OPŘ totožná s hranicí VÚSC", PointType.InnerBoundary},
+            {"Hranice TUDU (začátek nebo konec TUDU)", PointType.InnerBoundary},
+            {"Hranice třídy sklonu", PointType.InnerBoundary},
+            {"Jiné dopravní body", PointType.Point},
+            {"Kolejová křižovatka", PointType.Crossing},
+            {"Kolejová skupina stanice nebo jiného DVM", PointType.Station},
+            {"Nákladiště", PointType.Point},
+            {"Nákladiště a zastávka", PointType.Stop},
+            {"Obvod DVM nebo staniční kolejová skupina se zastávkou", PointType.Stop},
+            {"Odbočení ve stanici nebo v jiném DVM", PointType.Crossing},
+            {"Odbočení vlečky", PointType.Crossing},
+            {"Odbočka (dopravna s kolejovým rozvětvením)", PointType.Crossing},
+            {"Odbočka (dopravna) a zastávka", PointType.Stop},
+            {"Odbočka (dopravna), nákladiště a zastávka", PointType.Stop},
+            {"Odstup nezavěšeného postrku (na širé trati)", PointType.Point},
+            {"Samostatné kolejiště vlečky", PointType.Point},
+            {"Samostatné tarif.místo v rámci stanice nebo jiného DVM", PointType.Point},
+            {"Skok ve staničení", PointType.Point},
+            {"Stanice (z přepravního hlediska blíže neurčená)", PointType.Station},
+            {"Státní hranice", PointType.StateBoundary},
+            {"Trasovací bod TUDU, SENA", PointType.Point},
+            {"Výhybna", PointType.Siding},
+            {"Zastávka", PointType.Stop},
+            {"Zastávka lanové dráhy", PointType.Stop},
+            {"Zastávka náhradní autobusové dopravy", PointType.Stop},
+            {"Zastávka v obvodu stanice", PointType.Stop},
+            {"Závorářské stanoviště", PointType.Point}
+        };
     }
 }

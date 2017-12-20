@@ -11,7 +11,7 @@
         counters[point.Calendar] = count;
         return counters;
     }).Aggregate(new KeyValuePair<TrainCalendar, int>(null, 0), (max, calendar) => calendar.Value > max.Value ? calendar : max).Key;
-    var firstPoint = true;
+    var pointCount = Model.Route.Count;
 }
 
 <h2>Vlak @Model.TrainType @Model.TrainNumber @Model.TrainName</h2>
@@ -26,11 +26,19 @@
                 Nástroje <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-                <li><a href="http://www.zelpage.cz/razeni/16/vlaky/cd-@Model.TrainNumber">Řazení vlaku</a></li>
-                <li><a href="http://www.cd.cz/cd-online/poloha-vlaku/?train=@Model.TrainNumber">Poloha vlaku</a></li>
-                <li><a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.TrainNumber">Zpoždění vlaku</a></li>
+                <li>
+                    <a href="http://www.zelpage.cz/razeni/16/vlaky/cd-@Model.TrainNumber">Řazení vlaku</a>
+                </li>
+                <li>
+                    <a href="http://www.cd.cz/cd-online/poloha-vlaku/?train=@Model.TrainNumber">Poloha vlaku</a>
+                </li>
+                <li>
+                    <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.TrainNumber">Zpoždění vlaku</a>
+                </li>
                 <li role="separator" class="divider"></li>
-                <li><a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.ID }))">Sdílet na Facebook</a></li>
+                <li>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new {id = Model.ID}))">Sdílet na Facebook</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -38,28 +46,33 @@
 
 <table class="table table-striped">
     <thead>
-        <tr>
-            <th>Bod</th>
-            <th>Příjezd</th>
-            <th>Odjezd</th>
-            <th></th>
-        </tr>
+    <tr>
+        <th></th>
+        <th>Bod</th>
+        <th>Příjezd</th>
+        <th>Odjezd</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var point in Model.Route)
-        {
-            <tr class="@((firstPoint || point.ScheduledArrival != null) && point.ScheduledDeparture != null ? "majorpoint" : "minorpoint")">
-                <td>@point.Point.Name</td>
-                <td>@point.ScheduledArrival</td>
-                <td>@point.ScheduledDeparture</td>
-                <td>
-                    @if (point.Calendar != mainCalendar)
-                    {
-                        <em>@point.Calendar.Description</em>
-                    }
-                </td>
-            </tr>
-            firstPoint = false;
-        }
+    @for (var i = 0; i < pointCount; ++i)
+    {
+        var point = Model.Route[i];
+        var rowType = (i == 0 ? "-first" : "") + (i == pointCount - 1 ? "-last" : "");
+        <tr class="@((i == 0 || point.ScheduledArrival != null) && point.ScheduledDeparture != null ? "majorpoint" : "minorpoint")">
+            <td class="point-type-col@(rowType)">
+                <span class="point-type-icon point-type-icon-@point.Point.Type@rowType"></span>
+            </td>
+            <td><span title="@point.Point.Name">@point.Point.LongName</span></td>
+            <td>@point.ScheduledArrival</td>
+            <td>@point.ScheduledDeparture</td>
+            <td>
+                @if (point.Calendar != mainCalendar)
+                {
+                    <em>@point.Calendar.Description</em>
+                }
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
