@@ -19,7 +19,7 @@
     @foreach(var neighbor in Model.Point.NeighboringPoints)
     {
         <li>
-            @Html.ActionLink(neighbor.Name, "Nearest", new { id = neighbor.ID }, null)
+            @Html.ActionLink(neighbor.LongName, "Nearest", new { id = neighbor.ID }, null)
         </li>
     }
 </ul>
