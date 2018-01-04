@@ -61,7 +61,7 @@ namespace KdyPojedeVlak.Controllers
         private static bool CheckInCalendar(TrainCalendar calendar, DateTime baseDate, DateTime day, int dayOffset)
         {
             if (calendar.ValidFrom > day) return false;
-            if (calendar.ValidTo < day) return false;
+            if (calendar.ValidTo.Year > 1 && calendar.ValidTo < day) return false;
             var bitmap = calendar.Bitmap;
             if (bitmap == null) return true;
 
