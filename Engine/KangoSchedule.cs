@@ -213,11 +213,12 @@ namespace KdyPojedeVlak.Engine
                 }
                 var arrival = !String.IsNullOrEmpty(row[8]) ? GetTimeFromRow(row, 7) : new TimeSpan?();
                 var departure = !String.IsNullOrEmpty(row[14]) ? GetTimeFromRow(row, 13) : new TimeSpan?();
-                if (!String.IsNullOrEmpty(row[37])) currCalendar = calendars[row[37]];
+                if (!String.IsNullOrEmpty(row[36])) currCalendar = calendars[row[36]];
 
                 lastTime = arrival ?? departure ?? lastTime;
-                if (lastTime == null) throw new NotSupportedException(String.Format("{0}: No time", currTrain));
+                if (lastTime == null) throw new NotSupportedException(String.Format("{0}: No time", currTrain.ID));
 
+                if (currCalendar == null) throw new NotSupportedException(String.Format("{0}: No calendar", currTrain.ID));
                 var routingPoint = points[BuildPointId(row, 1)];
                 var trainRoutePoint = new TrainRoutePoint
                 {
