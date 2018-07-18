@@ -1,5 +1,5 @@
-﻿@using KdyPojedeVlak.Engine
-@model Train
+﻿@using KdyPojedeVlak.Engine.Kango
+@model KdyPojedeVlak.Engine.Kango.Train
 @{
     ViewData["Title"] = "Vlak " + Model.TrainType + " " + Model.TrainNumber + " " + Model.TrainName;
 
@@ -37,7 +37,7 @@
                 </li>
                 <li role="separator" class="divider"></li>
                 <li>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new {id = Model.ID}))">Sdílet na Facebook</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.ID }))">Sdílet na Facebook</a>
                 </li>
             </ul>
         </div>
@@ -63,7 +63,9 @@
             <td class="point-type-col@(rowType)">
                 <span class="point-type-icon point-type-icon-@point.Point.Type@rowType"></span>
             </td>
-            <td><span title="@point.Point.Name">@point.Point.LongName</span></td>
+            <td>
+                <span title="@point.Point.Name">@point.Point.LongName</span>
+            </td>
             <td>@point.ScheduledArrival</td>
             <td>@point.ScheduledDeparture</td>
             <td>

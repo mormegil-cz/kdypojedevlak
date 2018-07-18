@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KdyPojedeVlak.Engine;
+using KdyPojedeVlak.Engine.Kango;
 using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,7 +50,7 @@ namespace KdyPojedeVlak.Controllers
             var nowTime = now.TimeOfDay;
             var startTime = start.TimeOfDay;
 
-            var data = point.PassingTrains.Select(t => new {Day = 0, Train = t}).Concat(point.PassingTrains.Select(t => new {Day = 1, Train = t}))
+            var data = point.PassingTrains.Select(t => new { Day = 0, Train = t }).Concat(point.PassingTrains.Select(t => new { Day = 1, Train = t }))
                 .SkipWhile(p => p.Train.AnyScheduledTime < startTime)
                 .Where(p => CheckInCalendar(p.Train.Calendar, Program.Schedule.BitmapBaseDate, now.Date, p.Day + p.Train.AnyScheduledTime.Days))
                 .TakeWhile((pt, idx) => idx < 5 || (pt.Train.AnyScheduledTime < nowTime && pt.Day == 0));

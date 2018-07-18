@@ -34,6 +34,7 @@ namespace KdyPojedeVlak
         [DebuggerNonUserCode]
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            /*
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
@@ -77,6 +78,7 @@ namespace KdyPojedeVlak
                 Console.WriteLine("Error loading schedule: {0}", ex.Message);
                 throw;
             }
+            */
         }
     }
 }

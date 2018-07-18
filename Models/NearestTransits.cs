@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using KdyPojedeVlak.Engine;
+using KdyPojedeVlak.Engine.Kango;
 
 namespace KdyPojedeVlak.Models
 {

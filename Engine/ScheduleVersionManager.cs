@@ -25,6 +25,8 @@ namespace KdyPojedeVlak.Engine
 
         public async Task<ScheduleVersionInfo> TryUpdate()
         {
+            throw new NotImplementedException();
+            /*
             // 1. find current newest version
             var currentNewestVersion = GetCurrentNewestVersion();
 
@@ -77,6 +79,7 @@ namespace KdyPojedeVlak.Engine
             }
 
             return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataDirectoryPrefix + currentNewestVersion), lastUpdateDate);
+            */
         }
 
         private DateTime GetLastUpdateDate()

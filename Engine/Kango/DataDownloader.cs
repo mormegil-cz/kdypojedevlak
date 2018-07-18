@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CoreFtp;
 
-namespace KdyPojedeVlak.Engine
+namespace KdyPojedeVlak.Engine.Kango
 {
     public class DataDownloader
     {

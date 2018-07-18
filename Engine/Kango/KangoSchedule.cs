@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using CoreFtp.Infrastructure.Extensions;
 
-namespace KdyPojedeVlak.Engine
+namespace KdyPojedeVlak.Engine.Kango
 {
     public class Train
     {

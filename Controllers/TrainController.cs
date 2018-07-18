@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using KdyPojedeVlak.Engine;
+using KdyPojedeVlak.Engine.Kango;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KdyPojedeVlak.Controllers
@@ -14,9 +14,9 @@ namespace KdyPojedeVlak.Controllers
             if (String.IsNullOrEmpty(search)) return View();
 
             var parsed = reTrainNumber.Match(search);
-            if (!parsed.Success) return View((object)"Nesmyslné zadání. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod.");
+            if (!parsed.Success) return View((object) "Nesmyslné zadání. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod.");
             var id = parsed.Groups["id"].Value;
-            if (String.IsNullOrEmpty(id)) return View((object)"Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod.");
+            if (String.IsNullOrEmpty(id)) return View((object) "Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod.");
 
             Train train;
             if (Program.Schedule.Trains.TryGetValue(id, out train))
@@ -25,7 +25,7 @@ namespace KdyPojedeVlak.Controllers
             }
             else
             {
-                return View((object)String.Format("Vlak č. {0} nebyl nalezen.", id));
+                return View((object) String.Format("Vlak č. {0} nebyl nalezen.", id));
             }
         }
 
