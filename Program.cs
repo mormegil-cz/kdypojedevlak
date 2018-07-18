@@ -60,8 +60,8 @@ namespace KdyPojedeVlak
                         BitmapDays = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
                         ValidityPeriod = new ValidityPeriod
                         {
-                            StartDateTime = new DateTimeOffset(2018, 06, 10, 0, 0, 0, TimeSpan.Zero).ToString("o"),
-                            EndDateTime = new DateTimeOffset(2018, 09, 2, 0, 0, 0, TimeSpan.Zero).ToString("o")
+                            StartDateTime = new DateTime(2018, 06, 10),
+                            EndDateTime = new DateTime(2018, 09, 2)
                         }
                     },
                     CZPTTLocation = new[]

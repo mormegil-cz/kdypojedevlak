@@ -41,8 +41,8 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
 
     public class ValidityPeriod
     {
-        public string StartDateTime { get; set; }
-        public string EndDateTime { get; set; }
+        public DateTime StartDateTime { get; set; }
+        public DateTime EndDateTime { get; set; }
     }
 
     public class CZPTTLocation

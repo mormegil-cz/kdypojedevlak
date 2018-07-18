@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Xml;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
 
@@ -85,6 +84,37 @@ namespace KdyPojedeVlak.Engine.Djr
             if (trainDef.TrainCompany != trainId.Company) Console.WriteLine("TrainCompany mismatch: '{0}' vs '{1}'", trainDef.TrainCompany, trainId.Company);
             if (trainDef.TrainCore != trainId.Core) Console.WriteLine("TrainCore mismatch: '{0}' vs '{1}'", trainDef.TrainCore, trainId.Core);
             if (trainDef.TrainTimetableYear != trainId.TimetableYear) Console.WriteLine("TrainTimetableYear mismatch: '{0}' vs '{1}'", trainDef.TrainTimetableYear, trainId.TimetableYear);
+
+            foreach (var variant in trainDef.RouteVariants)
+            {
+                if (variant.PathVariant == pathId.Variant || variant.TrainVariant == trainId.Variant)
+                {
+                    Console.WriteLine("Duplicate variant in {0}: '{1}', '{2}'", trainId.Core, trainId.Variant, pathId.Variant);
+                    break;
+                }
+            }
+            var routingPoints = new List<TrainRoutePoint>();
+            var routeVariant = new RouteVariant
+            {
+                Train = trainDef,
+                Calendar = new TrainCalendar
+                {
+                    CalendarBitmap = new BitArray(message.CZPTTInformation.PlannedCalendar.BitmapDays.Select(c => c == '1').ToArray()),
+                    ValidFrom = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime,
+                    ValidTo = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.EndDateTime
+                },
+                PathVariant = pathId.Variant,
+                TrainVariant = trainId.Variant,
+                RoutingPoints = routingPoints
+            };
+            trainDef.RouteVariants.Add(routeVariant);
+            foreach (var location in message.CZPTTInformation.CZPTTLocation)
+            {
+                routingPoints.Add(new TrainRoutePoint
+                {
+                    RouteVariant = routeVariant
+                });
+            }
         }
     }
 
@@ -105,7 +135,7 @@ namespace KdyPojedeVlak.Engine.Djr
         // ?check: move to TrainRoutePoint?
         public string OperationalTrainNumber { get; set; }
 
-        public List<RouteVariant> RouteVariants { get; set; }
+        public List<RouteVariant> RouteVariants { get; } = new List<RouteVariant>();
     }
 
     public class RouteVariant
@@ -130,7 +160,7 @@ namespace KdyPojedeVlak.Engine.Djr
     public class TrainRoutePoint
     {
         public RoutingPoint Point { get; set; }
-        public Train RouteVariant { get; set; }
+        public RouteVariant RouteVariant { get; set; }
 
         public TrainRoutePointType PointType { get; set; }
 
