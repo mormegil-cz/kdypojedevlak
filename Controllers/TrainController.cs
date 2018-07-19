@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using KdyPojedeVlak.Engine.Kango;
+using KdyPojedeVlak.Engine.Djr;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KdyPojedeVlak.Controllers

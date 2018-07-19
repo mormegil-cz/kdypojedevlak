@@ -1,8 +1,9 @@
-﻿@using KdyPojedeVlak.Engine.Kango
-@model KdyPojedeVlak.Engine.Kango.Train
+﻿@using KdyPojedeVlak.Engine.Djr
+@model KdyPojedeVlak.Engine.Djr.Train
 @{
     ViewData["Title"] = "Vlak " + Model.TrainType + " " + Model.TrainNumber + " " + Model.TrainName;
 
+    /*
     var mainCalendar = Model.Route.Aggregate(new Dictionary<TrainCalendar, int>(), (counters, point) =>
     {
         int count;
@@ -12,10 +13,12 @@
         return counters;
     }).Aggregate(new KeyValuePair<TrainCalendar, int>(null, 0), (max, calendar) => calendar.Value > max.Value ? calendar : max).Key;
     var pointCount = Model.Route.Count;
+    */
 }
 
-<h2>Vlak @Model.TrainType @Model.TrainNumber @Model.TrainName</h2>
+<h2>Vlak @Model.TrainCategory @Model.TrainNumber @Model.TrainName</h2>
 
+@*
 <div class="row">
     <div class="col-md-11">
         <div>@mainCalendar.Description</div>
@@ -78,3 +81,4 @@
     }
     </tbody>
 </table>
+*@

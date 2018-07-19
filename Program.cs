@@ -1,33 +1,24 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
 using KdyPojedeVlak.Engine.Kango;
+using Microsoft.AspNetCore.Hosting;
 
 namespace KdyPojedeVlak
 {
     public class Program
     {
         // TODO: Dependency injection
-        public static KangoSchedule Schedule;
+        //public static KangoSchedule Schedule;
+        public static DjrSchedule Schedule;
         public static ScheduleVersionInfo ScheduleVersionInfo;
 
         public static void Main(string[] args)
         {
-//            TestSerialize();
-//            return;
-            try
-            {
-                new DjrSchedule(@"c:\Users\Petr\LinuxShare\GVD2018_3.ZIP").Load();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
-/*
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
@@ -36,7 +27,6 @@ namespace KdyPojedeVlak
                 .Build();
 
             host.Run();
-        */
         }
 
         private static void TestSerialize()

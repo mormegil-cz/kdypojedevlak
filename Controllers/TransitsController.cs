@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KdyPojedeVlak.Engine.Kango;
+using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,20 +52,20 @@ namespace KdyPojedeVlak.Controllers
 
             var data = point.PassingTrains.Select(t => new { Day = 0, Train = t }).Concat(point.PassingTrains.Select(t => new { Day = 1, Train = t }))
                 .SkipWhile(p => p.Train.AnyScheduledTime < startTime)
-                .Where(p => CheckInCalendar(p.Train.Calendar, Program.Schedule.BitmapBaseDate, now.Date, p.Day + p.Train.AnyScheduledTime.Days))
+                .Where(p => CheckInCalendar(p.Train.Calendar, now.Date, p.Day + p.Train.AnyScheduledTime.Days))
                 .TakeWhile((pt, idx) => idx < 5 || (pt.Train.AnyScheduledTime < nowTime && pt.Day == 0));
 
             return View(new NearestTransits(point, now, data.Select(t => t.Train)));
         }
 
-        private static bool CheckInCalendar(TrainCalendar calendar, DateTime baseDate, DateTime day, int dayOffset)
+        private static bool CheckInCalendar(TrainCalendar calendar, DateTime day, int dayOffset)
         {
             if (calendar.ValidFrom > day) return false;
             if (calendar.ValidTo.Year > 1 && calendar.ValidTo < day) return false;
-            var bitmap = calendar.Bitmap;
+            var bitmap = calendar.CalendarBitmap;
             if (bitmap == null) return true;
 
-            var offset = (int) day.AddDays(-dayOffset).Subtract(baseDate).TotalDays;
+            var offset = (int) day.AddDays(-dayOffset).Subtract(calendar.BaseDate).TotalDays;
             if (offset < 0 || offset >= bitmap.Length) return false;
             return bitmap[offset];
         }

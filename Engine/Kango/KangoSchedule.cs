@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace KdyPojedeVlak.Engine.Kango
     {
         public string ID { get; set; }
         public string TrainNumber { get; set; }
-        public string TrainType { get; set; }
+        public string TrainCategory { get; set; }
         public string TrainName { get; set; }
         public List<TrainRoutePoint> Route { get; }
 
@@ -25,9 +26,11 @@ namespace KdyPojedeVlak.Engine.Kango
     {
         public string ID { get; set; }
         public string Description { get; set; }
-        public bool[] Bitmap { get; set; }
+        public BitArray CalendarBitmap { get; set; }
         public DateTime ValidFrom { get; set; }
         public DateTime ValidTo { get; set; }
+
+        // public DateTime BaseDate => Program.Schedule.BitmapBaseDate;
     }
 
     public class TrainRoutePoint : IComparable<TrainRoutePoint>
@@ -173,18 +176,18 @@ namespace KdyPojedeVlak.Engine.Kango
                     Description = g.Last().Row[2] + g.Last().Row[3],
                     ValidFrom = GetDateFromRow(g.First().Row, 0),
                     ValidTo = GetDateFromRow(g.First().Row, 3),
-                    Bitmap = g.Last().Row[1].Select(c => c == '1').ToArray()
+                    CalendarBitmap = new BitArray(g.Last().Row[1].Select(c => c == '1').ToArray())
                 });
 
             BitmapBaseDate = calendars.Values.Min(c => c.ValidFrom);
 
-            calendars.Add("0", new TrainCalendar {ID = "0", Description = "jede pp", Bitmap = new bool[553]});
+            calendars.Add("0", new TrainCalendar {ID = "0", Description = "jede pp", CalendarBitmap = new BitArray(553, false)});
             calendars.Add("1",
                 new TrainCalendar
                 {
                     ID = "1",
                     Description = "",
-                    Bitmap = Enumerable.Range(1, 553).Select(_ => true).ToArray()
+                    CalendarBitmap = new BitArray(553, true)
                 });
 
             LoadKangoData(path, "HLV")
@@ -192,7 +195,7 @@ namespace KdyPojedeVlak.Engine.Kango
                 {
                     ID = t[0],
                     TrainNumber = t[0].Split('/')[0],
-                    TrainType = trainTypes[t[0]],
+                    TrainCategory = trainTypes[t[0]],
                     TrainName = t[1]
                 });
             trains.Values

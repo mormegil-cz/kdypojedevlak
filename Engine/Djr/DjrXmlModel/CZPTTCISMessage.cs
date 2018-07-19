@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Xml.Serialization;
 
 namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
@@ -29,6 +30,7 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
     public class CZPTTInformation
     {
         public PlannedCalendar PlannedCalendar { get; set; }
+
         [XmlElement]
         public List<CZPTTLocation> CZPTTLocation { get; set; }
     }
@@ -61,6 +63,7 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
         public string TrafficType { get; set; }
         public string CommercialTrafficType { get; set; }
         public string OperationalTrainNumber { get; set; }
+
         [XmlElement]
         public List<TrainActivity> TrainActivity { get; set; }
     }
@@ -68,6 +71,7 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
     public class LocationSubsidiaryIdentification
     {
         public LocationSubsidiaryCode LocationSubsidiaryCode { get; set; }
+        public string LocationSubsidiaryName { get; set; }
         public string AllocationCompany { get; set; }
     }
 
@@ -91,13 +95,14 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
         [XmlAttribute]
         public string TimingQualifierCode { get; set; }
 
-        public DateTimeOffset Time { get; set; }
+        public string Time { get; set; }
         public int Offset { get; set; }
+
+        public TimeSpan ToTimeSpan => DateTimeOffset.ParseExact(Time, "HH:mm:ss.fffffffzzz", CultureInfo.InvariantCulture).TimeOfDay.Add(TimeSpan.FromDays(Offset));
     }
 
     public class TrainActivity
     {
-        [XmlElement]
-        public List<string> TrainActivityType { get; set; }
+        public string TrainActivityType { get; set; }
     }
 }

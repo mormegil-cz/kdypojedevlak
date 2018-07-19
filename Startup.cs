@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using KdyPojedeVlak.Engine;
+using KdyPojedeVlak.Engine.Djr;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +35,6 @@ namespace KdyPojedeVlak
         [DebuggerNonUserCode]
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            /*
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
@@ -57,6 +57,7 @@ namespace KdyPojedeVlak
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
+            /*
             try
             {
                 var scheduleVersionManager = new ScheduleVersionManager(@"App_Data");
@@ -67,8 +68,10 @@ namespace KdyPojedeVlak
                 Console.WriteLine("Error updating schedule: {0}", ex.Message);
                 throw;
             }
+            */
 
-            Program.Schedule = new KangoSchedule(Program.ScheduleVersionInfo.CurrentPath);
+            //Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
+            Program.Schedule = new DjrSchedule(@"App_Data\data-gvd2018_3\GVD2018_3.ZIP");
             try
             {
                 Program.Schedule.Load();
@@ -78,7 +81,6 @@ namespace KdyPojedeVlak
                 Console.WriteLine("Error loading schedule: {0}", ex.Message);
                 throw;
             }
-            */
         }
     }
 }
