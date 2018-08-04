@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KdyPojedeVlak.Engine
+namespace KdyPojedeVlak.Engine.Algorithms
 {
-    public static class Algorithms
+    public static class ListMerger
     {
         public static List<T> MergeLists<T>(List<List<T>> lists)
         {

@@ -29,7 +29,7 @@
             </button>
             <ul class="dropdown-menu">
                 <li>
-                    <a href="http://www.zelpage.cz/razeni/16/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku</a>
+                    <a href="http://www.zelpage.cz/razeni/@(DateTime.Now.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku</a>
                 </li>
                 <li>
                     <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku</a>
@@ -53,7 +53,7 @@
         <th>Bod</th>
         @foreach (var variant in Model.Train.RouteVariants)
         {
-            <th colspan="2">@variant.Calendar.Name</th>
+            <th scope="col" class="time-col" colspan="3">@variant.Calendar.Name</th>
         }
     </tr>
     </thead>
@@ -62,7 +62,6 @@
     {
         var point = Model.Points[i];
         var rowType = (i == 0 ? "-first" : "") + (i == pointCount - 1 ? "-last" : "");
-        // var pointClass = ((i == 0 || point.ScheduledArrival != null) && point.ScheduledDeparture != null ? "majorpoint" : "minorpoint")
         <tr class="@(Model.MajorPointFlags[i] ? "majorpoint" : "minorpoint")">
             <td class="point-type-col@(rowType)">
                 <span class="point-type-icon point-type-icon-@point.Type@rowType"></span>
@@ -74,23 +73,24 @@
             {
                 if (pointVariant == null)
                 {
-                    <td>…</td>
-                    <td>…</td>
+                    <td></td>
+                    <td class="passthrough-col@(rowType)"></td>
+                    <td></td>
                 }
                 else
                 {
-                    <td>@pointVariant.ScheduledArrival</td>
-                    <td>
-                        @pointVariant.ScheduledDeparture
-                        @if (pointVariant.TrainOperations.Count > 0)
-                        {
-                            <span class="operation-icons">
-                                @foreach (var operation in pointVariant.TrainOperations)
+                    <td class="time-col">@pointVariant.ScheduledArrival?.ToString("hh':'mm':'ss")</td>
+                    <td class="time-col">
+                        @pointVariant.ScheduledDeparture?.ToString("hh':'mm':'ss")
+                        <td class="operation-icons">
+                            @if (pointVariant.TrainOperations.Count > 0)
+                            {
+                                foreach (var operation in pointVariant.TrainOperations)
                                 {
-                                    <span class="operation-icon-@operation">@DisplayConsts.TrainOperationIcons[operation]</span>
+                                    <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
                                 }
-                            </span>
-                        }
+                            }
+                        </td>
                     </td>
                 }
             }

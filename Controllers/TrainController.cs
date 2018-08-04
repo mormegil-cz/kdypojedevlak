@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using KdyPojedeVlak.Engine;
+using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +46,7 @@ namespace KdyPojedeVlak.Controllers
             }
 
             var pointsInVariants = train.RouteVariants.Select(variant => variant.RoutingPoints.Select(point => point.Point).ToList()).ToList();
-            var pointList = Algorithms.MergeLists(pointsInVariants);
+            var pointList = ListMerger.MergeLists(pointsInVariants);
             var pointIndices = new Dictionary<RoutingPoint, int>(pointList.Count);
             for (var i = 0; i < pointList.Count; ++i)
             {

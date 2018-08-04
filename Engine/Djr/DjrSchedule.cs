@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Xml.Serialization;
+using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
 
 namespace KdyPojedeVlak.Engine.Djr
@@ -15,9 +18,11 @@ namespace KdyPojedeVlak.Engine.Djr
         private readonly Dictionary<string, RoutingPoint> points = new Dictionary<string, RoutingPoint>();
         private readonly Dictionary<string, Train> trains = new Dictionary<string, Train>();
         private readonly Dictionary<string, Train> trainsByNumber = new Dictionary<string, Train>();
+        private readonly Dictionary<TrainCalendar, TrainCalendar> trainCalendars = new Dictionary<TrainCalendar, TrainCalendar>();
 
         public Dictionary<string, RoutingPoint> Points => points;
         public Dictionary<string, Train> Trains => trainsByNumber;
+        public Dictionary<TrainCalendar, TrainCalendar> TrainCalendars => trainCalendars;
 
         private string path;
 
@@ -115,15 +120,26 @@ namespace KdyPojedeVlak.Engine.Djr
                 }
             }
             var routingPoints = new List<TrainRoutePoint>();
+            var trainCalendar = new TrainCalendar
+            {
+                CalendarBitmap = new BitArray(message.CZPTTInformation.PlannedCalendar.BitmapDays.Select(c => c == '1').ToArray()),
+                ValidFrom = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime,
+                ValidTo = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.EndDateTime
+            };
+            if (trainCalendars.TryGetValue(trainCalendar, out var existingCalendar))
+            {
+                trainCalendar = existingCalendar;
+            }
+            else
+            {
+                trainCalendars.Add(trainCalendar, trainCalendar);
+                trainCalendar.ComputeName();
+            }
+
             var routeVariant = new RouteVariant
             {
                 Train = trainDef,
-                Calendar = new TrainCalendar
-                {
-                    CalendarBitmap = new BitArray(message.CZPTTInformation.PlannedCalendar.BitmapDays.Select(c => c == '1').ToArray()),
-                    ValidFrom = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime,
-                    ValidTo = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.EndDateTime
-                },
+                Calendar = trainCalendar,
                 PathVariant = pathId.Variant,
                 TrainVariant = trainId.Variant,
                 RoutingPoints = routingPoints
@@ -322,14 +338,46 @@ namespace KdyPojedeVlak.Engine.Djr
         public string ID => String.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}", Train.TrainCompany, Train.TrainCore, TrainVariant);
     }
 
-    public class TrainCalendar
+    public class TrainCalendar : IEquatable<TrainCalendar>
     {
         public BitArray CalendarBitmap { get; set; }
         public DateTime ValidFrom { get; set; }
         public DateTime ValidTo { get; set; }
 
         public DateTime BaseDate => ValidFrom;
-        public String Name => "";
+        public String Name { get; private set; }
+
+        internal void ComputeName()
+        {
+            Name = CalendarNamer.DetectName(CalendarBitmap, ValidFrom, ValidTo);
+        }
+
+        public bool Equals(TrainCalendar other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+
+            return Equals(CalendarBitmap, other.CalendarBitmap) && ValidFrom.Equals(other.ValidFrom) && ValidTo.Equals(other.ValidTo);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((TrainCalendar) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (CalendarBitmap != null ? CalendarBitmap.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ ValidFrom.GetHashCode();
+                hashCode = (hashCode * 397) ^ ValidTo.GetHashCode();
+                return hashCode;
+            }
+        }
     }
 
     public class TrainRoutePoint : IComparable<TrainRoutePoint>

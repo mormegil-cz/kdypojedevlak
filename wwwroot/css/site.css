@@ -149,3 +149,24 @@ textarea {
 .point-type-icon-Point-last {
     background-image: url("../images/point-point-last.png");
 }
+
+.time-col {
+    text-align: center;
+}
+
+.passthrough-col {
+    text-align: center;
+    background: repeat-y center url("../images/passthrough.png");
+}
+
+.passthrough-col-first {
+    text-align: center;
+    /* background: repeat-y center url("../images/passthrough.png"); */
+    background: no-repeat bottom url("../images/passthrough.png");
+}
+
+.passthrough-col-last {
+    text-align: center;
+    /* background: repeat-y center url("../images/passthrough.png"); */
+    background: no-repeat top url("../images/passthrough.png");
+}

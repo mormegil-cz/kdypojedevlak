@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Engine;
+using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
 using Microsoft.AspNetCore.Hosting;
@@ -31,7 +32,7 @@ namespace KdyPojedeVlak
 
         private static void TestMerge<T>(params List<T>[] lists)
         {
-            var merged = Algorithms.MergeLists(lists.ToList());
+            var merged = ListMerger.MergeLists(lists.ToList());
             foreach (var list in lists)
             {
                 for (var i = 0; i < list.Count; ++i)
