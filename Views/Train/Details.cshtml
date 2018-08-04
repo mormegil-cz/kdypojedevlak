@@ -1,4 +1,5 @@
 ﻿@using KdyPojedeVlak.Engine.Djr
+@using KdyPojedeVlak.Models
 @model KdyPojedeVlak.Models.TrainPlan
 @{
     ViewData["Title"] = "Vlak " + Model.Train.TrainCategory + " " + Model.Train.TrainNumber + " " + Model.Train.TrainName;
@@ -62,7 +63,7 @@
         var point = Model.Points[i];
         var rowType = (i == 0 ? "-first" : "") + (i == pointCount - 1 ? "-last" : "");
         // var pointClass = ((i == 0 || point.ScheduledArrival != null) && point.ScheduledDeparture != null ? "majorpoint" : "minorpoint")
-        <tr class="majorpoint">
+        <tr class="@(Model.MajorPointFlags[i] ? "majorpoint" : "minorpoint")">
             <td class="point-type-col@(rowType)">
                 <span class="point-type-icon point-type-icon-@point.Type@rowType"></span>
             </td>
@@ -79,7 +80,18 @@
                 else
                 {
                     <td>@pointVariant.ScheduledArrival</td>
-                    <td>@pointVariant.ScheduledDeparture</td>
+                    <td>
+                        @pointVariant.ScheduledDeparture
+                        @if (pointVariant.TrainOperations.Count > 0)
+                        {
+                            <span class="operation-icons">
+                                @foreach (var operation in pointVariant.TrainOperations)
+                                {
+                                    <span class="operation-icon-@operation">@DisplayConsts.TrainOperationIcons[operation]</span>
+                                }
+                            </span>
+                        }
+                    </td>
                 }
             }
         </tr>

@@ -181,11 +181,11 @@ namespace KdyPojedeVlak.Engine.Djr
                 Timing departureTiming = null;
                 timingPerType?.TryGetValue("ALA", out arrivalTiming);
                 timingPerType?.TryGetValue("ALD", out departureTiming);
-                
-                HashSet<TrainOperation> trainOperations;
+
+                ISet<TrainOperation> trainOperations;
                 if (location.TrainActivity?.Count > 0)
                 {
-                    trainOperations = new HashSet<TrainOperation>(location.TrainActivity.Count);
+                    trainOperations = new SortedSet<TrainOperation>();
                     foreach (var activity in location.TrainActivity)
                     {
                         trainOperations.Add(defTrainOperation[activity.TrainActivityType]);
@@ -193,7 +193,15 @@ namespace KdyPojedeVlak.Engine.Djr
                 }
                 else
                 {
-                    trainOperations = null;
+                    trainOperations = Sets<TrainOperation>.Empty;
+                }
+
+                if (arrivalTiming != null && arrivalTiming.Equals(departureTiming))
+                {
+                    if (!trainOperations.Contains(TrainOperation.ShortStop) && !trainOperations.Contains(TrainOperation.RequestStop))
+                    {
+                        arrivalTiming = null;
+                    }
                 }
 
                 routingPoints.Add(new TrainRoutePoint
@@ -268,7 +276,7 @@ namespace KdyPojedeVlak.Engine.Djr
             { "0040", TrainOperation.Passthrough },
             { "0043", TrainOperation.ConnectedTrains },
             { "0044", TrainOperation.TrainConnection },
-            { "CZ01", TrainOperation.StopsDuringOpeningHours },
+            { "CZ01", TrainOperation.StopsAfterOpening },
             { "CZ02", TrainOperation.ShortStop },
             { "CZ03", TrainOperation.HandicappedEmbark },
             { "CZ04", TrainOperation.HandicappedDisembark },
@@ -343,7 +351,8 @@ namespace KdyPojedeVlak.Engine.Djr
 
         public TimeSpan AnyScheduledTime => ScheduledArrival ?? ScheduledDeparture.GetValueOrDefault();
 
-        public HashSet<TrainOperation> TrainOperations { get; set; }
+        public ISet<TrainOperation> TrainOperations { get; set; }
+        public bool IsMajorPoint => ScheduledArrival != null;
 
         public int CompareTo(TrainRoutePoint other)
         {
@@ -469,7 +478,7 @@ namespace KdyPojedeVlak.Engine.Djr
         Passthrough,
         ConnectedTrains,
         TrainConnection,
-        StopsDuringOpeningHours,
+        StopsAfterOpening,
         ShortStop,
         HandicappedEmbark,
         HandicappedDisembark,

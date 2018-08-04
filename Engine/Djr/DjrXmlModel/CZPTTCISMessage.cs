@@ -90,7 +90,7 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
         public List<Timing> Timing { get; set; }
     }
 
-    public class Timing
+    public class Timing : IEquatable<Timing>
     {
         [XmlAttribute]
         public string TimingQualifierCode { get; set; }
@@ -99,6 +99,13 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
         public int Offset { get; set; }
 
         public TimeSpan ToTimeSpan => DateTimeOffset.ParseExact(Time, "HH:mm:ss.fffffffzzz", CultureInfo.InvariantCulture).TimeOfDay.Add(TimeSpan.FromDays(Offset));
+
+        public bool Equals(Timing other)
+        {
+            if (other == null) return false;
+
+            return other.ToTimeSpan.Equals(ToTimeSpan);
+        }
     }
 
     public class TrainActivity

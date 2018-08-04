@@ -92,7 +92,10 @@ namespace KdyPojedeVlak.Controllers
                 variantRoutingPoints.Add(variants);
             }
 
-            return View(new TrainPlan(train, pointList, variantRoutingPoints));
+            var majorPointFlags = variantRoutingPoints.Select(point => point.Any(variant => variant != null && variant.IsMajorPoint)).ToList();
+            majorPointFlags[0] = true;
+
+            return View(new TrainPlan(train, pointList, variantRoutingPoints, majorPointFlags));
         }
     }
 }

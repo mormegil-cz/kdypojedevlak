@@ -6,7 +6,6 @@ using System.Xml.Serialization;
 using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
-using KdyPojedeVlak.Engine.Kango;
 using Microsoft.AspNetCore.Hosting;
 
 namespace KdyPojedeVlak
@@ -20,10 +19,6 @@ namespace KdyPojedeVlak
 
         public static void Main(string[] args)
         {
-            TestMerge(
-                L(10, 20, 30),
-                L(19, 20, 21)
-            );
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
@@ -57,13 +52,13 @@ namespace KdyPojedeVlak
         {
             if (!test) throw new Exception("Assertion failed");
         }
-        
+
         private static List<T> L<T>(params T[] items)
         {
             return items.ToList();
         }
 
-        
+
         private static void TestSerialize()
         {
             var ser = new XmlSerializer(typeof(CZPTTCISMessage));
