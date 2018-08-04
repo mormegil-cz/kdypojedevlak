@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using KdyPojedeVlak.Engine.Djr;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace KdyPojedeVlak.Models
 {
     public static class DisplayConsts
     {
-        public static readonly Dictionary<TrainOperation, String> TrainOperationIcons = new Dictionary<TrainOperation, string>
+        public static readonly Dictionary<TrainOperation, string> TrainOperationIcons = new Dictionary<TrainOperation, string>
         {
             { TrainOperation.Unknown, "" },
             { TrainOperation.StopRequested, "" },
@@ -33,7 +31,7 @@ namespace KdyPojedeVlak.Models
             { TrainOperation.NonpublicStop, "⟠" },
         };
 
-        public static readonly Dictionary<TrainOperation, String> TrainOperationDescriptions = new Dictionary<TrainOperation, string>
+        public static readonly Dictionary<TrainOperation, string> TrainOperationDescriptions = new Dictionary<TrainOperation, string>
         {
             { TrainOperation.Unknown, "" },
             { TrainOperation.StopRequested, "Požadavek na zastavení" },
@@ -56,6 +54,34 @@ namespace KdyPojedeVlak.Models
             { TrainOperation.WaitForDelayedTrains, "Čekání na zpožděné vlaky" },
             { TrainOperation.OperationalStopOnly, "Zastavení jen z dopravních důvodů" },
             { TrainOperation.NonpublicStop, "Nezveřejněné zastavení" },
+        };
+
+        public static Dictionary<TrainCategory, string> TrainCategoryNames = new Dictionary<TrainCategory, string>
+        {
+            { TrainCategory.Unknown, "" },
+            { TrainCategory.EuroCity, "EC" },
+            { TrainCategory.Intercity, "IC" },
+            { TrainCategory.Express, "Ex" },
+            { TrainCategory.EuroNight, "EN" },
+            { TrainCategory.Regional, "Os" },
+            { TrainCategory.SuperCity, "SC" },
+            { TrainCategory.Rapid, "Sp" },
+            { TrainCategory.FastTrain, "R" },
+            { TrainCategory.RailJet, "rj" },
+            { TrainCategory.Rex, "Rx" },
+            { TrainCategory.TrilexExpres, "TLX" },
+            { TrainCategory.Trilex, "TL" },
+            { TrainCategory.LeoExpres, "LE" },
+            { TrainCategory.Regiojet, "RJ" },
+            { TrainCategory.ArrivaExpress, "AEx" },
+            { TrainCategory.NightJet, "NJ" },
+        };
+
+        public static Dictionary<SubsidiaryLocationType, string> SubsidiaryLocationTypeNames = new Dictionary<SubsidiaryLocationType, string>
+        {
+            { SubsidiaryLocationType.Unknown, "" },
+            { SubsidiaryLocationType.None, "" },
+            { SubsidiaryLocationType.StationTrack, "kolej " }
         };
     }
 }

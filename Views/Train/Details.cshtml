@@ -2,7 +2,7 @@
 @using KdyPojedeVlak.Models
 @model KdyPojedeVlak.Models.TrainPlan
 @{
-    ViewData["Title"] = "Vlak " + Model.Train.TrainCategory + " " + Model.Train.TrainNumber + " " + Model.Train.TrainName;
+    ViewData["Title"] = "Vlak " + DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] + " " + Model.Train.TrainNumber + " " + Model.Train.TrainName;
     var pointCount = Model.Points.Count;
 
     /*
@@ -18,7 +18,7 @@
     */
 }
 
-<h2>Vlak @Model.Train.TrainCategory @Model.Train.TrainNumber @Model.Train.TrainName</h2>
+<h2>Vlak @DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] @Model.Train.TrainNumber @Model.Train.TrainName</h2>
 <div class="row">
     <div class="col-md-11">
     </div>
@@ -81,7 +81,7 @@
                 {
                     <td class="time-col">@pointVariant.ScheduledArrival?.ToString("hh':'mm':'ss")</td>
                     <td class="time-col">
-                        @pointVariant.ScheduledDeparture?.ToString("hh':'mm':'ss")
+                        <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.ScheduledDeparture?.ToString("hh':'mm':'ss")</span>
                         <td class="operation-icons">
                             @if (pointVariant.TrainOperations.Count > 0)
                             {

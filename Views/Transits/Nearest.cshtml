@@ -1,4 +1,5 @@
-﻿@model KdyPojedeVlak.Models.NearestTransits
+﻿@using KdyPojedeVlak.Models
+@model KdyPojedeVlak.Models.NearestTransits
 @{
     ViewData["Title"] = String.Format("Nejbližší vlaky v „{0}“", Model.Point.Name);
     var now = Model.StartDate.TimeOfDay;
@@ -8,8 +9,8 @@
 @foreach(var train in Model.Transits)
 {
     <li class="@(train.AnyScheduledTime < now ? "past" : "future")">
-        @train.AnyScheduledTime
-        @Html.ActionLink(train.Train.TrainCategory + " " + train.Train.TrainNumber + " " + train.Train.TrainName, "Details", "Train", new { id = train.Train.TrainNumber })
+        @train.AnyScheduledTime.ToString("hh':'mm':'ss")
+        @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.Train.TrainCategory] + " " + train.Train.TrainNumber + " " + train.Train.TrainName, "Details", "Train", new { id = train.Train.TrainNumber })
     </li>
 }
 </ul>

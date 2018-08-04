@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -99,7 +100,7 @@ namespace KdyPojedeVlak.Engine.SR70
             { "Hranice třídy sklonu", PointType.InnerBoundary },
             { "Jiné dopravní body", PointType.Point },
             { "Kolejová křižovatka", PointType.Crossing },
-            { "Kolejová skupina stanice nebo jiného DVM", PointType.Station },
+            { "Kolejová skupina stanice nebo jiného DVM", PointType.Point },
             { "Nákladiště", PointType.Point },
             { "Nákladiště a zastávka", PointType.Stop },
             { "Obvod DVM nebo staniční kolejová skupina se zastávkou", PointType.Stop },

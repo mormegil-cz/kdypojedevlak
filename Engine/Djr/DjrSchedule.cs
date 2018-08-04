@@ -9,6 +9,7 @@ using System.Xml.Serialization;
 using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
 using KdyPojedeVlak.Engine.SR70;
+using KdyPojedeVlak.Models;
 
 namespace KdyPojedeVlak.Engine.Djr
 {
@@ -161,7 +162,7 @@ namespace KdyPojedeVlak.Engine.Djr
                             ID = locationID,
                             LongName = location.PrimaryLocationName,
                             ShortName = location.PrimaryLocationName,
-                            Type = PointType.Unknown
+                            Type = location.CountryCodeISO == "CZ" ? PointType.Unknown : PointType.Point
                         }
                     };
                     points.Add(point.ID, point);
@@ -409,6 +410,8 @@ namespace KdyPojedeVlak.Engine.Djr
 
         public ISet<TrainOperation> TrainOperations { get; set; }
         public bool IsMajorPoint => ScheduledArrival != null;
+
+        public string SubsidiaryLocationDescription => SubsidiaryLocation == null ? null : DisplayConsts.SubsidiaryLocationTypeNames[SubsidiaryLocationType] + " " + SubsidiaryLocation + " " + SubsidiaryLocationName;
 
         public int CompareTo(TrainRoutePoint other)
         {
