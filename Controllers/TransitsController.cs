@@ -23,6 +23,7 @@ namespace KdyPojedeVlak.Controllers
             // TODO: Proper (indexed) search
             var searchResults = Program.Schedule.Points
                 .Where(p => p.Value.Name.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0 ||
+                            p.Value.ShortName.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0 ||
                             p.Value.LongName.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0)
                 .Select(p => new KeyValuePair<string, string>(p.Key, p.Value.LongName))
                 .Take(100)

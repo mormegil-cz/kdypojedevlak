@@ -7,6 +7,7 @@ using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
+using KdyPojedeVlak.Engine.SR70;
 using Microsoft.AspNetCore.Hosting;
 
 namespace KdyPojedeVlak
@@ -17,6 +18,7 @@ namespace KdyPojedeVlak
         //public static KangoSchedule Schedule;
         public static DjrSchedule Schedule;
         public static ScheduleVersionInfo ScheduleVersionInfo;
+        public static PointCodebook PointCodebook;
 
         public static void Main(string[] args)
         {

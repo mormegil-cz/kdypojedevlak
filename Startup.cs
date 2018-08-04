@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.Djr;
+using KdyPojedeVlak.Engine.SR70;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -70,13 +71,23 @@ namespace KdyPojedeVlak
             }
             */
 
+            Program.PointCodebook = new PointCodebook(@"App_Data");
+            try
+            {
+                Program.PointCodebook.Load();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error loading SR70 codebook: {0}", ex.Message);
+            }
+
             //Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
             Program.Schedule = new DjrSchedule(@"App_Data\data-gvd2018_3\GVD2018_3.ZIP");
             try
             {
                 Program.Schedule.Load();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("Error loading schedule: {0}", ex.Message);
                 throw;

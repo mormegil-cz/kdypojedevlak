@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
+using KdyPojedeVlak.Engine.SR70;
 
 namespace KdyPojedeVlak.Engine.Djr
 {
@@ -18,11 +17,11 @@ namespace KdyPojedeVlak.Engine.Djr
         private readonly Dictionary<string, RoutingPoint> points = new Dictionary<string, RoutingPoint>();
         private readonly Dictionary<string, Train> trains = new Dictionary<string, Train>();
         private readonly Dictionary<string, Train> trainsByNumber = new Dictionary<string, Train>();
-        private readonly Dictionary<TrainCalendar, TrainCalendar> trainCalendars = new Dictionary<TrainCalendar, TrainCalendar>();
+
+        private Dictionary<TrainCalendar, TrainCalendar> trainCalendars = new Dictionary<TrainCalendar, TrainCalendar>();
 
         public Dictionary<string, RoutingPoint> Points => points;
         public Dictionary<string, Train> Trains => trainsByNumber;
-        public Dictionary<TrainCalendar, TrainCalendar> TrainCalendars => trainCalendars;
 
         private string path;
 
@@ -76,6 +75,8 @@ namespace KdyPojedeVlak.Engine.Djr
                 }
                 trainsByNumber[train.TrainNumber] = train;
             }
+
+            trainCalendars = null;
 
             Console.WriteLine("{0} trains", trains.Count);
         }
@@ -150,11 +151,18 @@ namespace KdyPojedeVlak.Engine.Djr
                 RoutingPoint point;
                 if (!points.TryGetValue(location.CountryCodeISO + ":" + location.LocationPrimaryCode, out point))
                 {
+                    var locationID = location.CountryCodeISO + ":" + location.LocationPrimaryCode;
                     point = new RoutingPoint
                     {
-                        ID = location.CountryCodeISO + ":" + location.LocationPrimaryCode,
+                        ID = locationID,
                         Name = location.PrimaryLocationName,
-                        // TODO: CodebookEntry =, LongName
+                        CodebookEntry = Program.PointCodebook.Find(locationID) ?? new PointCodebookEntry
+                        {
+                            ID = locationID,
+                            LongName = location.PrimaryLocationName,
+                            ShortName = location.PrimaryLocationName,
+                            Type = PointType.Unknown
+                        }
                     };
                     points.Add(point.ID, point);
                 }
@@ -429,16 +437,9 @@ namespace KdyPojedeVlak.Engine.Djr
             NeighboringPoints = new HashSet<RoutingPoint>();
         }
 
-        public string LongName => Name; // CodebookEntry?.LongName;
-        public PointType Type => PointType.Unknown; // CodebookEntry.Type
-    }
-
-    public class PointCodebookEntry
-    {
-        public string ID { get; set; }
-        public string LongName { get; set; }
-        public string ShortName { get; set; }
-        public PointType Type { get; set; }
+        public string LongName => CodebookEntry.LongName;
+        public string ShortName => CodebookEntry.ShortName;
+        public PointType Type => CodebookEntry.Type;
     }
 
     public enum TrainType
@@ -496,18 +497,6 @@ namespace KdyPojedeVlak.Engine.Djr
         Unknown,
         None,
         StationTrack
-    }
-
-    public enum PointType
-    {
-        Unknown,
-        Stop,
-        Station,
-        InnerBoundary,
-        StateBoundary,
-        Crossing,
-        Siding,
-        Point
     }
 
     public enum TrainOperation
