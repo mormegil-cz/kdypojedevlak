@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.Djr;
+using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KdyPojedeVlak.Controllers
@@ -39,7 +43,56 @@ namespace KdyPojedeVlak.Controllers
             {
                 return RedirectToAction("Index", new { search = id });
             }
-            return View(train);
+
+            var pointsInVariants = train.RouteVariants.Select(variant => variant.RoutingPoints.Select(point => point.Point).ToList()).ToList();
+            var pointList = Algorithms.MergeLists(pointsInVariants);
+            var pointIndices = new Dictionary<RoutingPoint, int>(pointList.Count);
+            for (var i = 0; i < pointList.Count; ++i)
+            {
+                if (pointIndices.ContainsKey(pointList[i]))
+                {
+                    Console.WriteLine("Duplicate point in list: {0}", pointList[i].Name);
+                }
+                pointIndices[pointList[i]] = i;
+            }
+            // pointList.Select((point, index) => (point, index)).ToDictionary(tuple => tuple.point, tuple => tuple.index);
+
+            var columns = new List<List<TrainRoutePoint>>(train.RouteVariants.Count);
+            foreach (var variant in train.RouteVariants)
+            {
+                var column = new TrainRoutePoint[pointList.Count];
+                var lastIndex = -1;
+                foreach (var point in variant.RoutingPoints)
+                {
+                    var pointIndex = pointIndices[point.Point];
+                    if (column[pointIndex] != null)
+                    {
+                        Console.WriteLine("Point #{0} ({1}) is duplicated after {2}", pointIndex, point.Point.Name, lastIndex);
+                        // throw new NotSupportedException("Cannot insert duplicate route point");
+                    }
+                    if (pointIndex < lastIndex)
+                    {
+                        Console.WriteLine("Point #{0} ({1}) goes into reverse after {2}", pointIndex, point.Point.Name, lastIndex);
+                        //throw new NotSupportedException("Cannot go in reverse");
+                    }
+                    column[pointIndex] = point;
+                    lastIndex = pointIndex;
+                }
+                columns.Add(column.ToList());
+            }
+
+            var variantRoutingPoints = new List<List<TrainRoutePoint>>(pointList.Count);
+            for (var i = 0; i < pointList.Count; ++i)
+            {
+                var variants = new List<TrainRoutePoint>(train.RouteVariants.Count);
+                for (var j = 0; j < train.RouteVariants.Count; ++j)
+                {
+                    variants.Add(columns[j][i]);
+                }
+                variantRoutingPoints.Add(variants);
+            }
+
+            return View(new TrainPlan(train, pointList, variantRoutingPoints));
         }
     }
 }

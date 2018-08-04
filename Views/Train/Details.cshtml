@@ -1,7 +1,8 @@
 ﻿@using KdyPojedeVlak.Engine.Djr
-@model KdyPojedeVlak.Engine.Djr.Train
+@model KdyPojedeVlak.Models.TrainPlan
 @{
-    ViewData["Title"] = "Vlak " + Model.TrainType + " " + Model.TrainNumber + " " + Model.TrainName;
+    ViewData["Title"] = "Vlak " + Model.Train.TrainCategory + " " + Model.Train.TrainNumber + " " + Model.Train.TrainName;
+    var pointCount = Model.Points.Count;
 
     /*
     var mainCalendar = Model.Route.Aggregate(new Dictionary<TrainCalendar, int>(), (counters, point) =>
@@ -16,12 +17,9 @@
     */
 }
 
-<h2>Vlak @Model.TrainCategory @Model.TrainNumber @Model.TrainName</h2>
-
-@*
+<h2>Vlak @Model.Train.TrainCategory @Model.Train.TrainNumber @Model.Train.TrainName</h2>
 <div class="row">
     <div class="col-md-11">
-        <div>@mainCalendar.Description</div>
     </div>
     <div class="col-md-1">
         <div class="btn-group">
@@ -30,17 +28,17 @@
             </button>
             <ul class="dropdown-menu">
                 <li>
-                    <a href="http://www.zelpage.cz/razeni/16/vlaky/cd-@Model.TrainNumber">Řazení vlaku</a>
+                    <a href="http://www.zelpage.cz/razeni/16/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku</a>
                 </li>
                 <li>
-                    <a href="https://www.cd.cz/vlak/@Model.TrainNumber">Poloha vlaku</a>
+                    <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku</a>
                 </li>
                 <li>
-                    <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.TrainNumber">Zpoždění vlaku</a>
+                    <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
                 </li>
                 <li role="separator" class="divider"></li>
                 <li>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.ID }))">Sdílet na Facebook</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.Train.TrainNumber }))">Sdílet na Facebook</a>
                 </li>
             </ul>
         </div>
@@ -52,33 +50,39 @@
     <tr>
         <th></th>
         <th>Bod</th>
-        <th>Příjezd</th>
-        <th>Odjezd</th>
-        <th></th>
+        @foreach (var variant in Model.Train.RouteVariants)
+        {
+            <th colspan="2">@variant.Calendar.Name</th>
+        }
     </tr>
     </thead>
     <tbody>
     @for (var i = 0; i < pointCount; ++i)
     {
-        var point = Model.Route[i];
+        var point = Model.Points[i];
         var rowType = (i == 0 ? "-first" : "") + (i == pointCount - 1 ? "-last" : "");
-        <tr class="@((i == 0 || point.ScheduledArrival != null) && point.ScheduledDeparture != null ? "majorpoint" : "minorpoint")">
+        // var pointClass = ((i == 0 || point.ScheduledArrival != null) && point.ScheduledDeparture != null ? "majorpoint" : "minorpoint")
+        <tr class="majorpoint">
             <td class="point-type-col@(rowType)">
-                <span class="point-type-icon point-type-icon-@point.Point.Type@rowType"></span>
+                <span class="point-type-icon point-type-icon-@point.Type@rowType"></span>
             </td>
             <td>
-                <span title="@point.Point.Name">@point.Point.LongName</span>
+                <span title="@point.Name">@point.LongName</span>
             </td>
-            <td>@point.ScheduledArrival</td>
-            <td>@point.ScheduledDeparture</td>
-            <td>
-                @if (point.Calendar != mainCalendar)
+            @foreach (var pointVariant in Model.VariantRoutingPoints[i])
+            {
+                if (pointVariant == null)
                 {
-                    <em>@point.Calendar.Description</em>
+                    <td>…</td>
+                    <td>…</td>
                 }
-            </td>
+                else
+                {
+                    <td>@pointVariant.ScheduledArrival</td>
+                    <td>@pointVariant.ScheduledDeparture</td>
+                }
+            }
         </tr>
     }
     </tbody>
 </table>
-*@

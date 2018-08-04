@@ -181,7 +181,7 @@ namespace KdyPojedeVlak.Engine.Djr
                 Timing departureTiming = null;
                 timingPerType?.TryGetValue("ALA", out arrivalTiming);
                 timingPerType?.TryGetValue("ALD", out departureTiming);
-
+                
                 HashSet<TrainOperation> trainOperations;
                 if (location.TrainActivity?.Count > 0)
                 {
@@ -321,6 +321,7 @@ namespace KdyPojedeVlak.Engine.Djr
         public DateTime ValidTo { get; set; }
 
         public DateTime BaseDate => ValidFrom;
+        public String Name => "";
     }
 
     public class TrainRoutePoint : IComparable<TrainRoutePoint>

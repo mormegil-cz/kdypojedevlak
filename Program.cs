@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -19,6 +20,10 @@ namespace KdyPojedeVlak
 
         public static void Main(string[] args)
         {
+            TestMerge(
+                L(10, 20, 30),
+                L(19, 20, 21)
+            );
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
@@ -29,6 +34,36 @@ namespace KdyPojedeVlak
             host.Run();
         }
 
+        private static void TestMerge<T>(params List<T>[] lists)
+        {
+            var merged = Algorithms.MergeLists(lists.ToList());
+            foreach (var list in lists)
+            {
+                for (var i = 0; i < list.Count; ++i)
+                {
+                    var iIndex = merged.IndexOf(list[i]);
+                    AssertTrue(iIndex >= 0);
+                    for (var j = i + 1; j < list.Count; ++j)
+                    {
+                        var jIndex = merged.IndexOf(list[j]);
+                        AssertTrue(jIndex >= 0);
+                        AssertTrue(iIndex < jIndex);
+                    }
+                }
+            }
+        }
+
+        private static void AssertTrue(bool test)
+        {
+            if (!test) throw new Exception("Assertion failed");
+        }
+        
+        private static List<T> L<T>(params T[] items)
+        {
+            return items.ToList();
+        }
+
+        
         private static void TestSerialize()
         {
             var ser = new XmlSerializer(typeof(CZPTTCISMessage));
