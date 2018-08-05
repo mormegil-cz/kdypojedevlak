@@ -11,6 +11,11 @@ namespace KdyPojedeVlak.Controllers
     {
         private static readonly IList<KeyValuePair<string, string>> emptyPointList = new KeyValuePair<string, string>[0];
 
+        private static readonly int[] intervals = { 1, 3, 5, 10, 15, 30, 60, 120, 240, 300, 480, 720, 1440 };
+        private const int GoodMinimum = 4;
+        private const int GoodEnough = 7;
+        private const int AbsoluteMaximum = 40;
+
         public IActionResult Index()
         {
             return RedirectToAction("ChoosePoint");
@@ -45,18 +50,48 @@ namespace KdyPojedeVlak.Controllers
                 return NotFound();
             }
 
-            // TODO: dynamic selection of previous trains
             var now = at ?? DateTime.Now;
-            var start = now.AddMinutes(-15);
+            return View(new NearestTransits(point, now, GetTrainList(now, point)));
+        }
+
+        private static List<TrainRoutePoint> GetTrainList(DateTime now, RoutingPoint point)
+        {
             var nowTime = now.TimeOfDay;
-            var startTime = start.TimeOfDay;
+            List<TrainRoutePoint> bestList = null;
+            bool bestOverMinimum = false;
 
-            var data = point.PassingTrains.Select(t => new { Day = 0, Train = t }).Concat(point.PassingTrains.Select(t => new { Day = 1, Train = t }))
-                .SkipWhile(p => p.Train.AnyScheduledTime < startTime)
-                .Where(p => CheckInCalendar(p.Train.Calendar, now.Date, p.Day + p.Train.AnyScheduledTime.Days))
-                .TakeWhile((pt, idx) => idx < 5 || (pt.Train.AnyScheduledTime < nowTime && pt.Day == 0));
+            for (int i = 0; i < intervals.Length; ++i)
+            {
+                var intervalWidth = intervals[i];
+                var startTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(-intervalWidth));
+                var endTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(intervals[i]));
 
-            return View(new NearestTransits(point, now, data.Select(t => t.Train)));
+                var data = point.PassingTrains.Select(t => (Day: 0, Train: t)).Concat(point.PassingTrains.Select(t => (Day: 1, Train: t)))
+                    .SkipWhile(p => p.Day == 0 && p.Train.AnyScheduledTime < startTime)
+                    .Where(p => CheckInCalendar(p.Train.Calendar, now.Date, p.Day + p.Train.AnyScheduledTimeSpan.Days))
+                    .TakeWhile(pt => pt.Train.AnyScheduledTime.Add(TimeSpan.FromDays(pt.Day)) < endTime)
+                    .Take(AbsoluteMaximum)
+                    .ToList();
+
+                if (data.Count == AbsoluteMaximum)
+                {
+                    // too many results…
+                    return bestOverMinimum ? bestList : data.Select(t => t.Train).ToList();
+                }
+
+                var futureTrainCount = data.Count(pt => pt.Day > 0 || pt.Train.AnyScheduledTime >= nowTime);
+
+                bestList = data.Select(t => t.Train).ToList();
+
+                if (bestList.Count >= GoodEnough && futureTrainCount >= GoodEnough / 3)
+                {
+                    return bestList;
+                }
+
+                bestOverMinimum = bestList.Count >= GoodMinimum && futureTrainCount >= GoodMinimum / 3;
+            }
+
+            return bestList;
         }
 
         private static bool CheckInCalendar(TrainCalendar calendar, DateTime day, int dayOffset)

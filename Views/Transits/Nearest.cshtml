@@ -8,6 +8,7 @@
 <ul>
     @foreach (var train in Model.Transits)
     {
+        @* TODO: Do not show tommorrow trains as past *@
         <li class="@(train.AnyScheduledTime < now ? "past" : "future")">
             @train.AnyScheduledTime
             @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.Train.TrainCategory] + " " + train.Train.TrainNumber + " " + train.Train.TrainName, "Details", "Train", new { id = train.Train.TrainNumber })
