@@ -6,18 +6,33 @@
 }
 <h3>Nejbližší průjezdy vlaku místem „@Model.Point.LongName“</h3>
 <ul>
-@foreach(var train in Model.Transits)
-{
-    <li class="@(train.AnyScheduledTime < now ? "past" : "future")">
-        @train.AnyScheduledTime
-        @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.Train.TrainCategory] + " " + train.Train.TrainNumber + " " + train.Train.TrainName, "Details", "Train", new { id = train.Train.TrainNumber })
-    </li>
-}
+    @foreach (var train in Model.Transits)
+    {
+        <li class="@(train.AnyScheduledTime < now ? "past" : "future")">
+            @train.AnyScheduledTime
+            @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.Train.TrainCategory] + " " + train.Train.TrainNumber + " " + train.Train.TrainName, "Details", "Train", new { id = train.Train.TrainNumber })
+            @if (train.SequenceIndex > 0)
+            {
+                if (train.SequenceIndex < train.RouteVariant.RoutingPoints.Count - 1)
+                {
+                    <text>(@(train.RouteVariant.RoutingPoints[train.SequenceIndex - 1].Point.Name) → @(train.RouteVariant.RoutingPoints[train.SequenceIndex + 1].Point.Name))</text>
+                }
+                else
+                {
+                    <text>(z @(train.RouteVariant.RoutingPoints[train.SequenceIndex - 1].Point.Name))</text>
+                }
+            }
+            else
+            {
+                <text>(směr @(train.RouteVariant.RoutingPoints[train.SequenceIndex + 1].Point.Name))</text>
+            }
+        </li>
+    }
 </ul>
 
 <h4>Sousední místa</h4>
 <ul>
-    @foreach(var neighbor in Model.Point.NeighboringPoints)
+    @foreach (var neighbor in Model.Point.NeighboringPoints)
     {
         <li>
             @Html.ActionLink(neighbor.LongName, "Nearest", new { id = neighbor.ID }, null)

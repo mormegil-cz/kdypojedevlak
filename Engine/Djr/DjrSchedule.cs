@@ -147,6 +147,7 @@ namespace KdyPojedeVlak.Engine.Djr
                 RoutingPoints = routingPoints
             };
             trainDef.RouteVariants.Add(routeVariant);
+            var locationIndex = 0;
             foreach (var location in message.CZPTTInformation.CZPTTLocation)
             {
                 RoutingPoint point;
@@ -232,6 +233,7 @@ namespace KdyPojedeVlak.Engine.Djr
                 routingPoints.Add(new TrainRoutePoint
                 {
                     RouteVariant = routeVariant,
+                    SequenceIndex = locationIndex++,
                     Point = point,
                     PointType = location.JourneyLocationTypeCode == null
                         ? TrainRoutePointType.Unknown
@@ -393,6 +395,7 @@ namespace KdyPojedeVlak.Engine.Djr
     {
         public RoutingPoint Point { get; set; }
         public RouteVariant RouteVariant { get; set; }
+        public int SequenceIndex { get; set; }
 
         public Train Train => RouteVariant.Train;
         public TrainCalendar Calendar => RouteVariant.Calendar;
