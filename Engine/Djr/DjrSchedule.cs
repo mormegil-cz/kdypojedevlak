@@ -126,7 +126,7 @@ namespace KdyPojedeVlak.Engine.Djr
             {
                 CalendarBitmap = new BitArray(message.CZPTTInformation.PlannedCalendar.BitmapDays.Select(c => c == '1').ToArray()),
                 ValidFrom = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime,
-                ValidTo = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.EndDateTime
+                ValidTo = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.EndDateTime ?? message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime,
             };
             if (trainCalendars.TryGetValue(trainCalendar, out var existingCalendar))
             {
@@ -406,7 +406,19 @@ namespace KdyPojedeVlak.Engine.Djr
         public TimeSpan? ScheduledArrival { get; set; }
         public TimeSpan? ScheduledDeparture { get; set; }
 
-        public TimeSpan AnyScheduledTime => ScheduledArrival ?? ScheduledDeparture.GetValueOrDefault();
+        public TimeSpan? ScheduledArrivalTime => TimeOfDayOfTimeSpan(ScheduledArrival);
+        public TimeSpan? ScheduledDepartureTime => TimeOfDayOfTimeSpan(ScheduledDeparture);
+
+        private TimeSpan? TimeOfDayOfTimeSpan(TimeSpan? timeSpan)
+        {
+            if (timeSpan == null) return null;
+            var value = timeSpan.GetValueOrDefault();
+            if (value.Days == 0) return timeSpan;
+            return new TimeSpan(0, value.Hours, value.Minutes, value.Seconds, value.Milliseconds);
+        }
+
+        public TimeSpan AnyScheduledTimeSpan => ScheduledArrival ?? ScheduledDeparture.GetValueOrDefault();
+        public TimeSpan AnyScheduledTime => ScheduledArrivalTime ?? ScheduledDepartureTime.GetValueOrDefault();
 
         public ISet<TrainOperation> TrainOperations { get; set; }
         public bool IsMajorPoint => ScheduledArrival != null;

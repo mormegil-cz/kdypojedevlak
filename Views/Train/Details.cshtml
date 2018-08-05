@@ -79,9 +79,9 @@
                 }
                 else
                 {
-                    <td class="time-col">@pointVariant.ScheduledArrival?.ToString("hh':'mm':'ss")</td>
+                    <td class="time-col">@pointVariant.ScheduledArrivalTime</td>
                     <td class="time-col">
-                        <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.ScheduledDeparture?.ToString("hh':'mm':'ss")</span>
+                        <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.ScheduledDepartureTime</span>
                         <td class="operation-icons">
                             @if (pointVariant.TrainOperations.Count > 0)
                             {

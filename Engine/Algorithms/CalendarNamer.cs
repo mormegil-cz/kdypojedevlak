@@ -182,11 +182,19 @@ namespace KdyPojedeVlak.Engine.Algorithms
 
             var classes = new Dictionary<DayClass, ClassPresence>(Enum.GetValues(typeof(DayClass)).Length);
 
-            var dayCount = (int) ((validTo - validFrom).TotalDays);
+            var dayCount = (int) ((validTo - validFrom).TotalDays) + 1;
+            DateTime? firstGoDate = null;
+            DateTime? lastGoDate = null;
             for (int dayIndex = 0; dayIndex < dayCount; ++dayIndex)
             {
                 var day = validFrom.AddDays(dayIndex);
                 var bitmapValue = calendarBitmap[dayIndex];
+
+                if (bitmapValue)
+                {
+                    if (firstGoDate == null) firstGoDate = day;
+                    lastGoDate = day;
+                }
 
                 foreach (var classifier in classifiers)
                 {
@@ -204,16 +212,37 @@ namespace KdyPojedeVlak.Engine.Algorithms
                 }
             }
 
+            Debug.Assert(firstGoDate != null);
+            Debug.Assert(lastGoDate != null);
+
             NamingResult bestNaming = null;
             var bestScore = Int32.MaxValue;
+            var bestSuspendedStart = false;
             foreach (var strategy in namingStrategies)
             {
                 var strategyResult = strategy(classes);
+
+                bool hasSuspendedStart = false;
+                while (strategyResult.ExceptionalNoGo.Count > 0)
+                {
+                    var firstNoGo = strategyResult.ExceptionalNoGo.First();
+                    if (firstNoGo < firstGoDate)
+                    {
+                        hasSuspendedStart = true;
+                        strategyResult.ExceptionalNoGo.Remove(firstNoGo);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
                 var score = strategyResult.ExceptionalGo.Count + strategyResult.ExceptionalNoGo.Count;
                 if (score < bestScore)
                 {
                     bestScore = score;
                     bestNaming = strategyResult;
+                    bestSuspendedStart = hasSuspendedStart;
                 }
             }
 
@@ -224,7 +253,18 @@ namespace KdyPojedeVlak.Engine.Algorithms
             {
                 result.Append("jede ");
             }
-            result.Append(bestNaming.Name);
+            if (firstGoDate.GetValueOrDefault().Equals(lastGoDate.GetValueOrDefault()))
+            {
+                result.Append(firstGoDate.GetValueOrDefault().ToShortDateString());
+            }
+            else
+            {
+                result.Append(bestNaming.Name);
+                if (bestSuspendedStart)
+                {
+                    result.AppendFormat(" od {0:d} do {1:d}", firstGoDate, lastGoDate);
+                }
+            }
             if (bestNaming.ExceptionalGo.Count > 0)
             {
                 if (bestNaming.Name.Length > 0)
