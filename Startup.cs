@@ -58,7 +58,6 @@ namespace KdyPojedeVlak
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            /*
             try
             {
                 var scheduleVersionManager = new ScheduleVersionManager(@"App_Data");
@@ -69,7 +68,6 @@ namespace KdyPojedeVlak
                 Console.WriteLine("Error updating schedule: {0}", ex.Message);
                 throw;
             }
-            */
 
             Program.PointCodebook = new PointCodebook(@"App_Data");
             try

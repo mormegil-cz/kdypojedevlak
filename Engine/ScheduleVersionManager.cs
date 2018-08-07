@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KdyPojedeVlak.Engine.Djr;
 using Newtonsoft.Json;
 
 namespace KdyPojedeVlak.Engine
@@ -25,8 +26,6 @@ namespace KdyPojedeVlak.Engine
 
         public async Task<ScheduleVersionInfo> TryUpdate()
         {
-            throw new NotImplementedException();
-            /*
             // 1. find current newest version
             var currentNewestVersion = GetCurrentNewestVersion();
 
@@ -34,7 +33,6 @@ namespace KdyPojedeVlak.Engine
             var lastUpdateDate = GetLastUpdateDate();
             if (lastUpdateDate <= DateTime.UtcNow.AddHours(-MIN_UPDATE_FREQ_HRS))
             {
-
                 var downloader = new DataDownloader();
                 await downloader.Connect();
                 try
@@ -45,9 +43,10 @@ namespace KdyPojedeVlak.Engine
                     if (currentNewestVersion == null || String.CompareOrdinal(onlineNewestVersion, currentNewestVersion) > 0)
                     {
                         // 3. if newer available, download and extract
-                        var tempName = $"temp-{onlineNewestVersion}";
-                        var finalDirName = dataDirectoryPrefix + onlineNewestVersion;
-                        var zipName = $"temp-{onlineNewestVersion}.zip";
+                        var onlineNewestVersionClean = VersionStringToFileName(onlineNewestVersion);
+                        var tempName = $"temp-{onlineNewestVersionClean}";
+                        var finalDirName = dataDirectoryPrefix + onlineNewestVersionClean;
+                        var zipName = $"temp-{onlineNewestVersionClean}.zip";
                         var tempDir = Path.Combine(basePath, tempName);
                         var zipPath = Path.Combine(tempDir, zipName);
                         var finalDir = Path.Combine(basePath, finalDirName);
@@ -57,7 +56,7 @@ namespace KdyPojedeVlak.Engine
                         ExtractZip(zipPath, tempDir);
                         File.Delete(zipPath);
 
-                        WriteMetadata(Path.Combine(tempDir, String.Format(CultureInfo.InvariantCulture, metadataNameFormat, onlineNewestVersion)), onlineNewestVersion, downloadTime, downloadInfo.Item1, downloadInfo.Item2);
+                        WriteMetadata(Path.Combine(tempDir, String.Format(CultureInfo.InvariantCulture, metadataNameFormat, onlineNewestVersionClean)), onlineNewestVersion, downloadTime, downloadInfo.Item1, downloadInfo.Item2);
 
                         Directory.Move(tempDir, finalDir);
 
@@ -78,9 +77,10 @@ namespace KdyPojedeVlak.Engine
                 }
             }
 
-            return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataDirectoryPrefix + currentNewestVersion), lastUpdateDate);
-            */
+            return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataDirectoryPrefix + VersionStringToFileName(currentNewestVersion)), lastUpdateDate);
         }
+
+        private static string VersionStringToFileName(string versionString) => versionString.Replace('/', '_').Replace('\\', '_');
 
         private DateTime GetLastUpdateDate()
         {
