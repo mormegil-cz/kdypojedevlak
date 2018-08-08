@@ -43,7 +43,7 @@ namespace KdyPojedeVlak.Engine
                     if (currentNewestVersion == null || String.CompareOrdinal(onlineNewestVersion, currentNewestVersion) > 0)
                     {
                         // 3. if newer available, download and extract
-                        var onlineNewestVersionClean = VersionStringToFileName(onlineNewestVersion);
+                        var onlineNewestVersionClean = VersionStringToDirectoryName(onlineNewestVersion);
                         var tempName = $"temp-{onlineNewestVersionClean}";
                         var finalDirName = dataDirectoryPrefix + onlineNewestVersionClean;
                         var zipName = $"temp-{onlineNewestVersionClean}.zip";
@@ -53,8 +53,9 @@ namespace KdyPojedeVlak.Engine
                         Directory.CreateDirectory(tempDir);
                         var downloadInfo = await downloader.DownloadZip(onlineNewestVersion, zipPath);
 
+                        /*
                         ExtractZip(zipPath, tempDir);
-                        File.Delete(zipPath);
+                        File.Delete(zipPath);*/
 
                         WriteMetadata(Path.Combine(tempDir, String.Format(CultureInfo.InvariantCulture, metadataNameFormat, onlineNewestVersionClean)), onlineNewestVersion, downloadTime, downloadInfo.Item1, downloadInfo.Item2);
 
@@ -77,10 +78,10 @@ namespace KdyPojedeVlak.Engine
                 }
             }
 
-            return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataDirectoryPrefix + VersionStringToFileName(currentNewestVersion)), lastUpdateDate);
+            return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataDirectoryPrefix + VersionStringToDirectoryName(currentNewestVersion)), lastUpdateDate);
         }
 
-        private static string VersionStringToFileName(string versionString) => versionString.Replace('/', '_').Replace('\\', '_');
+        private static string VersionStringToDirectoryName(string versionString) => versionString.Replace('/', '_').Replace('\\', '_');
 
         private DateTime GetLastUpdateDate()
         {

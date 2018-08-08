@@ -79,8 +79,8 @@ namespace KdyPojedeVlak
                 Console.WriteLine("Error loading SR70 codebook: {0}", ex.Message);
             }
 
-            //Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
-            Program.Schedule = new DjrSchedule(@"App_Data\data-gvd2018_3\GVD2018_3.ZIP");
+            Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
+            //Program.Schedule = new DjrSchedule(@"App_Data\data-gvd2018_3\GVD2018_3.ZIP");
             try
             {
                 Program.Schedule.Load();

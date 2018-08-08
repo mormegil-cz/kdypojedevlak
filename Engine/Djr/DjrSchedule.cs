@@ -35,7 +35,13 @@ namespace KdyPojedeVlak.Engine.Djr
         {
             if (points.Count > 0) throw new InvalidOperationException("Already loaded");
 
-            using (var zipFile = ZipFile.OpenRead(path))
+            var filesInDataDirectory = Directory.EnumerateFiles(path, "*.ZIP").ToList();
+            if (filesInDataDirectory.Count != 1)
+            {
+                throw new FileNotFoundException("Cannot find data file");
+            }
+
+            using (var zipFile = ZipFile.OpenRead(filesInDataDirectory[0]))
             {
                 foreach (var entry in zipFile.Entries)
                 {
