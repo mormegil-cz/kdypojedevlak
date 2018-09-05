@@ -5,6 +5,36 @@
     var now = Model.StartDate.TimeOfDay;
 }
 <h3>Nejbližší průjezdy vlaku místem „@Model.Point.LongName“</h3>
+<div class="row">
+    <div class="col-md-11">
+    </div>
+    <div class="col-md-1">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Nástroje <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                @if (Model.Point.CountryCodeFromID == "CZ")
+                {
+                    <li>
+                        <a href="https://www.cd.cz/stanice/54@(Model.Point.ShortCzechIdentifier)">Detail stanice ČD</a>
+                    </li>
+                    <li>
+                        <a href="http://provoz.szdc.cz/tabule/StationDetail.aspx?lang=cs&id=54@(Model.Point.ShortCzechIdentifier)&t=1">Tabule příjezdů</a>
+                    </li>
+                    <li>
+                        <a href="http://provoz.szdc.cz/tabule/StationDetail.aspx?lang=cs&id=54@(Model.Point.ShortCzechIdentifier)&t=2">Tabule odjezdů</a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                }
+                <li>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Nearest", new { id = Model.Point.ID }))">Sdílet na Facebook</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
 <ul>
     @foreach (var train in Model.Transits)
     {

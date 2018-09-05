@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
@@ -458,6 +459,24 @@ namespace KdyPojedeVlak.Engine.Djr
         public string LongName => CodebookEntry.LongName;
         public string ShortName => CodebookEntry.ShortName;
         public PointType Type => CodebookEntry.Type;
+
+        public string CountryCodeFromID
+        {
+            get
+            {
+                var colon = ID.IndexOf(':');
+                return colon < 0 ? null : ID.Substring(0, colon);
+            }
+        }
+
+        public string ShortCzechIdentifier
+        {
+            get
+            {
+                var colon = ID.IndexOf(':');
+                return colon < 0 ? null : ID.Substring(colon + 1);
+            }
+        }
     }
 
     public enum TrainType
