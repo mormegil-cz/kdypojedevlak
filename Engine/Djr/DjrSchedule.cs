@@ -24,7 +24,7 @@ namespace KdyPojedeVlak.Engine.Djr
         public Dictionary<string, RoutingPoint> Points => points;
         public Dictionary<string, Train> Trains => trainsByNumber;
 
-        private string path;
+        private readonly string path;
 
         public DjrSchedule(string path)
         {
@@ -35,13 +35,7 @@ namespace KdyPojedeVlak.Engine.Djr
         {
             if (points.Count > 0) throw new InvalidOperationException("Already loaded");
 
-            var filesInDataDirectory = Directory.EnumerateFiles(path, "*.ZIP").ToList();
-            if (filesInDataDirectory.Count != 1)
-            {
-                throw new FileNotFoundException("Cannot find data file");
-            }
-
-            using (var zipFile = ZipFile.OpenRead(filesInDataDirectory[0]))
+            using (var zipFile = ZipFile.OpenRead(path))
             {
                 foreach (var entry in zipFile.Entries)
                 {

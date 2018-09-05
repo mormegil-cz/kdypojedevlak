@@ -80,7 +80,6 @@ namespace KdyPojedeVlak
             }
 
             Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
-            //Program.Schedule = new DjrSchedule(@"App_Data\data-gvd2018_3\GVD2018_3.ZIP");
             try
             {
                 Program.Schedule.Load();

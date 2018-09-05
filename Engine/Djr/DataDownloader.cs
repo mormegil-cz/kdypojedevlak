@@ -25,6 +25,8 @@ namespace KdyPojedeVlak.Engine.Djr
 
         private FtpClient ftp;
 
+        public bool ShouldExtractZip => false;
+
         public async Task Connect()
         {
             if (ftp != null) throw new InvalidOperationException("Already connected");
@@ -70,15 +72,17 @@ namespace KdyPojedeVlak.Engine.Djr
 
         public async Task<Tuple<string, long>> DownloadZip(string version, string destinationFilename)
         {
-            var versionParts = version.Split('/');
-            var directory = versionParts[0];
-            var fileVersion = versionParts[1];
-            await ftp.ChangeWorkingDirectoryAsync(directory);
+            var originalDirectory = ftp.WorkingDirectory;
+            var versionSegments = version.Split('/');
+            for (var i = 0; i < versionSegments.Length - 1; ++i)
+            {
+                await ftp.ChangeWorkingDirectoryAsync(versionSegments[i]);
+            }
+            var fileNameVersion = versionSegments[versionSegments.Length - 1];
             using (var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
             {
                 var size = 0L;
-                using (var receiveStream = await ftp.OpenFileReadStreamAsync(String.Format(CultureInfo.InvariantCulture,
-                    filenameFormat, fileVersion)))
+                using (var receiveStream = await ftp.OpenFileReadStreamAsync(String.Format(CultureInfo.InvariantCulture, filenameFormat, fileNameVersion)))
                 {
                     using (var storeStream = new FileStream(destinationFilename, FileMode.Create, FileAccess.Write,
                         FileShare.Read))
@@ -95,9 +99,7 @@ namespace KdyPojedeVlak.Engine.Djr
                         }
                     }
                 }
-
-                await ftp.ChangeWorkingDirectoryAsync("..");
-
+                await ftp.ChangeWorkingDirectoryAsync(originalDirectory);
                 var hash = hasher.GetHashAndReset();
                 return Tuple.Create(BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant(), size);
             }
