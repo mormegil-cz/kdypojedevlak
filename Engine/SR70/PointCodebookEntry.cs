@@ -8,6 +8,8 @@ namespace KdyPojedeVlak.Engine.SR70
         public string LongName { get; set; }
         public string ShortName { get; set; }
         public PointType Type { get; set; }
+        public float? Latitude { get; set; }
+        public float? Longitude { get; set; }
     }
 
     public enum PointType

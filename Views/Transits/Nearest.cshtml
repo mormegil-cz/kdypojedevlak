@@ -1,8 +1,10 @@
-﻿@using KdyPojedeVlak.Models
+﻿@using System.Globalization
+@using KdyPojedeVlak.Models
 @model KdyPojedeVlak.Models.NearestTransits
 @{
     ViewData["Title"] = String.Format("Nejbližší vlaky v „{0}“", Model.Point.Name);
     var now = Model.StartDate.TimeOfDay;
+    var hasTools = false;
 }
 <h3>Nejbližší průjezdy vlaku místem „@Model.Point.LongName“</h3>
 <div class="row">
@@ -14,8 +16,18 @@
                 Nástroje <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
+                @if (Model.Point.CodebookEntry.Latitude != null)
+                {
+                    hasTools = true;
+                    var lat = Model.Point.CodebookEntry.Latitude.GetValueOrDefault().ToString("F4", CultureInfo.InvariantCulture);
+                    var lon = Model.Point.CodebookEntry.Longitude.GetValueOrDefault().ToString("F4", CultureInfo.InvariantCulture);
+                    <li>
+                        <a href="https://www.openstreetmap.org/?mlat=@lat&mlon=@lon#map=15/@lat/@lon">Poloha stanice</a>
+                    </li>
+                }
                 @if (Model.Point.CountryCodeFromID == "CZ")
                 {
+                    hasTools = true;
                     <li>
                         <a href="https://www.cd.cz/stanice/54@(Model.Point.ShortCzechIdentifier)">Detail stanice ČD</a>
                     </li>
@@ -25,10 +37,13 @@
                     <li>
                         <a href="http://provoz.szdc.cz/tabule/StationDetail.aspx?lang=cs&id=54@(Model.Point.ShortCzechIdentifier)&t=2">Tabule odjezdů</a>
                     </li>
+                }
+                @if (hasTools)
+                {
                     <li role="separator" class="divider"></li>
                 }
                 <li>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Nearest", new { id = Model.Point.ID }))">Sdílet na Facebook</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Nearest", new {id = Model.Point.ID}))">Sdílet na Facebook</a>
                 </li>
             </ul>
         </div>
