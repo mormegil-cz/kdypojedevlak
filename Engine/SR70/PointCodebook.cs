@@ -28,7 +28,7 @@ namespace KdyPojedeVlak.Engine.SR70
             if (codebook != null) throw new InvalidOperationException("Already loaded");
 
             codebook = new Dictionary<string, PointCodebookEntry>();
-            LoadCsvData(path, @"SR70-2017-12-10.csv", Encoding.GetEncoding(1250))
+            LoadCsvData(path, @"SR70-2017-12-10.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r))
                 .IntoDictionary(codebook, r => r.ID, r => new PointCodebookEntry
                 {
@@ -39,17 +39,12 @@ namespace KdyPojedeVlak.Engine.SR70
                 });
 
             var pointsWithPositions = 0;
-            foreach (var row in LoadCsvData(path, @"trainline-eu-stations-2018-09-04.csv", Encoding.UTF8)
-                .Select(r => (Name: r[1], ID: r[3], Latitude: r[5], Longitude: r[6], Country: r[8]))
-                .Where(r => r.Country == "CZ" && !String.IsNullOrEmpty(r.ID))
+            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2018-09-07.csv", '\t', Encoding.UTF8)
+                .Skip(1)
+                .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
             {
-                if (!row.ID.StartsWith("54"))
-                {
-                    Console.WriteLine("Czech point with unsupported prefix '{0}'", row.ID);
-                    continue;
-                }
-                if (codebook.TryGetValue(row.Country + ":" + row.ID.Substring(2), out var entry)
+                if (codebook.TryGetValue("CZ:" + row.ID.Substring(0, 5), out var entry)
                     && Single.TryParse(row.Latitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var latitude)
                     && Single.TryParse(row.Longitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var longitude)
                 )
@@ -65,6 +60,7 @@ namespace KdyPojedeVlak.Engine.SR70
                     ++pointsWithPositions;
                 }
             }
+
             Console.WriteLine("{0} point(s) with geographical location", pointsWithPositions);
         }
 
@@ -80,7 +76,7 @@ namespace KdyPojedeVlak.Engine.SR70
             return !pointTypePerName.TryGetValue(typeStr, out type) ? PointType.Unknown : type;
         }
 
-        private static IEnumerable<string[]> LoadCsvData(string path, string fileName, Encoding encoding)
+        private static IEnumerable<string[]> LoadCsvData(string path, string fileName, char fieldSeparator, Encoding encoding)
         {
             using (var stream = new FileStream(Path.Combine(path, fileName), FileMode.Open, FileAccess.Read, FileShare.Read))
             {
@@ -104,7 +100,7 @@ namespace KdyPojedeVlak.Engine.SR70
                                 continue;
                             }
 
-                            yield return line.Split(';');
+                            yield return line.Split(fieldSeparator);
                         }
                     }
                 }
