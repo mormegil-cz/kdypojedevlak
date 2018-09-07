@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.SR70;
@@ -78,7 +79,7 @@ namespace KdyPojedeVlak
             {
                 Console.WriteLine("Error loading SR70 codebook: {0}", ex.Message);
             }
-
+            
             Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
             try
             {

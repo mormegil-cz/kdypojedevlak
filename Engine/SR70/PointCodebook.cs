@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Supercluster.KDTree;
 
 namespace KdyPojedeVlak.Engine.SR70
 {
@@ -12,6 +12,7 @@ namespace KdyPojedeVlak.Engine.SR70
     {
         private readonly string path;
         private Dictionary<string, PointCodebookEntry> codebook;
+        private KDTree<float, string> tree;
 
         static PointCodebook()
         {
@@ -62,12 +63,33 @@ namespace KdyPojedeVlak.Engine.SR70
             }
 
             Console.WriteLine("{0} point(s) with geographical location", pointsWithPositions);
+
+            var pointList = codebook.Where(p => p.Value.Latitude != null).ToList();
+            var pointIDs = pointList.Select(p => p.Key).ToArray();
+            var pointCoordinates = pointList.Select(p => new[] {p.Value.Latitude.GetValueOrDefault(), p.Value.Longitude.GetValueOrDefault()}).ToArray();
+            tree = new KDTree<float, string>(2, pointCoordinates, pointIDs, L2Norm);
+        }
+
+        private double L2Norm(float[] x, float[] y)
+        {
+            double dist = 0;
+            for (int i = 0; i < x.Length; i++)
+            {
+                dist += (x[i] - y[i]) * (x[i] - y[i]);
+            }
+
+            return dist;
         }
 
         public PointCodebookEntry Find(string id)
         {
             codebook.TryGetValue(id, out var result);
             return result;
+        }
+
+        public List<PointCodebookEntry> FindNearest(float latitude, float longitude)
+        {
+            return tree.NearestNeighbors(new[] {latitude, longitude}, 5).Select(point => Find(point.Item2)).Where(x => x != null).ToList();
         }
 
         private static PointType ParsePointType(string typeStr)
