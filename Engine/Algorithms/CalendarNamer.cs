@@ -280,7 +280,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
             }
             if (bestScore > 10)
             {
-                Console.WriteLine("Suspicious calendar: " + result);
+                DebugLog.LogProblem("Suspicious calendar: " + result);
             }
             return result.ToString();
         }

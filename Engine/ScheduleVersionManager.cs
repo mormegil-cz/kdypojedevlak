@@ -76,7 +76,7 @@ namespace KdyPojedeVlak.Engine
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("Unexpected exception in DataDownloader.Disconnect: {0}", ex);
+                        DebugLog.LogProblem("Unexpected exception in DataDownloader.Disconnect: {0}", ex);
                     }
                 }
             }

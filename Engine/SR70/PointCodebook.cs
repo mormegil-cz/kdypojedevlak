@@ -40,7 +40,7 @@ namespace KdyPojedeVlak.Engine.SR70
                 });
 
             var pointsWithPositions = 0;
-            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2018-09-07.csv", '\t', Encoding.UTF8)
+            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2018-09-21.csv", '\t', Encoding.UTF8)
                 .Skip(1)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
@@ -52,7 +52,7 @@ namespace KdyPojedeVlak.Engine.SR70
                 {
                     if (entry.Latitude != null || entry.Longitude != null)
                     {
-                        Console.WriteLine("Duplicate geographical position for point #{0}", row.ID);
+                        DebugLog.LogProblem("Duplicate geographical position for point #{0}", row.ID);
                         continue;
                     }
 
@@ -62,7 +62,7 @@ namespace KdyPojedeVlak.Engine.SR70
                 }
             }
 
-            Console.WriteLine("{0} point(s) with geographical location", pointsWithPositions);
+            DebugLog.LogDebugMsg("{0}/{1} point(s) with geographical location", pointsWithPositions, codebook.Count);
 
             var pointList = codebook.Where(p => p.Value.Latitude != null).ToList();
             var pointIDs = pointList.Select(p => p.Key).ToArray();

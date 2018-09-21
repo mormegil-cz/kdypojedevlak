@@ -77,7 +77,7 @@ namespace KdyPojedeVlak
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error updating schedule: {0}", ex.Message);
+                DebugLog.LogProblem("Error updating schedule: {0}", ex.Message);
                 throw;
             }
 
@@ -88,7 +88,7 @@ namespace KdyPojedeVlak
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error loading SR70 codebook: {0}", ex.Message);
+                DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex.Message);
             }
 
             Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
@@ -98,7 +98,7 @@ namespace KdyPojedeVlak
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error loading schedule: {0}", ex.Message);
+                DebugLog.LogProblem("Error loading schedule: {0}", ex.Message);
                 throw;
             }
         }

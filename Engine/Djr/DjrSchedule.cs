@@ -44,7 +44,7 @@ namespace KdyPojedeVlak.Engine.Djr
 
                     if (String.Compare(Path.GetExtension(entry.Name), ".xml", StringComparison.InvariantCultureIgnoreCase) != 0)
                     {
-                        Console.WriteLine("Unknown extension: at {0}", entry.FullName);
+                        DebugLog.LogProblem("Unknown extension: at {0}", entry.FullName);
                         continue;
                     }
 
@@ -80,7 +80,7 @@ namespace KdyPojedeVlak.Engine.Djr
 
             trainCalendars = null;
 
-            Console.WriteLine("{0} trains", trains.Count);
+            DebugLog.LogDebugMsg("{0} trains", trains.Count);
         }
 
         private void LoadXmlFile(Stream stream)
@@ -107,18 +107,18 @@ namespace KdyPojedeVlak.Engine.Djr
                 trains.Add(trainId.Company + "/" + trainId.Core, trainDef);
             }
 
-            if (trainDef.PathCompany != pathId.Company) Console.WriteLine("PathCompany mismatch: '{0}' vs '{1}'", trainDef.PathCompany, pathId.Company);
-            if (trainDef.PathCore != pathId.Core) Console.WriteLine("PathCore mismatch: '{0}' vs '{1}'", trainDef.PathCore, pathId.Core);
-            if (trainDef.PathTimetableYear != pathId.TimetableYear) Console.WriteLine("PathTimetableYear mismatch: '{0}' vs '{1}'", trainDef.PathTimetableYear, pathId.TimetableYear);
-            if (trainDef.TrainCompany != trainId.Company) Console.WriteLine("TrainCompany mismatch: '{0}' vs '{1}'", trainDef.TrainCompany, trainId.Company);
-            if (trainDef.TrainCore != trainId.Core) Console.WriteLine("TrainCore mismatch: '{0}' vs '{1}'", trainDef.TrainCore, trainId.Core);
-            if (trainDef.TrainTimetableYear != trainId.TimetableYear) Console.WriteLine("TrainTimetableYear mismatch: '{0}' vs '{1}'", trainDef.TrainTimetableYear, trainId.TimetableYear);
+            if (trainDef.PathCompany != pathId.Company) DebugLog.LogProblem("PathCompany mismatch: '{0}' vs '{1}'", trainDef.PathCompany, pathId.Company);
+            if (trainDef.PathCore != pathId.Core) DebugLog.LogProblem("PathCore mismatch: '{0}' vs '{1}'", trainDef.PathCore, pathId.Core);
+            if (trainDef.PathTimetableYear != pathId.TimetableYear) DebugLog.LogProblem("PathTimetableYear mismatch: '{0}' vs '{1}'", trainDef.PathTimetableYear, pathId.TimetableYear);
+            if (trainDef.TrainCompany != trainId.Company) DebugLog.LogProblem("TrainCompany mismatch: '{0}' vs '{1}'", trainDef.TrainCompany, trainId.Company);
+            if (trainDef.TrainCore != trainId.Core) DebugLog.LogProblem("TrainCore mismatch: '{0}' vs '{1}'", trainDef.TrainCore, trainId.Core);
+            if (trainDef.TrainTimetableYear != trainId.TimetableYear) DebugLog.LogProblem("TrainTimetableYear mismatch: '{0}' vs '{1}'", trainDef.TrainTimetableYear, trainId.TimetableYear);
 
             foreach (var variant in trainDef.RouteVariants)
             {
                 if (variant.PathVariant == pathId.Variant || variant.TrainVariant == trainId.Variant)
                 {
-                    Console.WriteLine("Duplicate variant in {0}: '{1}', '{2}'", trainId.Core, trainId.Variant, pathId.Variant);
+                    DebugLog.LogProblem("Duplicate variant in {0}: '{1}', '{2}'", trainId.Core, trainId.Variant, pathId.Variant);
                     break;
                 }
             }
@@ -180,7 +180,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     {
                         if (!trainDef.AllTrainNumbers.Contains(location.OperationalTrainNumber))
                         {
-                            Console.WriteLine("Train number mismatch: '{0}' vs '{1}'", trainDef.TrainNumber, location.OperationalTrainNumber);
+                            DebugLog.LogProblem("Train number mismatch: '{0}' vs '{1}'", trainDef.TrainNumber, location.OperationalTrainNumber);
                             // TODO: Remove common prefix?
                             trainDef.TrainNumber += "/" + location.OperationalTrainNumber;
                         }
@@ -198,7 +198,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     {
                         if (trainDef.TrainCategory != category)
                         {
-                            Console.WriteLine("Train category mismatch for {0}: {1} vs {2}", trainDef.TrainNumber, trainDef.TrainCategory, category);
+                            DebugLog.LogProblem("Train category mismatch for {0}: {1} vs {2}", trainDef.TrainNumber, trainDef.TrainCategory, category);
                         }
                     }
                 }

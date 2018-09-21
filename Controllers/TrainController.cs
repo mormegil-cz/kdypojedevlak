@@ -7,6 +7,7 @@ using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace KdyPojedeVlak.Controllers
 {
@@ -52,7 +53,7 @@ namespace KdyPojedeVlak.Controllers
             {
                 if (pointIndices.ContainsKey(pointList[i]))
                 {
-                    Console.WriteLine("Duplicate point in list: {0}", pointList[i].Name);
+                    DebugLog.LogProblem("Duplicate point in list: {0}", pointList[i].Name);
                 }
                 pointIndices[pointList[i]] = i;
             }
@@ -68,12 +69,12 @@ namespace KdyPojedeVlak.Controllers
                     var pointIndex = pointIndices[point.Point];
                     if (column[pointIndex] != null)
                     {
-                        Console.WriteLine("Point #{0} ({1}) is duplicated after {2}", pointIndex, point.Point.Name, lastIndex);
+                        DebugLog.LogProblem("Point #{0} ({1}) is duplicated after {2}", pointIndex, point.Point.Name, lastIndex);
                         // throw new NotSupportedException("Cannot insert duplicate route point");
                     }
                     if (pointIndex < lastIndex)
                     {
-                        Console.WriteLine("Point #{0} ({1}) goes into reverse after {2}", pointIndex, point.Point.Name, lastIndex);
+                        DebugLog.LogProblem("Point #{0} ({1}) goes into reverse after {2}", pointIndex, point.Point.Name, lastIndex);
                         //throw new NotSupportedException("Cannot go in reverse");
                     }
                     column[pointIndex] = point;
