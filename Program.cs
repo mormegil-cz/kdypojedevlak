@@ -22,15 +22,15 @@ namespace KdyPojedeVlak
 
         public static void Main(string[] args)
         {
-            var host = new WebHostBuilder()
+            CreateWebHostBuilder(args).Build().Run();
+        }
+
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+            new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
-                .UseStartup<Startup>()
-                .Build();
-
-            host.Run();
-        }
+                .UseStartup<Startup>();
 
         private static void TestMerge<T>(params List<T>[] lists)
         {
@@ -71,8 +71,8 @@ namespace KdyPojedeVlak
                 {
                     PlannedTransportIdentifiers = new[]
                     {
-                        new PlannedTransportIdentifiers { ObjectType = "PA", Company = "0054" },
-                        new PlannedTransportIdentifiers { ObjectType = "TR", Company = "3246" },
+                        new PlannedTransportIdentifiers {ObjectType = "PA", Company = "0054"},
+                        new PlannedTransportIdentifiers {ObjectType = "TR", Company = "3246"},
                     }.ToList()
                 },
                 CZPTTCreation = DateTime.Now,
