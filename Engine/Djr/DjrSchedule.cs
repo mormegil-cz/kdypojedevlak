@@ -5,7 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Xml;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
@@ -48,9 +48,16 @@ namespace KdyPojedeVlak.Engine.Djr
                         continue;
                     }
 
-                    using (var fileStream = entry.Open())
+                    try
                     {
-                        LoadXmlFile(fileStream);
+                        using (var fileStream = entry.Open())
+                        {
+                            LoadXmlFile(fileStream);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        DebugLog.LogProblem("Error loading XML file {0}: {1}", entry.FullName, e);
                     }
                 }
             }
