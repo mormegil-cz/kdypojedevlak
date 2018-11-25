@@ -10,6 +10,9 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
         public Identifiers Identifiers { get; set; }
         public DateTime CZPTTCreation { get; set; }
         public CZPTTInformation CZPTTInformation { get; set; }
+
+        [XmlElement]
+        public List<NetworkSpecificParameter> NetworkSpecificParameter { get; set; }
     }
 
     public class Identifiers
@@ -66,6 +69,9 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
 
         [XmlElement]
         public List<TrainActivity> TrainActivity { get; set; }
+
+        [XmlElement]
+        public List<NetworkSpecificParameter> NetworkSpecificParameter { get; set; }
     }
 
     public class LocationSubsidiaryIdentification
@@ -111,5 +117,11 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
     public class TrainActivity
     {
         public string TrainActivityType { get; set; }
+    }
+
+    public class NetworkSpecificParameter
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
     }
 }

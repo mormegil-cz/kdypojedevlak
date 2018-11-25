@@ -5,7 +5,6 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Xml;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
@@ -98,6 +97,13 @@ namespace KdyPojedeVlak.Engine.Djr
             var identifiersPerType = message.Identifiers.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
             var trainId = identifiersPerType["TR"];
             var pathId = identifiersPerType["PA"];
+            var networkSpecificParameters = message.NetworkSpecificParameter.ToDictionary(param => param.Name, param => param.Value);
+            string trainName;
+            networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out trainName);
+            if (networkSpecificParameters.Count - (trainName != null ? 1 : 0) > 0)
+            {
+                Console.WriteLine(trainId.Company + "/" + trainId.Core);
+            }
 
             Train trainDef;
             if (!trains.TryGetValue(trainId.Company + "/" + trainId.Core, out trainDef))
@@ -109,7 +115,8 @@ namespace KdyPojedeVlak.Engine.Djr
                     PathTimetableYear = pathId.TimetableYear,
                     TrainCompany = trainId.Company,
                     TrainCore = trainId.Core,
-                    TrainTimetableYear = trainId.TimetableYear
+                    TrainTimetableYear = trainId.TimetableYear,
+                    TrainName = trainName
                 };
                 trains.Add(trainId.Company + "/" + trainId.Core, trainDef);
             }
@@ -566,5 +573,18 @@ namespace KdyPojedeVlak.Engine.Djr
         WaitForDelayedTrains,
         OperationalStopOnly,
         NonpublicStop
+    }
+
+    public enum NetworkSpecificParameterGlobal
+    {
+        Unknown,
+        CZReroute,
+        CZOriginalCalendarStartDate,
+        CZOriginalCalendarEndDate,
+        CZOriginalCalendarBitmaps,
+        CZCentralPTTNote,
+        CZNonCentralPTTNote,
+        CZCalendarPTTNote,
+        CZTrainName
     }
 }
