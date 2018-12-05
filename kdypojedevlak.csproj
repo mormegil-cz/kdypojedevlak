@@ -6,8 +6,8 @@
     <PackageId>kdypojedevlak</PackageId>
     <UserSecretsId>aspnet-KdyPojedeVlak-20160915124940</UserSecretsId>
     <RuntimeIdentifiers>win10-x64;win81-x64;win8-x64;win7-x64</RuntimeIdentifiers>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <LangVersion>7.2</LangVersion>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <LangVersion>7.3</LangVersion>
     <RootNamespace>KdyPojedeVlak</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
@@ -17,7 +17,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CoreFtp" Version="1.4.0" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.4" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.0" />
     <PackageReference Include="Supercluster.KDTree" Version="1.0.4" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
   </ItemGroup>
