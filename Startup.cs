@@ -75,6 +75,13 @@ namespace KdyPojedeVlak
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+            }
+
             try
             {
                 var scheduleVersionManager = new ScheduleVersionManager(@"App_Data");

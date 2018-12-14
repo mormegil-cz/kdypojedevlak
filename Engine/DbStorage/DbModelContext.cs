@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -26,7 +27,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 .HasIndex(o => o.Number).IsUnique();
 
             modelBuilder.Entity<TrainTimetable>()
-                .HasIndex(o => new {o.Train, o.TimetableYear}).IsUnique();
+                .HasIndex(o => new {o.TrainId, o.YearId}).IsUnique();
 
             modelBuilder.Entity<TrainTimetable>()
                 .HasIndex(o => o.Name); // TODO: Fulltext
@@ -38,20 +39,21 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 .HasIndex(o => new {o.Latitude, o.Longitude}); // TODO: Geographic coordinates (R-Tree)
 
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new {o.Year, o.Point, o.Train, o.Order}).IsUnique();
+                .HasIndex(o => new {o.YearId, o.PointId, o.TrainId, o.Order}).IsUnique();
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new {o.Year, o.Train, o.Order}).IsUnique();
+                .HasIndex(o => new {o.YearId, o.TrainId, o.Order}).IsUnique();
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new {o.Year, o.Point, o.ArrivalTime});
+                .HasIndex(o => new {o.YearId, o.PointId, o.ArrivalTime});
 
             modelBuilder.Entity<NeighboringPoints>()
-                .HasKey(o => new {o.PointA, o.PointB});
+                .HasKey(o => new {o.PointAId, o.PointBId});
         }
     }
 
     public class TimetableYear
     {
-        [Key] public int Year { get; set; }
+        [Key]
+        public int Year { get; set; }
 
         public DateTime MinDate { get; set; }
         public DateTime MaxDate { get; set; }
@@ -62,11 +64,25 @@ namespace KdyPojedeVlak.Engine.DbStorage
     {
         public int Id { get; set; }
 
-        [Required] public TimetableYear TimetableYear { get; set; }
-        [Required] public string Guid { get; set; }
-        [Required] public string Description { get; set; }
+        [Required]
+        public TimetableYear TimetableYear { get; set; }
+
+        [Required]
+        public Guid Guid { get; set; }
+
+        [Required]
+        [MaxLength(200)]
+        public string Description { get; set; }
+
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+
+        [Required]
+        [MaxLength(70)]
+        public String BitmapEncoded { get; set; }
+
+        [NotMapped]
+        // TODO: Decode BitmapEncoded
         public bool[] Bitmap { get; set; }
 
         public Guid ComputeGuid()
@@ -80,7 +96,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 }
             }
 
-            return System.Guid.Empty;
+            return Guid.Empty;
         }
 
         private static Guid ComputeGuid(DateTime startDate, bool[] bitmap, int startIndex)
@@ -103,10 +119,20 @@ namespace KdyPojedeVlak.Engine.DbStorage
     {
         public int Id { get; set; }
 
-        [Required] public string Code { get; set; }
+        [Required]
+        [MaxLength(20)]
+        public string Code { get; set; }
+
+        [MaxLength(100)]
         public string Name { get; set; }
+
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
+
+        public string DataJson { get; set; }
+
+        [NotMapped]
+        // TODO: Decode data JSON
         public Dictionary<string, string> Data { get; set; }
     }
 
@@ -121,9 +147,25 @@ namespace KdyPojedeVlak.Engine.DbStorage
     {
         public int Id { get; set; }
 
-        [Required] public Train Train { get; set; }
-        [Required] public TimetableYear TimetableYear { get; set; }
+        [Required]
+        public int TrainId { get; set; }
+
+        [ForeignKey("TrainId")]
+        public Train Train { get; set; }
+
+        [Required]
+        public int YearId { get; set; }
+
+        [ForeignKey("YearId")]
+        public TimetableYear TimetableYear { get; set; }
+
+        [MaxLength(100)]
         public string Name { get; set; }
+
+        public string DataJson { get; set; }
+
+        [NotMapped]
+        // TODO: Decode data JSON
         public Dictionary<string, string> Data { get; set; }
 
         public List<TrainTimetableVariant> Variants { get; set; }
@@ -133,8 +175,16 @@ namespace KdyPojedeVlak.Engine.DbStorage
     {
         public int Id { get; set; }
 
-        [Required] public TrainTimetable Timetable { get; set; }
-        [Required] public CalendarDefinition Calendar { get; set; }
+        [Required]
+        public TrainTimetable Timetable { get; set; }
+
+        [Required]
+        public CalendarDefinition Calendar { get; set; }
+
+        public string DataJson { get; set; }
+
+        [NotMapped]
+        // TODO: Decode data JSON
         public Dictionary<string, string> Data { get; set; }
     }
 
@@ -142,20 +192,52 @@ namespace KdyPojedeVlak.Engine.DbStorage
     {
         public int Id { get; set; }
 
-        [Required] public TimetableYear Year { get; set; }
-        [Required] public RoutingPoint Point { get; set; }
-        [Required] public Train Train { get; set; }
+        [Required]
+        public int YearId { get; set; }
+
+        [ForeignKey("YearId")]
+        public TimetableYear Year { get; set; }
+
+        [Required]
+        public int PointId { get; set; }
+
+        [ForeignKey("PointId")]
+        public RoutingPoint Point { get; set; }
+
+        [Required]
+        public int TrainId { get; set; }
+
+        [ForeignKey("TrainId")]
+        public Train Train { get; set; }
+
         public int Order { get; set; }
 
         public TimeSpan ArrivalTime { get; set; }
         public TimeSpan? DepartureTime { get; set; }
 
+        public int ArrivalDay { get; set; }
+        public int DepartureDay { get; set; }
+
+        public string DataJson { get; set; }
+
+        [NotMapped]
+        // TODO: Decode data JSON
         public Dictionary<string, string> Data { get; set; }
     }
 
     public class NeighboringPoints
     {
-        [Required] public RoutingPoint PointA { get; set; }
-        [Required] public RoutingPoint PointB { get; set; }
+        [Required]
+        public int PointAId { get; set; }
+
+        [Required]
+        public int PointBId { get; set; }
+
+        [ForeignKey("PointAId")]
+        public RoutingPoint PointA { get; set; }
+
+        [Required]
+        [ForeignKey("PointBId")]
+        public RoutingPoint PointB { get; set; }
     }
 }
