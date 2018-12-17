@@ -75,13 +75,6 @@ namespace KdyPojedeVlak
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
-            {
-                var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
-                context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
-            }
-
             try
             {
                 var scheduleVersionManager = new ScheduleVersionManager(@"App_Data");
@@ -106,7 +99,16 @@ namespace KdyPojedeVlak
             Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
             try
             {
-                Program.Schedule.Load();
+                using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+                {
+                    var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+                    context.Database.EnsureDeleted();
+                    context.Database.EnsureCreated();
+
+                    Program.Schedule.Load(context);
+
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {

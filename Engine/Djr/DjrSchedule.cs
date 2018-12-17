@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.DbStorage;
@@ -34,18 +35,9 @@ namespace KdyPojedeVlak.Engine.Djr
             this.path = path;
         }
 
-        public void Load()
+        public void Load(DbModelContext dbContext)
         {
             if (points.Count > 0) throw new InvalidOperationException("Already loaded");
-
-            var optionsBuilder = new DbContextOptionsBuilder<DbModelContext>();
-            optionsBuilder.UseSqlite("Data Source=kdypojedevlak.db");
-            using (var dbContext = new DbModelContext(optionsBuilder.Options))
-            {
-                dbContext.TimetableYears.Add(new TimetableYear
-                    {Year = 2019, MinDate = new DateTime(2018, 12, 9), MaxDate = new DateTime(2019, 12, 8)});
-                dbContext.SaveChanges();
-            }
 
             using (var zipFile = ZipFile.OpenRead(path))
             {
@@ -64,7 +56,8 @@ namespace KdyPojedeVlak.Engine.Djr
                     {
                         using (var fileStream = entry.Open())
                         {
-                            LoadXmlFile(fileStream);
+                            LoadXmlFile(fileStream, dbContext);
+                            dbContext.SaveChanges();
                         }
                     }
                     catch (Exception e)
@@ -103,7 +96,7 @@ namespace KdyPojedeVlak.Engine.Djr
             DebugLog.LogDebugMsg("{0} trains", trains.Count);
         }
 
-        private void LoadXmlFile(Stream stream)
+        private void LoadXmlFile(Stream stream, DbModelContext dbContext)
         {
             var ser = new XmlSerializer(typeof(CZPTTCISMessage));
             var message = (CZPTTCISMessage) ser.Deserialize(stream);
@@ -112,17 +105,76 @@ namespace KdyPojedeVlak.Engine.Djr
                 message.Identifiers.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
             var trainId = identifiersPerType["TR"];
             var pathId = identifiersPerType["PA"];
+
+            if (trainId.TimetableYear != pathId.TimetableYear)
+            {
+                DebugLog.LogProblem("TimetableYear mismatch at {0}: {1} vs {2}", trainId.Core, trainId.TimetableYear, pathId.TimetableYear);
+            }
+
+            var operationalTrainNumber = message.CZPTTInformation.CZPTTLocation.First(loc => loc.OperationalTrainNumber != null).OperationalTrainNumber;
+            foreach (var loc in message.CZPTTInformation.CZPTTLocation.Where(loc => loc.OperationalTrainNumber != null))
+            {
+                if (loc.OperationalTrainNumber != operationalTrainNumber)
+                {
+                    DebugLog.LogProblem("OpTrainNumber mismatch at {0}: {1} vs {2}", trainId.Core, operationalTrainNumber, loc.OperationalTrainNumber);
+                }
+            }
+
+            var year = Int32.Parse(trainId.TimetableYear, CultureInfo.InvariantCulture);
+            var timetableYear = dbContext.TimetableYears.Find(year);
+            if (timetableYear == null)
+            {
+                timetableYear = new TimetableYear
+                    {
+                        Year = year,
+                        MinDate = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime,
+                        MaxDate = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.EndDateTime ?? message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime.AddDays(message.CZPTTInformation.PlannedCalendar.BitmapDays.Length),
+                    };
+                DebugLog.LogDebugMsg("Created timetable year {0}", year);
+                dbContext.TimetableYears.Add(timetableYear);
+            }
+
+            var train = dbContext.Trains.SingleOrDefault(t => t.Number == operationalTrainNumber);
+            if (train == null)
+            {
+                train = new DbStorage.Train
+                {
+                    Number = operationalTrainNumber
+                };
+                DebugLog.LogDebugMsg("Created train {0}", operationalTrainNumber);
+                dbContext.Trains.Add(train);
+            }
+
             var networkSpecificParameters =
                 message.NetworkSpecificParameter.ToDictionary(param => param.Name, param => param.Value);
             string trainName;
             networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out trainName);
+            /*
             if (networkSpecificParameters.Count - (trainName != null ? 1 : 0) > 0)
             {
                 Console.WriteLine(trainId.Company + "/" + trainId.Core);
             }
+            */
+
+            var trainIdentifier = trainId.Company + "/" + trainId.Core;
+
+            var trainTimetable = dbContext.TrainTimetables.SingleOrDefault(tt => tt.TimetableYear == timetableYear && tt.Train == train);
+            if (trainTimetable == null)
+            {
+                trainTimetable = new TrainTimetable
+                {
+                    TimetableYear = timetableYear,
+                    Train = train,
+                    Name = trainName,
+                    Data = new Dictionary<string, string>
+                    {
+                    }
+                };
+                dbContext.TrainTimetables.Add(trainTimetable);
+            }
 
             Train trainDef;
-            if (!trains.TryGetValue(trainId.Company + "/" + trainId.Core, out trainDef))
+            if (!trains.TryGetValue(trainIdentifier, out trainDef))
             {
                 trainDef = new Train
                 {
@@ -134,7 +186,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     TrainTimetableYear = trainId.TimetableYear,
                     TrainName = trainName
                 };
-                trains.Add(trainId.Company + "/" + trainId.Core, trainDef);
+                trains.Add(trainIdentifier, trainDef);
             }
 
             if (trainDef.PathCompany != pathId.Company)

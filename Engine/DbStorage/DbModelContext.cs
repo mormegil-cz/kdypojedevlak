@@ -59,7 +59,6 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public DateTime MaxDate { get; set; }
     }
 
-
     public class CalendarDefinition
     {
         public int Id { get; set; }
@@ -140,7 +139,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
     {
         public int Id { get; set; }
 
-        public int Number { get; set; }
+        public string Number { get; set; }
     }
 
     public class TrainTimetable
