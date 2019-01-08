@@ -2,6 +2,7 @@
 {{geocodeArea:Czechia}}->.searchArea;
 (
   node["railway"="station"]["railway:ref"](area.searchArea);
+  node["railway"="halt"]["railway:ref"](area.searchArea);
 );
 out body;
 >;

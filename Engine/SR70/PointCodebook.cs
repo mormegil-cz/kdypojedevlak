@@ -40,7 +40,7 @@ namespace KdyPojedeVlak.Engine.SR70
                 });
 
             var pointsWithPositions = 0;
-            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2018-09-21.csv", '\t', Encoding.UTF8)
+            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2019-01-08.csv", '\t', Encoding.UTF8)
                 .Skip(1)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
