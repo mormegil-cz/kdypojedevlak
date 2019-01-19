@@ -135,6 +135,9 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public Dictionary<string, string> Data { get; set; }
     }
 
+    /**
+     * Label of a train, common for all timetable years
+     */
     public class Train
     {
         public int Id { get; set; }
@@ -142,6 +145,9 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public string Number { get; set; }
     }
 
+    /**
+     * Train in a single timetable year
+     */
     public class TrainTimetable
     {
         public int Id { get; set; }
@@ -170,6 +176,9 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public List<TrainTimetableVariant> Variants { get; set; }
     }
 
+    /**
+     * Variant of a train in the respective timetable year
+     */
     public class TrainTimetableVariant
     {
         public int Id { get; set; }
