@@ -66,9 +66,10 @@ namespace KdyPojedeVlak.Engine.SR70
                     ++pointsWithPositions;
                     */
 
-                    if (Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude) > 0.0167)
+                    var dist = Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude);
+                    if (dist > 0.005)
                     {
-                        DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0}: {1}, {2} versus {3}, {4}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude));
+                        DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0}: {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f));
                     }
                 }
             }
@@ -130,7 +131,7 @@ namespace KdyPojedeVlak.Engine.SR70
 
             return result;
         }
-        
+
         private static IEnumerable<string[]> LoadCsvData(string path, string fileName, char fieldSeparator, Encoding encoding)
         {
             using (var stream = new FileStream(Path.Combine(path, fileName), FileMode.Open, FileAccess.Read, FileShare.Read))
