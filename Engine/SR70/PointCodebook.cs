@@ -4,12 +4,15 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Supercluster.KDTree;
 
 namespace KdyPojedeVlak.Engine.SR70
 {
     public class PointCodebook
     {
+        private static Regex regexGeoCoordinate = new Regex(@"\s*^[NE]\s*(?<deg>[0-9]+)\s*°\s*(?<min>[0-9]+)\s*'\s*(?<sec>[0-9]+\s*(,\s*([0-9]+)?)?)\s*""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
+
         private readonly string path;
         private Dictionary<string, PointCodebookEntry> codebook;
         private KDTree<float, string> tree;
@@ -29,17 +32,18 @@ namespace KdyPojedeVlak.Engine.SR70
             if (codebook != null) throw new InvalidOperationException("Already loaded");
 
             codebook = new Dictionary<string, PointCodebookEntry>();
-            LoadCsvData(path, @"SR70-2017-12-10.csv", ';', Encoding.GetEncoding(1250))
+            LoadCsvData(path, @"SR70-2019-01-01.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r))
                 .IntoDictionary(codebook, r => r.ID, r => new PointCodebookEntry
                 {
                     ID = r.Row[0],
                     LongName = r.Row[1],
                     ShortName = r.Row[2],
-                    Type = ParsePointType(r.Row[5])
+                    Type = ParsePointType(r.Row[6]),
+                    Longitude = ParseGeoCoordinate(r.Row[15]),
+                    Latitude = ParseGeoCoordinate(r.Row[16]),
                 });
 
-            var pointsWithPositions = 0;
             foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2019-01-28.csv", '\t', Encoding.UTF8)
                 .Skip(1)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
@@ -50,6 +54,7 @@ namespace KdyPojedeVlak.Engine.SR70
                     && Single.TryParse(row.Longitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var longitude)
                 )
                 {
+                    /*
                     if (entry.Latitude != null || entry.Longitude != null)
                     {
                         DebugLog.LogProblem("Duplicate geographical position for point #{0}", row.ID);
@@ -59,10 +64,16 @@ namespace KdyPojedeVlak.Engine.SR70
                     entry.Latitude = latitude;
                     entry.Longitude = longitude;
                     ++pointsWithPositions;
+                    */
+
+                    if (Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude) > 0.0167)
+                    {
+                        DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0}: {1}, {2} versus {3}, {4}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude));
+                    }
                 }
             }
 
-            DebugLog.LogDebugMsg("{0}/{1} point(s) with geographical location", pointsWithPositions, codebook.Count);
+            DebugLog.LogDebugMsg("{0} point(s)", codebook.Count);
 
             var pointList = codebook.Where(p => p.Value.Latitude != null).ToList();
             var pointIDs = pointList.Select(p => p.Key).ToArray();
@@ -70,7 +81,7 @@ namespace KdyPojedeVlak.Engine.SR70
             tree = new KDTree<float, string>(2, pointCoordinates, pointIDs, L2Norm);
         }
 
-        private double L2Norm(float[] x, float[] y)
+        private static double L2Norm(float[] x, float[] y)
         {
             double dist = 0;
             for (int i = 0; i < x.Length; i++)
@@ -94,10 +105,32 @@ namespace KdyPojedeVlak.Engine.SR70
 
         private static PointType ParsePointType(string typeStr)
         {
-            PointType type;
-            return !pointTypePerName.TryGetValue(typeStr, out type) ? PointType.Unknown : type;
+            return !pointTypePerName.TryGetValue(typeStr, out var type) ? PointType.Unknown : type;
         }
 
+        private static float? ParseGeoCoordinate(string posStr)
+        {
+            if (String.IsNullOrEmpty(posStr)) return null;
+            var match = regexGeoCoordinate.Match(posStr);
+            if (!match.Success) throw new FormatException($"Invalid geographical coordinate '{posStr}'");
+            var deg = ParseFloat(match.Groups["deg"].Value);
+            var min = ParseFloat(match.Groups["min"].Value);
+            var sec = ParseFloat(match.Groups["sec"].Value.Replace(',', '.'));
+            return deg + (min / 60.0f) + (sec / 60.0f / 60.0f);
+        }
+
+        private static float ParseFloat(string str)
+        {
+            str = str.Replace(" ", "");
+            if (str.EndsWith(".")) str += '0';
+            if (!Single.TryParse(str, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var result))
+            {
+                throw new FormatException($"Invalid float number: {str}");
+            }
+
+            return result;
+        }
+        
         private static IEnumerable<string[]> LoadCsvData(string path, string fileName, char fieldSeparator, Encoding encoding)
         {
             using (var stream = new FileStream(Path.Combine(path, fileName), FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -108,13 +141,18 @@ namespace KdyPojedeVlak.Engine.SR70
                     bool firstLine = true;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        /*
-                        TODO: Real CSV processing
+                        // TODO: Real CSV processing
                         if (line.Contains('"'))
                         {
+                            yield return line.Split(fieldSeparator).Select(field =>
+                            {
+                                if (!field.Contains('"')) return field;
+                                if (field.Length < 2 || field[0] != '"' || field[field.Length - 1] != '"') throw new FormatException($"Invalid or unsupported CSV file: '{field}' at '{line}'");
+                                if (field.Count(c => c == '"') % 2 != 0) throw new FormatException($"Unsupported CSV file: '{field}' at '{line}'");
+                                return field.Substring(1, field.Length - 2).Replace("\"\"", "\"");
+                            }).ToArray();
                         }
                         else
-                        */
                         {
                             if (firstLine)
                             {
