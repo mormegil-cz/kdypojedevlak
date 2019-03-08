@@ -44,7 +44,7 @@ namespace KdyPojedeVlak.Engine.SR70
                     Latitude = ParseGeoCoordinate(r.Row[16]),
                 });
 
-            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2019-01-28.csv", '\t', Encoding.UTF8)
+            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2019-03-08.csv", '\t', Encoding.UTF8)
                 .Skip(1)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
