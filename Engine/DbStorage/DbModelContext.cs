@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,6 +16,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public DbSet<Train> Trains { get; set; }
         public DbSet<TrainTimetable> TrainTimetables { get; set; }
         public DbSet<RoutingPoint> RoutingPoints { get; set; }
+        public DbSet<CalendarDefinition> CalendarDefinitions { get; set; }
 
         public DbModelContext(DbContextOptions<DbModelContext> options)
             : base(options)
@@ -27,7 +29,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 .HasIndex(o => o.Number).IsUnique();
 
             modelBuilder.Entity<TrainTimetable>()
-                .HasIndex(o => new {o.TrainId, o.YearId}).IsUnique();
+                .HasIndex(o => new { o.TrainId, o.YearId }).IsUnique();
 
             modelBuilder.Entity<TrainTimetable>()
                 .HasIndex(o => o.Name); // TODO: Fulltext
@@ -36,17 +38,17 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 .HasIndex(o => o.Code).IsUnique();
 
             modelBuilder.Entity<RoutingPoint>()
-                .HasIndex(o => new {o.Latitude, o.Longitude}); // TODO: Geographic coordinates (R-Tree)
+                .HasIndex(o => new { o.Latitude, o.Longitude }); // TODO: Geographic coordinates (R-Tree)
 
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new {o.YearId, o.PointId, o.TrainId, o.Order}).IsUnique();
+                .HasIndex(o => new { o.YearId, o.PointId, o.TrainId, o.Order }).IsUnique();
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new {o.YearId, o.TrainId, o.Order}).IsUnique();
+                .HasIndex(o => new { o.YearId, o.TrainId, o.Order }).IsUnique();
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new {o.YearId, o.PointId, o.ArrivalTime});
+                .HasIndex(o => new { o.YearId, o.PointId, o.ArrivalTime });
 
             modelBuilder.Entity<NeighboringPoints>()
-                .HasKey(o => new {o.PointAId, o.PointBId});
+                .HasKey(o => new { o.PointAId, o.PointBId });
         }
     }
 
@@ -61,6 +63,10 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
     public class CalendarDefinition
     {
+        private static readonly Guid calendarNamespaceGuid = new Guid("4eb0c41b-32a1-4acb-bd5f-8a6dbe847162");
+
+        private bool[] bitmap;
+
         public int Id { get; set; }
 
         [Required]
@@ -82,16 +88,38 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         [NotMapped]
         // TODO: Decode BitmapEncoded
-        public bool[] Bitmap { get; set; }
+        public bool[] Bitmap
+        {
+            get
+            {
+                if (bitmap == null)
+                {
+                    var bytes = Convert.FromBase64String(BitmapEncoded);
+                    var decoded = new bool[bytes.Length * 8];
+                    new BitArray(bytes).CopyTo(decoded, 0);
+                    bitmap = decoded;
+                }
+                return bitmap;
+            }
+            set
+            {
+                bitmap = value;
+                var bytes = new byte[(bitmap.Length + 7) / 8];
+                new BitArray(bitmap).CopyTo(bytes, 0);
+                BitmapEncoded = Convert.ToBase64String(bytes);
+                Guid = ComputeGuid();
+            }
+        }
 
-        public Guid ComputeGuid()
+        private Guid ComputeGuid()
         {
             var start = StartDate;
-            for (int i = 0; i < Bitmap.Length - 1; ++i, start = start.AddDays(1))
+            var bits = bitmap;
+            for (int i = 0; i < bits.Length - 1; ++i, start = start.AddDays(1))
             {
-                if (Bitmap[i])
+                if (bits[i])
                 {
-                    return ComputeGuid(start, Bitmap, i + 1);
+                    return ComputeGuid(start, bits, i + 1);
                 }
             }
 
@@ -110,7 +138,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         private static Guid BuildGuidFromHash(string data)
         {
-            throw new NotImplementedException();
+            return new Guid(GuidEx.NewGuid(data, calendarNamespaceGuid).ToByteArray());
         }
     }
 
