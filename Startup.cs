@@ -99,22 +99,22 @@ namespace KdyPojedeVlak
             Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
             try
             {
-                Program.Schedule.Load();
+                //Program.Schedule.Load();
 
                 using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
                 {
                     var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
-                    context.Database.EnsureDeleted();
+                    //context.Database.EnsureDeleted();
                     context.Database.EnsureCreated();
 
                     context.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                    Program.Schedule.StoreToDatabase(context);
+                    //Program.Schedule.StoreToDatabase(context);
 
-                    context.SaveChanges();
+                    //context.SaveChanges();
                 }
 
-                Program.Schedule.ClearTemps();
+                //Program.Schedule.ClearTemps();
             }
             catch (Exception ex)
             {

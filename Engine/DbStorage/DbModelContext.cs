@@ -6,6 +6,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using KdyPojedeVlak.Engine.Djr;
+using KdyPojedeVlak.Engine.SR70;
 using Microsoft.EntityFrameworkCore;
 
 namespace KdyPojedeVlak.Engine.DbStorage
@@ -29,7 +31,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 .HasIndex(o => o.Number).IsUnique();
 
             modelBuilder.Entity<TrainTimetable>()
-                .HasIndex(o => new { o.TrainId, o.YearId }).IsUnique();
+                .HasIndex(o => new {o.TrainId, o.YearId}).IsUnique();
 
             modelBuilder.Entity<TrainTimetable>()
                 .HasIndex(o => o.Name); // TODO: Fulltext
@@ -38,17 +40,17 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 .HasIndex(o => o.Code).IsUnique();
 
             modelBuilder.Entity<RoutingPoint>()
-                .HasIndex(o => new { o.Latitude, o.Longitude }); // TODO: Geographic coordinates (R-Tree)
+                .HasIndex(o => new {o.Latitude, o.Longitude}); // TODO: Geographic coordinates (R-Tree)
 
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new { o.YearId, o.PointId, o.TrainId, o.Order }).IsUnique();
+                .HasIndex(o => new {o.PointId, o.TrainId, o.Order}).IsUnique();
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new { o.YearId, o.TrainId, o.Order }).IsUnique();
+                .HasIndex(o => new {o.TrainId, o.Order}).IsUnique();
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new { o.YearId, o.PointId, o.ArrivalTime });
+                .HasIndex(o => new {o.YearId, o.PointId, o.ArrivalTime});
 
             modelBuilder.Entity<NeighboringPoints>()
-                .HasKey(o => new { o.PointAId, o.PointBId });
+                .HasKey(o => new {o.PointAId, o.PointBId});
         }
     }
 
@@ -99,6 +101,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
                     new BitArray(bytes).CopyTo(decoded, 0);
                     bitmap = decoded;
                 }
+
                 return bitmap;
             }
             set
@@ -161,6 +164,12 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [NotMapped]
         // TODO: Decode data JSON
         public Dictionary<string, string> Data { get; set; }
+
+        // TODO: Point attributes
+        [NotMapped]
+        public PointType Type => PointType.Unknown;
+        [NotMapped]
+        public String ShortName => Name;
     }
 
     /**
@@ -197,11 +206,19 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         public string DataJson { get; set; }
 
+        [InverseProperty("Timetable")]
+        public virtual List<TrainTimetableVariant> Variants { get; set; }
+
         [NotMapped]
         // TODO: Decode data JSON
         public Dictionary<string, string> Data { get; set; }
 
-        public List<TrainTimetableVariant> Variants { get; set; }
+        [NotMapped]
+        public string TrainNumber => Train.Number;
+
+        // TODO: Train attributes
+        [NotMapped]
+        public TrainCategory TrainCategory => TrainCategory.Unknown;
     }
 
     /**
@@ -222,12 +239,16 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [NotMapped]
         // TODO: Decode data JSON
         public Dictionary<string, string> Data { get; set; }
+
+        public virtual List<Passage> Points { get; set; }
     }
 
     public class Passage
     {
         public int Id { get; set; }
 
+        // note that this is denormalized: TrainId implies YearId, but it would be difficult to normalize it
+        // and we need YearId to properly find all transits through a given point (in the specific timetable year)
         [Required]
         public int YearId { get; set; }
 
@@ -244,12 +265,13 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public int TrainId { get; set; }
 
         [ForeignKey("TrainId")]
-        public Train Train { get; set; }
+        public TrainTimetableVariant TrainTimetableVariant { get; set; }
 
         public int Order { get; set; }
 
         public TimeSpan ArrivalTime { get; set; }
-        public TimeSpan? DepartureTime { get; set; }
+        public TimeSpan DepartureTime { get; set; }
+        public int? DwellTime { get; set; }
 
         public int ArrivalDay { get; set; }
         public int DepartureDay { get; set; }
@@ -259,6 +281,15 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [NotMapped]
         // TODO: Decode data JSON
         public Dictionary<string, string> Data { get; set; }
+
+        [NotMapped]
+        public bool IsMajorPoint => DwellTime != null;
+
+        // TODO: Point attributes
+        [NotMapped]
+        public string SubsidiaryLocationDescription => null;
+        [NotMapped]
+        public List<TrainOperation> TrainOperations => Enumerable.Empty<TrainOperation>().ToList();
     }
 
     public class NeighboringPoints

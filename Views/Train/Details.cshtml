@@ -2,7 +2,7 @@
 @using KdyPojedeVlak.Models
 @model KdyPojedeVlak.Models.TrainPlan
 @{
-    ViewData["Title"] = "Vlak " + DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] + " " + Model.Train.TrainNumber + " " + Model.Train.TrainName;
+    ViewData["Title"] = "Vlak " + DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] + " " + Model.Train.TrainNumber + " " + Model.Train.Name;
     var pointCount = Model.Points.Count;
 
     /*
@@ -18,7 +18,7 @@
     */
 }
 
-<h2>Vlak @DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] @Model.Train.TrainNumber @Model.Train.TrainName</h2>
+<h2>Vlak @DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] @Model.Train.TrainNumber @Model.Train.Name</h2>
 <div class="row">
     <div class="col-md-11">
     </div>
@@ -51,9 +51,9 @@
     <tr>
         <th></th>
         <th>Bod</th>
-        @foreach (var variant in Model.Train.RouteVariants)
+        @foreach (var variant in Model.Train.Variants)
         {
-            <th scope="col" class="time-col" colspan="3">@variant.Calendar.Name</th>
+            <th scope="col" class="time-col" colspan="3">@variant.Calendar.Description</th>
         }
     </tr>
     </thead>
@@ -79,9 +79,9 @@
                 }
                 else
                 {
-                    <td class="time-col">@pointVariant.ScheduledArrivalTime</td>
+                    <td class="time-col">@pointVariant.ArrivalTime</td>
                     <td class="time-col">
-                        <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.ScheduledDepartureTime</span>
+                        <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.DepartureTime</span>
                         <td class="operation-icons">
                             @if (pointVariant.TrainOperations.Count > 0)
                             {
