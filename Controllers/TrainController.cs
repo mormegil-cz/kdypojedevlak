@@ -8,6 +8,7 @@ using KdyPojedeVlak.Engine.DbStorage;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RoutingPoint = KdyPojedeVlak.Engine.DbStorage.RoutingPoint;
 
@@ -35,7 +36,7 @@ namespace KdyPojedeVlak.Controllers
 
             if (dbModelContext.Trains.Any(t => t.Number == id))
             {
-                return RedirectToAction("Details", new {id});
+                return RedirectToAction("Details", new { id });
             }
             else
             {
@@ -54,17 +55,22 @@ namespace KdyPojedeVlak.Controllers
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null)
             {
-                return RedirectToAction("Index", new {search = id});
+                return RedirectToAction("Index", new { search = id });
             }
 
-            var timetable = dbModelContext.TrainTimetables.SingleOrDefault(t => t.Train == train && t.TimetableYear == year);
+            var timetable = dbModelContext.TrainTimetables
+                .Include(tt => tt.Variants)
+                    .ThenInclude(ttv => ttv.Points)
+                .Include(tt => tt.Variants)
+                    .ThenInclude(ttv => ttv.Calendar)
+                .SingleOrDefault(t => t.Train == train && t.TimetableYear == year);
 
             var pointsInVariants = timetable.Variants.Select(
                 variant => variant.Points
                     .OrderBy(p => p.Order)
                     .Select(point => point.Point)
                     .ToList()
-                ).ToList();
+            ).ToList();
             var pointList = ListMerger.MergeLists(pointsInVariants);
             var pointIndices = new Dictionary<RoutingPoint, int>(pointList.Count);
             for (var i = 0; i < pointList.Count; ++i)
@@ -117,8 +123,7 @@ namespace KdyPojedeVlak.Controllers
                 variantRoutingPoints.Add(variants);
             }
 
-            var majorPointFlags = variantRoutingPoints.Select(point => point.Any(variant => variant != null && variant.IsMajorPoint)).ToList();
-            majorPointFlags[0] = true;
+            var majorPointFlags = variantRoutingPoints.Select((point, idx) => idx == 0 || point.Any(variant => variant != null && variant.IsMajorPoint)).ToList();
 
             return View(new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags));
         }
