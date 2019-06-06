@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -78,6 +79,18 @@ namespace KdyPojedeVlak.Engine.Djr
                 calendars.Add(convertedCalendar, calendar);
             }
 
+            var dbPoints = new Dictionary<string, DbStorage.RoutingPoint>();
+            foreach (var dbPoint in dbContext.RoutingPoints)
+            {
+                dbPoints.Add(dbPoint.Code, dbPoint);
+            }
+
+            var pointTuples = new HashSet<ValueTuple<string, string>>();
+            foreach (var neighbor in dbContext.NeighboringPointTuples.Include(npt => npt.PointA).Include(npt => npt.PointB))
+            {
+                pointTuples.Add(ValueTuple.Create(neighbor.PointA.Code, neighbor.PointB.Code));
+            }
+
             var dbTrainByNumber = new Dictionary<string, DbStorage.Train>(trains.Count);
 
             var counter = 0;
@@ -146,8 +159,56 @@ namespace KdyPojedeVlak.Engine.Djr
                     trainTimetable.Variants.Add(timetableVariant);
                     dbContext.Add(timetableVariant);
 
-                    foreach (var routingPoint in trainVariant.RoutingPoints)
+                    var passageOrderIndex = 0;
+                    DbStorage.RoutingPoint prevPoint = null;
+                    foreach (var trainRoutePoint in trainVariant.RoutingPoints)
                     {
+                        var point = trainRoutePoint.Point;
+                        if (!dbPoints.TryGetValue(point.ID, out var dbPoint))
+                        {
+                            var codebookEntry = Program.PointCodebook.Find(point.ID);
+
+                            dbPoint = new DbStorage.RoutingPoint
+                            {
+                                Code = point.ID,
+                                Name = point.Name,
+                                Latitude = codebookEntry?.Latitude,
+                                Longitude = codebookEntry?.Longitude,
+                                // TODO: Point data
+                            };
+                            dbPoints.Add(point.ID, dbPoint);
+                            dbContext.RoutingPoints.Add(dbPoint);
+                        }
+                        if (prevPoint != null)
+                        {
+                            var tuple = ValueTuple.Create(prevPoint.Code, dbPoint.Code);
+                            if (!pointTuples.Contains(tuple))
+                            {
+                                dbContext.NeighboringPointTuples.Add(new NeighboringPoints
+                                {
+                                    PointA = prevPoint,
+                                    PointB = dbPoint
+                                });
+                                pointTuples.Add(tuple);
+                            }
+                        }
+                        prevPoint = dbPoint;
+
+                        var passage = new Passage
+                        {
+                            Order = passageOrderIndex++,
+                            Point = dbPoint,
+                            TrainTimetableVariant = timetableVariant,
+                            Year = dbTimetableYear,
+                            ArrivalDay = trainRoutePoint.ScheduledArrival?.Days ?? 0,
+                            ArrivalTime = trainRoutePoint.ScheduledArrivalTime,
+                            DepartureDay = trainRoutePoint.ScheduledDeparture?.Days ?? 0,
+                            DepartureTime = trainRoutePoint.ScheduledDepartureTime,
+                            DwellTime = trainRoutePoint.DwellTime,
+                            // TODO: Passage attributes
+                        };
+                        dbContext.Add(passage);
+                        timetableVariant.Points.Add(passage);
                     }
                 }
 
@@ -426,6 +487,7 @@ namespace KdyPojedeVlak.Engine.Djr
                         : defTrainRoutePointType[location.JourneyLocationTypeCode],
                     ScheduledArrival = arrivalTiming?.ToTimeSpan,
                     ScheduledDeparture = departureTiming?.ToTimeSpan,
+                    DwellTime = location.TimingAtLocation?.DwellTime,
                     SubsidiaryLocation = location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code,
                     SubsidiaryLocationType = location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
                                                  ?.LocationSubsidiaryTypeCode == null
@@ -552,6 +614,8 @@ namespace KdyPojedeVlak.Engine.Djr
         public DateTime BaseDate => ValidFrom;
         public String Name { get; private set; }
 
+        private int? hashCode;
+
         public TrainCalendar(BitArray calendarBitmap, DateTime validFrom, DateTime validTo)
         {
             CalendarBitmap = calendarBitmap;
@@ -568,9 +632,23 @@ namespace KdyPojedeVlak.Engine.Djr
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
+            if (GetHashCode() != other.GetHashCode()) return false;
 
-            return Equals(CalendarBitmap, other.CalendarBitmap) && ValidFrom.Equals(other.ValidFrom) &&
+            return BitmapEquals(CalendarBitmap, other.CalendarBitmap) && ValidFrom.Equals(other.ValidFrom) &&
                    ValidTo.Equals(other.ValidTo);
+        }
+
+        private static bool BitmapEquals(BitArray a, BitArray b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (ReferenceEquals(a, null)) return false;
+            if (ReferenceEquals(b, null)) return false;
+            if (a.Length != b.Length) return false;
+            for (var i = 0; i < a.Length; ++i)
+            {
+                if (a[i] != b[i]) return false;
+            }
+            return true;
         }
 
         public override bool Equals(object obj)
@@ -581,14 +659,18 @@ namespace KdyPojedeVlak.Engine.Djr
             return Equals((TrainCalendar) obj);
         }
 
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
         public override int GetHashCode()
         {
             unchecked
             {
-                var hashCode = (CalendarBitmap != null ? CalendarBitmap.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ ValidFrom.GetHashCode();
-                hashCode = (hashCode * 397) ^ ValidTo.GetHashCode();
-                return hashCode;
+                if (hashCode != null) return hashCode.GetValueOrDefault();
+
+                var code = (CalendarBitmap != null ? CalendarBitmap.GetHashCode() : 0);
+                code = (code * 397) ^ ValidFrom.GetHashCode();
+                code = (code * 397) ^ ValidTo.GetHashCode();
+                hashCode = code;
+                return code;
             }
         }
     }
@@ -610,6 +692,7 @@ namespace KdyPojedeVlak.Engine.Djr
 
         public TimeSpan? ScheduledArrival { get; set; }
         public TimeSpan? ScheduledDeparture { get; set; }
+        public decimal? DwellTime { get; set; }
 
         public TimeSpan? ScheduledArrivalTime => TimeOfDayOfTimeSpan(ScheduledArrival);
         public TimeSpan? ScheduledDepartureTime => TimeOfDayOfTimeSpan(ScheduledDeparture);

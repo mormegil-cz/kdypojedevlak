@@ -92,6 +92,8 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
 
     public class TimingAtLocation
     {
+        public decimal? DwellTime { get; set; }
+
         [XmlElement]
         public List<Timing> Timing { get; set; }
     }

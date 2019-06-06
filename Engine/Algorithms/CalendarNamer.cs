@@ -127,28 +127,28 @@ namespace KdyPojedeVlak.Engine.Algorithms
 
         private static NamingResult WorkdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult
         {
-            Name = "⚒",
+            Name = "⚒\uFE0E",
             ExceptionalGo = new SortedSet<DateTime>(classPresences[DayClass.Holiday].YesDates.Concat(classPresences[DayClass.Saturday].YesDates)),
             ExceptionalNoGo = classPresences[DayClass.Workday].NoDates
         };
 
         private static NamingResult WorkdaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult
         {
-            Name = "⚒⑥",
+            Name = "⚒\uFE0E⑥",
             ExceptionalGo = new SortedSet<DateTime>(classPresences[DayClass.Sunday].YesDates.Concat(classPresences[DayClass.NonSaturdayHoliday].YesDates)),
             ExceptionalNoGo = new SortedSet<DateTime>(classPresences[DayClass.Workday].NoDates.Concat(classPresences[DayClass.Saturday].NoDates))
         };
 
         private static NamingResult HolidaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult
         {
-            Name = "✝",
+            Name = "✝\uFE0E",
             ExceptionalGo = new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates.Concat(classPresences[DayClass.SaturdayNonHoliday].YesDates)),
             ExceptionalNoGo = new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates)
         };
 
         private static NamingResult HolidaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult
         {
-            Name = "✝⑥",
+            Name = "✝\uFE0E⑥",
             ExceptionalGo = new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates),
             ExceptionalNoGo = new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates.Concat(classPresences[DayClass.SaturdayNonHoliday].NoDates))
         };

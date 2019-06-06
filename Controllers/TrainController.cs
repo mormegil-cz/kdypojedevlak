@@ -61,6 +61,7 @@ namespace KdyPojedeVlak.Controllers
             var timetable = dbModelContext.TrainTimetables
                 .Include(tt => tt.Variants)
                     .ThenInclude(ttv => ttv.Points)
+                        .ThenInclude(p => p.Point)
                 .Include(tt => tt.Variants)
                     .ThenInclude(ttv => ttv.Calendar)
                 .SingleOrDefault(t => t.Train == train && t.TimetableYear == year);

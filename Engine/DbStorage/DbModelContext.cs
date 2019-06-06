@@ -19,6 +19,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public DbSet<TrainTimetable> TrainTimetables { get; set; }
         public DbSet<RoutingPoint> RoutingPoints { get; set; }
         public DbSet<CalendarDefinition> CalendarDefinitions { get; set; }
+        public DbSet<NeighboringPoints> NeighboringPointTuples { get; set; }
 
         public DbModelContext(DbContextOptions<DbModelContext> options)
             : base(options)
@@ -156,8 +157,8 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [MaxLength(100)]
         public string Name { get; set; }
 
-        public decimal Latitude { get; set; }
-        public decimal Longitude { get; set; }
+        public float? Latitude { get; set; }
+        public float? Longitude { get; set; }
 
         public string DataJson { get; set; }
 
@@ -167,9 +168,10 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         // TODO: Point attributes
         [NotMapped]
-        public PointType Type => PointType.Unknown;
+        public PointType Type => Program.PointCodebook.Find(Code)?.Type ?? PointType.Unknown;
+
         [NotMapped]
-        public String ShortName => Name;
+        public String ShortName => Program.PointCodebook.Find(Code)?.ShortName ?? Name;
     }
 
     /**
@@ -269,9 +271,9 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         public int Order { get; set; }
 
-        public TimeSpan ArrivalTime { get; set; }
-        public TimeSpan DepartureTime { get; set; }
-        public int? DwellTime { get; set; }
+        public TimeSpan? ArrivalTime { get; set; }
+        public TimeSpan? DepartureTime { get; set; }
+        public decimal? DwellTime { get; set; }
 
         public int ArrivalDay { get; set; }
         public int DepartureDay { get; set; }
