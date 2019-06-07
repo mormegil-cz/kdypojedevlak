@@ -172,6 +172,9 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         [NotMapped]
         public String ShortName => Program.PointCodebook.Find(Code)?.ShortName ?? Name;
+
+        [InverseProperty("Point")]
+        public List<Passage> PassingTrains { get; set; }
     }
 
     /**
@@ -290,6 +293,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
         // TODO: Point attributes
         [NotMapped]
         public string SubsidiaryLocationDescription => null;
+
         [NotMapped]
         public List<TrainOperation> TrainOperations => Enumerable.Empty<TrainOperation>().ToList();
     }

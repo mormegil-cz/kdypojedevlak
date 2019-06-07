@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using KdyPojedeVlak.Engine.Djr;
+using KdyPojedeVlak.Engine.DbStorage;
 
 namespace KdyPojedeVlak.Models
 {
@@ -8,9 +8,9 @@ namespace KdyPojedeVlak.Models
     {
         public RoutingPoint Point { get; }
         public DateTime StartDate { get; }
-        public IEnumerable<TrainRoutePoint> Transits { get; }
+        public IEnumerable<Passage> Transits { get; }
 
-        public NearestTransits(RoutingPoint point, DateTime startDate, IEnumerable<TrainRoutePoint> transits)
+        public NearestTransits(RoutingPoint point, DateTime startDate, IEnumerable<Passage> transits)
         {
             Point = point;
             Transits = transits;
