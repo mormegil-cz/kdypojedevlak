@@ -9,9 +9,12 @@ using System.Text;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.SR70;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace KdyPojedeVlak.Engine.DbStorage
 {
+    using static DbModelUtils;
+
     public class DbModelContext : DbContext
     {
         public DbSet<TimetableYear> TimetableYears { get; set; }
@@ -42,6 +45,8 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
             modelBuilder.Entity<RoutingPoint>()
                 .HasIndex(o => new {o.Latitude, o.Longitude}); // TODO: Geographic coordinates (R-Tree)
+            modelBuilder.Entity<RoutingPoint>()
+                .HasIndex(o => o.Name); // TODO: Fulltext
 
             modelBuilder.Entity<Passage>()
                 .HasIndex(o => new {o.PointId, o.TrainId, o.Order}).IsUnique();
@@ -52,6 +57,28 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
             modelBuilder.Entity<NeighboringPoints>()
                 .HasKey(o => new {o.PointAId, o.PointBId});
+            modelBuilder.Entity<NeighboringPoints>()
+                .HasIndex(o => new {o.PointBId, o.PointAId});
+        }
+
+        public HashSet<RoutingPoint> GetNeighboringPoints(RoutingPoint point)
+        {
+            if (point == null) throw new ArgumentNullException(nameof(point));
+
+            var pointId = point.Id;
+            var neighbors = NeighboringPointTuples
+                .Include(npt => npt.PointA)
+                .Include(npt => npt.PointB)
+                .Where(npt => npt.PointA.Id == pointId || npt.PointB.Id == pointId)
+                .ToList();
+            var result = new HashSet<RoutingPoint>(neighbors.Count);
+            foreach (var neighbor in neighbors)
+            {
+                if (neighbor.PointA != point) result.Add(neighbor.PointA);
+                else if (neighbor.PointB != point) result.Add(neighbor.PointB);
+            }
+
+            return result;
         }
     }
 
@@ -90,7 +117,6 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public String BitmapEncoded { get; set; }
 
         [NotMapped]
-        // TODO: Decode BitmapEncoded
         public bool[] Bitmap
         {
             get
@@ -173,6 +199,12 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [NotMapped]
         public String ShortName => Program.PointCodebook.Find(Code)?.ShortName ?? Name;
 
+        [NotMapped]
+        public string CountryCodeFromId => Code.Substring(0, Math.Max(Code.IndexOf(':'), 0));
+
+        [NotMapped]
+        public string ShortCzechIdentifier => Code.Substring(Math.Max(Code.IndexOf(':'), -1) + 1);
+
         [InverseProperty("Point")]
         public List<Passage> PassingTrains { get; set; }
     }
@@ -192,6 +224,12 @@ namespace KdyPojedeVlak.Engine.DbStorage
      */
     public class TrainTimetable
     {
+        public static readonly string AttribTrafficType = "TrafficType";
+        public static readonly string AttribTrainCategory = "TrainCategory";
+        public static readonly string AttribTrainType = "TrainType";
+
+        private Dictionary<string, string> data;
+
         public int Id { get; set; }
 
         [Required]
@@ -215,15 +253,26 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public virtual List<TrainTimetableVariant> Variants { get; set; }
 
         [NotMapped]
-        // TODO: Decode data JSON
-        public Dictionary<string, string> Data { get; set; }
+        public Dictionary<string, string> Data
+        {
+            get
+            {
+                if (data != null) return data;
+                data = LoadDataJson(DataJson);
+                return data;
+            }
+            set
+            {
+                data = value;
+                DataJson = StoreDataJson(value);
+            }
+        }
 
         [NotMapped]
         public string TrainNumber => Train.Number;
 
-        // TODO: Train attributes
         [NotMapped]
-        public TrainCategory TrainCategory => TrainCategory.Unknown;
+        public TrainCategory TrainCategory => GetAttributeEnum(Data, AttribTrainCategory, TrainCategory.Unknown);
     }
 
     /**
@@ -290,12 +339,32 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [NotMapped]
         public bool IsMajorPoint => DwellTime != null;
 
+        [NotMapped]
+        public TimeSpan? AnyScheduledTime => ArrivalTime ?? DepartureTime;
+
+        [NotMapped]
+        public TimeSpan? ArrivalTimeOfDay => TimeOfDayOfTimeSpan(ArrivalTime);
+
+        [NotMapped]
+        public TimeSpan? DepartureTimeOfDay => TimeOfDayOfTimeSpan(DepartureTime);
+
+        [NotMapped]
+        public TimeSpan? AnyScheduledTimeOfDay => ArrivalTimeOfDay ?? DepartureTimeOfDay;
+
         // TODO: Point attributes
         [NotMapped]
         public string SubsidiaryLocationDescription => null;
 
         [NotMapped]
         public List<TrainOperation> TrainOperations => Enumerable.Empty<TrainOperation>().ToList();
+
+        private TimeSpan? TimeOfDayOfTimeSpan(TimeSpan? timeSpan)
+        {
+            if (timeSpan == null) return null;
+            var value = timeSpan.GetValueOrDefault();
+            if (value.Days == 0) return timeSpan;
+            return new TimeSpan(0, value.Hours, value.Minutes, value.Seconds, value.Milliseconds);
+        }
     }
 
     public class NeighboringPoints
@@ -312,5 +381,18 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [Required]
         [ForeignKey("PointBId")]
         public RoutingPoint PointB { get; set; }
+    }
+
+    internal static class DbModelUtils
+    {
+        public static Dictionary<string, string> LoadDataJson(string json) => JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+
+        public static string StoreDataJson(Dictionary<string, string> json) => JsonConvert.SerializeObject(json);
+
+        public static string GetAttribute(Dictionary<string, string> data, string key, string defaultValue) => data.TryGetValue(key, out var result) ? result : defaultValue;
+
+        public static TEnum GetAttributeEnum<TEnum>(Dictionary<string, string> data, string key, TEnum defaultValue)
+            where TEnum : struct =>
+            Enum.TryParse<TEnum>(GetAttribute(data, key, null), out var result) ? result : defaultValue;
     }
 }

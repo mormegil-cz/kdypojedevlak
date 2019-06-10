@@ -6,7 +6,7 @@
     var now = Model.StartDate.TimeOfDay;
     var hasTools = false;
 }
-<h3>Nejbližší průjezdy vlaku místem „@Model.Point.LongName“</h3>
+<h3>Nejbližší průjezdy vlaku místem „@Model.Point.Name“</h3>
 <div class="row">
     <div class="col-md-11">
     </div>
@@ -16,16 +16,16 @@
                 Nástroje <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-                @if (Model.Point.CodebookEntry.Latitude != null)
+                @if (Model.Point.Latitude != null)
                 {
                     hasTools = true;
-                    var lat = Model.Point.CodebookEntry.Latitude.GetValueOrDefault().ToString("F5", CultureInfo.InvariantCulture);
-                    var lon = Model.Point.CodebookEntry.Longitude.GetValueOrDefault().ToString("F5", CultureInfo.InvariantCulture);
+                    var lat = Model.Point.Latitude.GetValueOrDefault().ToString("F5", CultureInfo.InvariantCulture);
+                    var lon = Model.Point.Longitude.GetValueOrDefault().ToString("F5", CultureInfo.InvariantCulture);
                     <li>
                         <a href="https://www.openstreetmap.org/?mlat=@lat&mlon=@lon#map=15/@lat/@lon">Poloha stanice</a>
                     </li>
                 }
-                @if (Model.Point.CountryCodeFromID == "CZ")
+                @if (Model.Point.CountryCodeFromId == "CZ")
                 {
                     hasTools = true;
                     <li>
@@ -43,7 +43,7 @@
                     <li role="separator" class="divider"></li>
                 }
                 <li>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Nearest", new {id = Model.Point.ID}))">Sdílet na Facebook</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Nearest", new {id = Model.Point.Code}))">Sdílet na Facebook</a>
                 </li>
             </ul>
         </div>
@@ -53,7 +53,7 @@
 <form class="form-inline">
     <div class="form-group">
         <label for="at">Datum/čas:</label>
-        <input type="datetime" class="form-control" id="at" name="at" placeholder="@Model.StartDate.ToString("s")" />
+        <input type="datetime" class="form-control" id="at" name="at" placeholder="@Model.StartDate.ToString("s")"/>
     </div>
     <button type="submit" class="btn btn-default">Aktualizovat</button>
 </form>
@@ -61,35 +61,37 @@
 <ul>
     @foreach (var train in Model.Transits)
     {
-        @* TODO: Do not show tommorrow trains as past *@
+        @* TODO: Do not show tomorrow trains as past *@
         <li class="@(train.AnyScheduledTime < now ? "past" : "future")">
             @train.AnyScheduledTime
-            @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.Train.TrainCategory] + " " + train.Train.TrainNumber + " " + train.Train.TrainName, "Details", "Train", new { id = train.Train.TrainNumber })
-            @if (train.SequenceIndex > 0)
+            @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.TrainTimetableVariant.Timetable.TrainCategory] + " " + train.TrainTimetableVariant.Timetable.TrainNumber + " " + train.TrainTimetableVariant.Timetable.Name, "Details", "Train", new {id = train.TrainTimetableVariant.Timetable.TrainNumber})
+            @*
+            @if (train.Order > 0)
             {
-                if (train.SequenceIndex < train.RouteVariant.RoutingPoints.Count - 1)
+                if (train.Order < train.TrainTimetableVariant.Points.Count - 1)
                 {
-                    <text>(@(train.RouteVariant.RoutingPoints[train.SequenceIndex - 1].Point.Name) → @(train.RouteVariant.RoutingPoints[train.SequenceIndex + 1].Point.Name))</text>
+                    <text>(@(train.TrainTimetableVariant.Points[train.Order - 1].Point.Name) → @(train.TrainTimetableVariant.Points[train.Order + 1].Point.Name))</text>
                 }
                 else
                 {
-                    <text>(z @(train.RouteVariant.RoutingPoints[train.SequenceIndex - 1].Point.Name))</text>
+                    <text>(z @(train.TrainTimetableVariant.Points[train.Order - 1].Point.Name))</text>
                 }
             }
             else
             {
-                <text>(směr @(train.RouteVariant.RoutingPoints[train.SequenceIndex + 1].Point.Name))</text>
+                <text>(směr @(train.TrainTimetableVariant.Points[train.Order + 1].Point.Name))</text>
             }
+            *@
         </li>
     }
 </ul>
 
 <h4>Sousední místa</h4>
 <ul>
-    @foreach (var neighbor in Model.Point.NeighboringPoints)
+    @foreach (var neighbor in Model.NeighboringPoints)
     {
         <li>
-            @Html.ActionLink(neighbor.LongName, "Nearest", new { id = neighbor.ID }, null)
+            @Html.ActionLink(neighbor.Name, "Nearest", new {id = neighbor.Code}, null)
         </li>
     }
 </ul>

@@ -10,10 +10,13 @@ namespace KdyPojedeVlak.Models
         public DateTime StartDate { get; }
         public IEnumerable<Passage> Transits { get; }
 
-        public NearestTransits(RoutingPoint point, DateTime startDate, IEnumerable<Passage> transits)
+        public HashSet<RoutingPoint> NeighboringPoints { get; }
+
+        public NearestTransits(RoutingPoint point, DateTime startDate, IEnumerable<Passage> transits, HashSet<RoutingPoint> neighboringPoints)
         {
             Point = point;
             Transits = transits;
+            NeighboringPoints = neighboringPoints;
             StartDate = startDate;
         }
     }

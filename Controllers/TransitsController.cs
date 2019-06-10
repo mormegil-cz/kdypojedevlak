@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using KdyPojedeVlak.Engine.DbStorage;
-//using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RoutingPoint = KdyPojedeVlak.Engine.DbStorage.RoutingPoint;
 
 namespace KdyPojedeVlak.Controllers
 {
@@ -36,6 +36,7 @@ namespace KdyPojedeVlak.Controllers
 
             // TODO: Fulltext search
             var searchResults = dbModelContext.RoutingPoints.Where(p => p.Name.StartsWith(search))
+                .OrderBy(p => p.Name)
                 .Select(p => new {p.Code, p.Name})
                 .Take(100)
                 .Select(p => new KeyValuePair<string, string>(p.Code, p.Name))
@@ -51,7 +52,15 @@ namespace KdyPojedeVlak.Controllers
                 return RedirectToAction("ChoosePoint");
             }
 
-            var point = dbModelContext.RoutingPoints.Include(p => p.PassingTrains).SingleOrDefault(p => p.Code == id);
+            var point = dbModelContext.RoutingPoints
+                .Include(p => p.PassingTrains)
+                .ThenInclude(pt => pt.TrainTimetableVariant)
+                .ThenInclude(ttv => ttv.Calendar)
+                .Include(p => p.PassingTrains)
+                .ThenInclude(pt => pt.TrainTimetableVariant)
+                .ThenInclude(pt => pt.Timetable)
+                .ThenInclude(pt => pt.Train)
+                .SingleOrDefault(p => p.Code == id);
             if (point == null)
             {
                 // TODO: Error message?
@@ -59,7 +68,7 @@ namespace KdyPojedeVlak.Controllers
             }
 
             var now = at ?? DateTime.Now;
-            return View(new NearestTransits(point, now, GetTrainList(now, point)));
+            return View(new NearestTransits(point, now, GetTrainList(now, point), dbModelContext.GetNeighboringPoints(point)));
         }
 
         private List<Passage> GetTrainList(DateTime now, RoutingPoint point)
@@ -74,13 +83,13 @@ namespace KdyPojedeVlak.Controllers
                 var startTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(-intervalWidth));
                 var endTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(intervals[i]));
 
-                var passingTrains = point.PassingTrains.ToList();
+                var passingTrains = point.PassingTrains.AsEnumerable().OrderBy(p => p.AnyScheduledTimeOfDay).ToList();
 
                 var data = passingTrains
                     .Select(t => (Day: 0, Train: t)).Concat(passingTrains.Select(t => (Day: 1, Train: t)))
-                    .SkipWhile(p => p.Day == 0 && p.Train.AnyScheduledTime < startTime)
-                    .Where(p => CheckInCalendar(p.Train.Calendar, now.Date, p.Day + p.Train.AnyScheduledTimeSpan.Days))
-                    .TakeWhile(pt => pt.Train.AnyScheduledTime.Add(TimeSpan.FromDays(pt.Day)) < endTime)
+                    .SkipWhile(p => p.Day == 0 && p.Train.AnyScheduledTimeOfDay < startTime)
+                    .Where(p => CheckInCalendar(p.Train.TrainTimetableVariant.Calendar, now.Date, p.Day + (p.Train.AnyScheduledTime?.Days ?? 0)))
+                    .TakeWhile(pt => pt.Train.AnyScheduledTime?.Add(TimeSpan.FromDays(pt.Day)) < endTime)
                     .Take(AbsoluteMaximum)
                     .ToList();
 
@@ -90,7 +99,7 @@ namespace KdyPojedeVlak.Controllers
                     return bestOverMinimum ? bestList : data.Select(t => t.Train).ToList();
                 }
 
-                var futureTrainCount = data.Count(pt => pt.Day > 0 || pt.Train.AnyScheduledTime >= nowTime);
+                var futureTrainCount = data.Count(pt => pt.Day > 0 || pt.Train.AnyScheduledTimeOfDay >= nowTime);
 
                 bestList = data.Select(t => t.Train).ToList();
 
@@ -105,14 +114,14 @@ namespace KdyPojedeVlak.Controllers
             return bestList;
         }
 
-        private static bool CheckInCalendar(TrainCalendar calendar, DateTime day, int dayOffset)
+        private static bool CheckInCalendar(CalendarDefinition calendar, DateTime day, int dayOffset)
         {
-            if (calendar.ValidFrom > day) return false;
-            if (calendar.ValidTo.Year > 1 && calendar.ValidTo < day) return false;
-            var bitmap = calendar.CalendarBitmap;
+            if (calendar.StartDate > day) return false;
+            if (calendar.EndDate.Year > 1 && calendar.EndDate < day) return false;
+            var bitmap = calendar.Bitmap;
             if (bitmap == null) return true;
 
-            var offset = (int) day.AddDays(-dayOffset).Subtract(calendar.BaseDate).TotalDays;
+            var offset = (int) day.AddDays(-dayOffset).Subtract(calendar.StartDate).TotalDays;
             if (offset < 0 || offset >= bitmap.Length) return false;
             return bitmap[offset];
         }
