@@ -208,7 +208,13 @@ namespace KdyPojedeVlak.Engine.Djr
                             DepartureDay = trainRoutePoint.ScheduledDeparture?.Days ?? 0,
                             DepartureTime = trainRoutePoint.ScheduledDepartureTime,
                             DwellTime = trainRoutePoint.DwellTime,
-                            // TODO: Passage attributes
+                            Data = new Dictionary<string, string>
+                            {
+                                {Passage.AttribTrainOperations, String.Join(";", trainRoutePoint.TrainOperations.Select(op => op.ToString()))},
+                                {Passage.AttribSubsidiaryLocation, trainRoutePoint.SubsidiaryLocation},
+                                {Passage.AttribSubsidiaryLocationType, trainRoutePoint.SubsidiaryLocationType.ToString()},
+                                {Passage.AttribSubsidiaryLocationName, trainRoutePoint.SubsidiaryLocationName},
+                            }
                         };
                         dbContext.Add(passage);
                         timetableVariant.Points.Add(passage);

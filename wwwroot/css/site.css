@@ -154,6 +154,10 @@ textarea {
     text-align: center;
 }
 
+.time-col span[title] {
+    border-bottom: 1px dotted grey;
+}
+
 .passthrough-col {
     text-align: center;
     background: repeat-y center url("../images/passthrough.png");

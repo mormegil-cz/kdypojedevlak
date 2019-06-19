@@ -82,15 +82,15 @@
                     <td class="time-col">@pointVariant.ArrivalTime</td>
                     <td class="time-col">
                         <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.DepartureTime</span>
-                        <td class="operation-icons">
-                            @if (pointVariant.TrainOperations.Count > 0)
+                    </td>
+                    <td class="operation-icons">
+                        @if (pointVariant.TrainOperations.Count > 0)
+                        {
+                            foreach (var operation in pointVariant.TrainOperations)
                             {
-                                foreach (var operation in pointVariant.TrainOperations)
-                                {
-                                    <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
-                                }
+                                <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
                             }
-                        </td>
+                        }
                     </td>
                 }
             }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.SR70;
+using KdyPojedeVlak.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -299,6 +300,11 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
     public class Passage
     {
+        public static readonly string AttribTrainOperations = "TrainOperations";
+        public static readonly string AttribSubsidiaryLocation = "SubsidiaryLocation";
+        public static readonly string AttribSubsidiaryLocationName = "SubsidiaryLocationName";
+        public static readonly string AttribSubsidiaryLocationType = "SubsidiaryLocationType";
+
         public int Id { get; set; }
 
         // note that this is denormalized: TrainId implies YearId, but it would be difficult to normalize it
@@ -333,8 +339,22 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public string DataJson { get; set; }
 
         [NotMapped]
-        // TODO: Decode data JSON
-        public Dictionary<string, string> Data { get; set; }
+        public Dictionary<string, string> Data
+        {
+            get
+            {
+                if (data != null) return data;
+                data = LoadDataJson(DataJson);
+                return data;
+            }
+            set
+            {
+                data = value;
+                DataJson = StoreDataJson(value);
+            }
+        }
+
+        private Dictionary<string, string> data;
 
         [NotMapped]
         public bool IsMajorPoint => DwellTime != null;
@@ -353,10 +373,22 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         // TODO: Point attributes
         [NotMapped]
-        public string SubsidiaryLocationDescription => null;
+        public string SubsidiaryLocationDescription => SubsidiaryLocation == null
+            ? null
+            : DisplayConsts.SubsidiaryLocationTypeNames[SubsidiaryLocationType] + " " + SubsidiaryLocation + " " +
+              SubsidiaryLocationName;
 
         [NotMapped]
-        public List<TrainOperation> TrainOperations => Enumerable.Empty<TrainOperation>().ToList();
+        public HashSet<TrainOperation> TrainOperations => GetAttributeEnumSet<TrainOperation>(Data, AttribTrainOperations);
+
+        [NotMapped]
+        public string SubsidiaryLocation => GetAttribute(Data, AttribSubsidiaryLocation, null);
+
+        [NotMapped]
+        public string SubsidiaryLocationName => GetAttribute(Data, AttribSubsidiaryLocationName, null);
+
+        [NotMapped]
+        public SubsidiaryLocationType SubsidiaryLocationType => GetAttributeEnum(Data, AttribSubsidiaryLocationType, SubsidiaryLocationType.None);
 
         private TimeSpan? TimeOfDayOfTimeSpan(TimeSpan? timeSpan)
         {
@@ -394,5 +426,12 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public static TEnum GetAttributeEnum<TEnum>(Dictionary<string, string> data, string key, TEnum defaultValue)
             where TEnum : struct =>
             Enum.TryParse<TEnum>(GetAttribute(data, key, null), out var result) ? result : defaultValue;
+
+        public static HashSet<TEnum> GetAttributeEnumSet<TEnum>(Dictionary<string, string> data, string key)
+            where TEnum : struct =>
+            GetAttribute(data, key, "")
+                .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(Enum.Parse<TEnum>)
+                .ToHashSet();
     }
 }
