@@ -375,8 +375,8 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [NotMapped]
         public string SubsidiaryLocationDescription => SubsidiaryLocation == null
             ? null
-            : DisplayConsts.SubsidiaryLocationTypeNames[SubsidiaryLocationType] + " " + SubsidiaryLocation + " " +
-              SubsidiaryLocationName;
+            : (DisplayConsts.SubsidiaryLocationTypeNames[SubsidiaryLocationType] + " " + SubsidiaryLocation + " " +
+              SubsidiaryLocationName).Trim();
 
         [NotMapped]
         public HashSet<TrainOperation> TrainOperations => GetAttributeEnumSet<TrainOperation>(Data, AttribTrainOperations);

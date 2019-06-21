@@ -58,9 +58,14 @@ namespace KdyPojedeVlak.Controllers
                 .ThenInclude(ttv => ttv.Calendar)
                 .Include(p => p.PassingTrains)
                 .ThenInclude(pt => pt.TrainTimetableVariant)
-                .ThenInclude(pt => pt.Timetable)
-                .ThenInclude(pt => pt.Train)
+                .ThenInclude(ttv => ttv.Timetable)
+                .ThenInclude(tt => tt.Train)
+                .Include(p => p.PassingTrains)
+                .ThenInclude(pt => pt.TrainTimetableVariant)
+                .ThenInclude(ttv => ttv.Points)
+                .ThenInclude(p => p.Point)
                 .SingleOrDefault(p => p.Code == id);
+
             if (point == null)
             {
                 // TODO: Error message?
