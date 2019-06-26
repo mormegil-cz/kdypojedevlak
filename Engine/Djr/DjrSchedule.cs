@@ -34,7 +34,8 @@ namespace KdyPojedeVlak.Engine.Djr
 
         public DjrSchedule(string path)
         {
-            this.path = path;
+            this.path = @"c:\Users\Petr\Downloads\PA_0054_-KADR167609C_01_2019.zip";
+            //this.path = path;
         }
 
         public void ClearTemps()
@@ -58,18 +59,27 @@ namespace KdyPojedeVlak.Engine.Djr
 
         public void StoreToDatabase(DbModelContext dbContext)
         {
+            var calendarMinDate = trainCalendars.Values.Min(cal => cal.ValidFrom);
+            var calendarMaxDate = trainCalendars.Values.Max(cal => cal.ValidTo);
+
+            // TODO: Timetable year should be per-train
             var dbTimetableYear = dbContext.TimetableYears.Find(timetableYear);
             if (dbTimetableYear == null)
             {
                 dbTimetableYear = new TimetableYear
                 {
                     Year = timetableYear,
-                    MinDate = trainCalendars.Values.Min(cal => cal.ValidFrom),
-                    MaxDate = trainCalendars.Values.Max(cal => cal.ValidTo)
+                    MinDate = calendarMinDate,
+                    MaxDate = calendarMaxDate
                 };
                 DebugLog.LogDebugMsg("Created timetable year {0}", timetableYear);
                 dbContext.TimetableYears.Add(dbTimetableYear);
                 dbContext.SaveChanges();
+            }
+            else
+            {
+                if (calendarMinDate < dbTimetableYear.MinDate) dbTimetableYear.MinDate = calendarMinDate;
+                if (calendarMaxDate > dbTimetableYear.MaxDate) dbTimetableYear.MaxDate = calendarMaxDate;
             }
 
             var calendars = new Dictionary<TrainCalendar, CalendarDefinition>();
@@ -302,6 +312,19 @@ namespace KdyPojedeVlak.Engine.Djr
             if (trainId.TimetableYear != pathId.TimetableYear)
             {
                 DebugLog.LogProblem("TimetableYear mismatch at {0}: {1} vs {2}", trainId.Core, trainId.TimetableYear, pathId.TimetableYear);
+            }
+
+            // TODO: Remote, timetable year should be per-variant
+            if (timetableYear == 0)
+            {
+                timetableYear = trainId.TimetableYear;
+            }
+            else
+            {
+                if (timetableYear != trainId.TimetableYear)
+                {
+                    DebugLog.LogProblem("TimetableYear change at {0}: {1} vs {2}", trainId.Core, timetableYear, trainId.TimetableYear);
+                }
             }
 
             var operationalTrainNumber = message.CZPTTInformation.CZPTTLocation.First(loc => loc.OperationalTrainNumber != null).OperationalTrainNumber;
@@ -581,10 +604,10 @@ namespace KdyPojedeVlak.Engine.Djr
     {
         public string PathCompany { get; set; }
         public string PathCore { get; set; }
-        public string PathTimetableYear { get; set; }
+        public int PathTimetableYear { get; set; }
         public string TrainCompany { get; set; }
         public string TrainCore { get; set; }
-        public string TrainTimetableYear { get; set; }
+        public int TrainTimetableYear { get; set; }
 
         public string TrainNumber { get; set; }
         public HashSet<string> AllTrainNumbers { get; } = new HashSet<string>(1);

@@ -18,7 +18,7 @@ namespace KdyPojedeVlak
     public class Startup
     {
         private static readonly bool RecreateDatabase = false;
-        private static readonly bool ImportData = false;
+        private static readonly bool ImportData = true;
 
         public Startup(IHostingEnvironment env)
         {

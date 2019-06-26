@@ -27,7 +27,7 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
         public string Company { get; set; }
         public string Core { get; set; }
         public string Variant { get; set; }
-        public string TimetableYear { get; set; }
+        public int TimetableYear { get; set; }
     }
 
     public class CZPTTInformation
