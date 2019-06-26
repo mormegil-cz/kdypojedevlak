@@ -7,7 +7,7 @@
     <UserSecretsId>aspnet-KdyPojedeVlak-20160915124940</UserSecretsId>
     <RuntimeIdentifiers>win10-x64;win81-x64;win8-x64;win7-x64</RuntimeIdentifiers>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8</LangVersion>
     <RootNamespace>KdyPojedeVlak</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

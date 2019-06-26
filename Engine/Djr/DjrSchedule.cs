@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #nullable enable
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -6,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Threading;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.DbStorage;
@@ -161,6 +162,7 @@ namespace KdyPojedeVlak.Engine.Djr
                         calendars.Add(trainCalendar, dbCalendar);
                         dbContext.CalendarDefinitions.Add(dbCalendar);
                     }
+
                     var timetableVariant = new TrainTimetableVariant
                     {
                         Timetable = trainTimetable,
@@ -192,6 +194,7 @@ namespace KdyPojedeVlak.Engine.Djr
                             dbPoints.Add(point.ID, dbPoint);
                             dbContext.RoutingPoints.Add(dbPoint);
                         }
+
                         if (prevPoint != null)
                         {
                             var tuple = ValueTuple.Create(prevPoint.Code, dbPoint.Code);
@@ -205,6 +208,7 @@ namespace KdyPojedeVlak.Engine.Djr
                                 pointTuples.Add(tuple);
                             }
                         }
+
                         prevPoint = dbPoint;
 
                         var passage = new Passage
@@ -680,6 +684,7 @@ namespace KdyPojedeVlak.Engine.Djr
             {
                 if (a[i] != b[i]) return false;
             }
+
             return true;
         }
 
