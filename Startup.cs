@@ -99,7 +99,7 @@ namespace KdyPojedeVlak
                 DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex.Message);
             }
 
-            Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo.CurrentPath);
+            Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo);
             try
             {
                 if (ImportData) Program.Schedule.Load();

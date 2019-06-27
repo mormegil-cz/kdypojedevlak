@@ -31,12 +31,11 @@ namespace KdyPojedeVlak.Engine.Djr
 
         public int timetableYear;
 
-        private readonly string path;
+        private readonly ScheduleVersionInfo versionInfo;
 
-        public DjrSchedule(string path)
+        public DjrSchedule(ScheduleVersionInfo versionInfo)
         {
-            this.path = @"c:\Users\Petr\Downloads\PA_0054_-KADR167609C_01_2019.zip";
-            //this.path = path;
+            this.versionInfo = versionInfo;
         }
 
         public void ClearTemps()
@@ -245,33 +244,54 @@ namespace KdyPojedeVlak.Engine.Djr
             dbContext.SaveChanges();
         }
 
+        private static bool IsGzip(string filename)
+        {
+            using var file = File.OpenRead(filename);
+            return file.Length > 2 && file.ReadByte() == 0x1F && file.ReadByte() == 0x8B;
+        }
+
         public void Load()
         {
             if (points.Count > 0) throw new InvalidOperationException("Already loaded");
 
-            using (var zipFile = ZipFile.OpenRead(path))
+            foreach (var filename in Directory.GetFiles(versionInfo.CurrentPath, "*.zip"))
             {
-                foreach (var entry in zipFile.Entries)
+                DebugLog.LogDebugMsg("Importing {0}", filename);
+                if (IsGzip(filename))
                 {
-                    if (entry.FullName.EndsWith("/")) continue;
-
-                    if (String.Compare(Path.GetExtension(entry.Name), ".xml",
-                            StringComparison.InvariantCultureIgnoreCase) != 0)
-                    {
-                        DebugLog.LogProblem("Unknown extension: at {0}", entry.FullName);
-                        continue;
-                    }
-
                     try
                     {
-                        using (var fileStream = entry.Open())
-                        {
-                            LoadXmlFile(fileStream);
-                        }
+                        using var fileStream = new GZipStream(File.OpenRead(filename), CompressionMode.Decompress);
+                        LoadXmlFile(fileStream);
                     }
                     catch (Exception e)
                     {
-                        DebugLog.LogProblem("Error loading XML file {0}: {1}", entry.FullName, e);
+                        DebugLog.LogProblem("Error loading XML file {0}: {1}", filename, e);
+                    }
+                }
+                else
+                {
+                    using var zipFile = ZipFile.OpenRead(filename);
+                    foreach (var entry in zipFile.Entries)
+                    {
+                        if (entry.FullName.EndsWith("/")) continue;
+
+                        if (String.Compare(Path.GetExtension(entry.Name), ".xml",
+                                StringComparison.InvariantCultureIgnoreCase) != 0)
+                        {
+                            DebugLog.LogProblem("Unknown extension: at {0}", entry.FullName);
+                            continue;
+                        }
+
+                        try
+                        {
+                            using var fileStream = entry.Open();
+                            LoadXmlFile(fileStream);
+                        }
+                        catch (Exception e)
+                        {
+                            DebugLog.LogProblem("Error loading XML file {0}: {1}", entry.FullName, e);
+                        }
                     }
                 }
             }
@@ -344,15 +364,13 @@ namespace KdyPojedeVlak.Engine.Djr
 
             var networkSpecificParameters =
                 message.NetworkSpecificParameter.ToDictionary(param => param.Name, param => param.Value);
-            string trainName;
-            networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out trainName);
+            networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out var trainName);
 //            if (networkSpecificParameters.Count - (trainName != null ? 1 : 0) > 0)
 //            {
 //                Console.WriteLine(trainId.Company + "/" + trainId.Core);
 //            }
 
-            Train trainDef;
-            if (!trains.TryGetValue(trainIdentifier, out trainDef))
+            if (!trains.TryGetValue(trainIdentifier, out var trainDef))
             {
                 trainDef = new Train
                 {
@@ -422,8 +440,7 @@ namespace KdyPojedeVlak.Engine.Djr
             var locationIndex = 0;
             foreach (var location in message.CZPTTInformation.CZPTTLocation)
             {
-                RoutingPoint point;
-                if (!points.TryGetValue(location.CountryCodeISO + ":" + location.LocationPrimaryCode, out point))
+                if (!points.TryGetValue(location.CountryCodeISO + ":" + location.LocationPrimaryCode, out var point))
                 {
                     var locationID = location.CountryCodeISO + ":" + location.LocationPrimaryCode;
                     point = new RoutingPoint
