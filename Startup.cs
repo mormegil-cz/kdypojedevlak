@@ -80,8 +80,8 @@ namespace KdyPojedeVlak
 
             try
             {
-                var scheduleVersionManager = new ScheduleVersionManager(@"App_Data");
-                Program.ScheduleVersionInfo = scheduleVersionManager.TryUpdate().Result;
+                var scheduleVersionManager = new ScheduleVersionManager(@"App_Data\cisjrdata");
+                Program.ScheduleVersionInfo = scheduleVersionManager.DownloadMissingFiles().Result;
             }
             catch (Exception ex)
             {

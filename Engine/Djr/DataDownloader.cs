@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -13,9 +14,8 @@ namespace KdyPojedeVlak.Engine.Djr
     {
         private const string clientName = "KdyPojedeVlak/CoreFTP";
         private static readonly Uri serverBaseUri = new Uri(@"ftp://ftp.cisjr.cz/draha/celostatni/szdc/");
-        private const string filenameFormat = "GVD{0}.ZIP";
 
-        private static readonly Regex reFilename = new Regex(@"^GVD([0-9_]+)\.ZIP$",
+        private static readonly Regex reFilename = new Regex(@"^([^.]+)\.(XML\.)ZIP$",
             RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
         private static readonly Regex reDirectory = new Regex(@"^2[0-9]{3}$",
@@ -31,7 +31,7 @@ namespace KdyPojedeVlak.Engine.Djr
         {
             if (ftp != null) throw new InvalidOperationException("Already connected");
 
-            ftp = new FtpClient(new FtpClientConfiguration {Host = serverBaseUri.GetLeftPart(UriPartial.Authority)});
+            ftp = new FtpClient(new FtpClientConfiguration { Host = serverBaseUri.GetLeftPart(UriPartial.Authority) });
             await ftp.LoginAsync();
             await ftp.SetClientName(clientName);
             await ftp.ChangeWorkingDirectoryAsync(serverBaseUri.AbsolutePath);
@@ -44,11 +44,40 @@ namespace KdyPojedeVlak.Engine.Djr
             ftp = null;
         }
 
+        public async Task<Dictionary<string, long>> GetListOfFilesAvailable()
+        {
+            var directories = (await ftp.ListDirectoriesAsync())
+                .Select(dir => new { Directory = dir, Match = reDirectory.Match(dir.Name) })
+                .Where(f => f.Match.Success)
+                .Select(f => f.Directory.Name)
+                .ToList();
+
+            var results = new Dictionary<string, long>();
+            foreach (var dir in directories)
+            {
+                await ftp.ChangeWorkingDirectoryAsync(dir);
+
+                var files = (await ftp.ListFilesAsync())
+                    .Select(file => new { File = file, Match = reFilename.Match(file.Name) })
+                    .Where(f => f.Match.Success)
+                    .OrderByDescending(f => f.Match.Groups[1].Value)
+                    .Select(f => f.File);
+
+                foreach (var file in files)
+                {
+                    results.Add(dir + "/" + file.Name, file.Size);
+                }
+
+                await ftp.ChangeWorkingDirectoryAsync("..");
+            }
+            return results;
+        }
+
         public async Task<string> GetLatestVersionAvailable()
         {
             var directories = await ftp.ListDirectoriesAsync();
             var newestDirectory = directories
-                .Select(dir => new {Directory = dir, Match = reDirectory.Match(dir.Name)})
+                .Select(dir => new { Directory = dir, Match = reDirectory.Match(dir.Name) })
                 .Where(f => f.Match.Success)
                 .OrderByDescending(f => f.Directory.Name)
                 .FirstOrDefault()
@@ -60,7 +89,7 @@ namespace KdyPojedeVlak.Engine.Djr
 
             var files = await ftp.ListFilesAsync();
             var newest = files
-                .Select(file => new {File = file, Match = reFilename.Match(file.Name)})
+                .Select(file => new { File = file, Match = reFilename.Match(file.Name) })
                 .Where(f => f.Match.Success)
                 .OrderByDescending(f => f.Match.Groups[1].Value)
                 .FirstOrDefault();
@@ -70,19 +99,19 @@ namespace KdyPojedeVlak.Engine.Djr
             return newestDirectory + "/" + newest?.Match.Groups[1].Value;
         }
 
-        public async Task<Tuple<string, long>> DownloadZip(string version, string destinationFilename)
+        public async Task<(string, long)> DownloadZip(string path, string destinationFilename)
         {
             var originalDirectory = ftp.WorkingDirectory;
-            var versionSegments = version.Split('/');
+            var versionSegments = path.Split('/');
             for (var i = 0; i < versionSegments.Length - 1; ++i)
             {
                 await ftp.ChangeWorkingDirectoryAsync(versionSegments[i]);
             }
-            var fileNameVersion = versionSegments[versionSegments.Length - 1];
+            var fileName = versionSegments[versionSegments.Length - 1];
             using (var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
             {
                 var size = 0L;
-                using (var receiveStream = await ftp.OpenFileReadStreamAsync(String.Format(CultureInfo.InvariantCulture, filenameFormat, fileNameVersion)))
+                using (var receiveStream = await ftp.OpenFileReadStreamAsync(fileName))
                 {
                     using (var storeStream = new FileStream(destinationFilename, FileMode.Create, FileAccess.Write,
                         FileShare.Read))
@@ -101,7 +130,7 @@ namespace KdyPojedeVlak.Engine.Djr
                 }
                 await ftp.ChangeWorkingDirectoryAsync(originalDirectory);
                 var hash = hasher.GetHashAndReset();
-                return Tuple.Create(BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant(), size);
+                return (BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant(), size);
             }
         }
     }

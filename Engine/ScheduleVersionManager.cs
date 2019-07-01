@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -13,6 +14,7 @@ namespace KdyPojedeVlak.Engine
     public class ScheduleVersionManager
     {
         private const string dataDirectoryPrefix = "data-";
+        private const string dataFilePattern = "*.zip";
         private const string metadataNameFormat = "{0}._info";
         private const string updateStatusFileName = ".update_info.json";
         private const int MIN_UPDATE_FREQ_HRS = 8;
@@ -24,12 +26,9 @@ namespace KdyPojedeVlak.Engine
             this.basePath = basePath;
         }
 
-        public async Task<ScheduleVersionInfo> TryUpdate()
+        public async Task<ScheduleVersionInfo> DownloadMissingFiles()
         {
             var downloader = new DataDownloader();
-
-            // 1. find current newest version
-            var currentNewestVersion = GetCurrentNewestVersion();
 
             // 2. check online if not too soon after last update
             var lastUpdateDate = GetLastUpdateDate();
@@ -39,34 +38,28 @@ namespace KdyPojedeVlak.Engine
                 try
                 {
                     var downloadTime = DateTime.UtcNow;
-                    var onlineNewestVersion = await downloader.GetLatestVersionAvailable();
-                    var onlineNewestVersionClean = VersionStringToFileName(onlineNewestVersion);
+                    var availableFilesForDownload = await downloader.GetListOfFilesAvailable();
 
-                    if (currentNewestVersion == null || String.CompareOrdinal(onlineNewestVersionClean, currentNewestVersion) > 0)
+                    foreach (var file in availableFilesForDownload)
                     {
-                        // 3. if newer available, download and extract
-                        var tempName = $"temp-{onlineNewestVersionClean}";
-                        var finalDirName = dataDirectoryPrefix + onlineNewestVersionClean;
-                        var zipName = $"{onlineNewestVersionClean}.zip";
-                        var tempDir = Path.Combine(basePath, tempName);
-                        var zipPath = Path.Combine(tempDir, zipName);
-                        var finalDir = Path.Combine(basePath, finalDirName);
-                        Directory.CreateDirectory(tempDir);
-                        var downloadInfo = await downloader.DownloadZip(onlineNewestVersion, zipPath);
+                        var filePath = Path.Combine(basePath, file.Key.Replace('/', Path.DirectorySeparatorChar));
+                        var fileInfo = new FileInfo(filePath);
+                        if (fileInfo.Exists && file.Value == fileInfo.Length) continue;
 
-                        if (downloader.ShouldExtractZip)
+                        DebugLog.LogDebugMsg("Downloading {0}", file.Key);
+                        var dirName = Path.GetDirectoryName(filePath);
+                        if (!Directory.Exists(dirName))
                         {
-                            ExtractZip(zipPath, tempDir);
-                            File.Delete(zipPath);
+                            DebugLog.LogDebugMsg("Creating directory {0}", dirName);
+                            Directory.CreateDirectory(dirName);
                         }
-
-                        WriteMetadata(Path.Combine(tempDir, String.Format(CultureInfo.InvariantCulture, metadataNameFormat, onlineNewestVersionClean)), onlineNewestVersionClean, downloadTime, downloadInfo.Item1, downloadInfo.Item2);
-
-                        Directory.Move(tempDir, finalDir);
-
-                        currentNewestVersion = onlineNewestVersion;
+                        var tempFile = Path.ChangeExtension(fileInfo.FullName, ".tmp");
+                        var (hash, size) = await downloader.DownloadZip(file.Key, tempFile);
+                        File.Move(tempFile, fileInfo.FullName);
+                        DebugLog.LogDebugMsg("Downloaded {0} ({1} B: {2})", file.Key, size, hash);
                     }
-                    WriteLastUpdateDate(downloadTime);
+
+                    // WriteLastUpdateDate(downloadTime);
                 }
                 finally
                 {
@@ -81,10 +74,24 @@ namespace KdyPojedeVlak.Engine
                 }
             }
 
-            var currentNewestVersionClean = VersionStringToFileName(currentNewestVersion);
-            var pathToDir = dataDirectoryPrefix + currentNewestVersionClean;
-            var dataPath = downloader.ShouldExtractZip ? pathToDir : Path.Combine(pathToDir, $"{currentNewestVersionClean}.zip");
-            return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataPath), lastUpdateDate);
+//            var currentNewestVersionClean = VersionStringToFileName(currentNewestVersion);
+//            var pathToDir = dataDirectoryPrefix + currentNewestVersionClean;
+//            var dataPath = downloader.ShouldExtractZip ? pathToDir : Path.Combine(pathToDir, $"{currentNewestVersionClean}.zip");
+//            return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataPath), lastUpdateDate);
+            return null;
+        }
+
+        private Dictionary<string, long> GetDownloadedFiles()
+        {
+            var result = new Dictionary<string, long>();
+            foreach (var subdirectory in Directory.GetDirectories(basePath))
+            {
+                foreach (var file in Directory.GetFiles(subdirectory, dataFilePattern))
+                {
+                    result.Add(file, new FileInfo(file).Length);
+                }
+            }
+            return result;
         }
 
         private static string VersionStringToFileName(string versionString) => versionString.Replace('/', '_').Replace('\\', '_');
