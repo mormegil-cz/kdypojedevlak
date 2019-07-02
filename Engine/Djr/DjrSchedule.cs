@@ -31,11 +31,15 @@ namespace KdyPojedeVlak.Engine.Djr
 
         public int timetableYear;
 
+        [Obsolete]
         private readonly ScheduleVersionInfo versionInfo;
 
-        public DjrSchedule(ScheduleVersionInfo versionInfo)
+        private readonly string basePath;
+
+        public DjrSchedule(string basePath)
         {
-            this.versionInfo = versionInfo;
+            //this.versionInfo = versionInfo;
+            this.basePath = basePath;
         }
 
         public void ClearTemps()
@@ -43,19 +47,26 @@ namespace KdyPojedeVlak.Engine.Djr
             trainCalendars = null;
         }
 
-        public void LoadFromSerializedCache()
+        public async void ImportNewFiles(DbModelContext context, Dictionary<string, long> availableDataFiles)
         {
-        }
+            foreach (var file in availableDataFiles)
+            {
+                var importedFile = context.ImportedFiles.SingleOrDefault(f => f.Name == file.Key);
+                if (importedFile != null && importedFile.Size == file.Value) continue;
 
-        public void StoreToSerializedCache()
-        {
-        }
+                if (importedFile != null)
+                {
+                    DebugLog.LogProblem("Imported file size mismatch: {0} imported as {1} B, now has {2} B");
+                    continue;
+                }
 
-        /*
-        public void LoadFromDatabase(DbModelContext dbContext)
-        {
+                var importedData = ImportZip(file.Key);
+                StoreToDatabase(dbContext, importedFile);
+
+                context.ImportedFiles.Add(new ImportedFile(file.Key, file.Value));
+                await context.SaveChangesAsync();
+            }
         }
-        */
 
         public void StoreToDatabase(DbModelContext dbContext)
         {

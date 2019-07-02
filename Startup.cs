@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.DbStorage;
@@ -78,14 +79,15 @@ namespace KdyPojedeVlak
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
+            Dictionary<string, long> availableDataFiles;
             try
             {
                 var scheduleVersionManager = new ScheduleVersionManager(@"App_Data\cisjrdata");
-                Program.ScheduleVersionInfo = scheduleVersionManager.DownloadMissingFiles().Result;
+                availableDataFiles = scheduleVersionManager.DownloadMissingFiles().Result;
             }
             catch (Exception ex)
             {
-                DebugLog.LogProblem("Error updating schedule: {0}", ex.Message);
+                DebugLog.LogProblem("Error downloading new schedule files: {0}", ex.Message);
                 throw;
             }
 
@@ -99,25 +101,21 @@ namespace KdyPojedeVlak
                 DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex.Message);
             }
 
-            Program.Schedule = new DjrSchedule(Program.ScheduleVersionInfo);
+            Program.Schedule = new DjrSchedule(@"App_Data\cisjrdata");
             try
             {
-                if (ImportData) Program.Schedule.Load();
-
                 using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
                 {
-                    var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+                    using var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+
                     if (RecreateDatabase) context.Database.EnsureDeleted();
                     context.Database.EnsureCreated();
 
                     context.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                    if (ImportData)
-                    {
-                        Program.Schedule.StoreToDatabase(context);
+                    Program.Schedule.ImportNewFiles(context, availableDataFiles);
 
-                        context.SaveChanges();
-                    }
+                    context.SaveChanges();
                 }
 
                 Program.Schedule.ClearTemps();

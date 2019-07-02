@@ -26,14 +26,16 @@ namespace KdyPojedeVlak.Engine
             this.basePath = basePath;
         }
 
-        public async Task<ScheduleVersionInfo> DownloadMissingFiles()
+        public async Task<Dictionary<string, long>> DownloadMissingFiles()
         {
-            var downloader = new DataDownloader();
+            var dataFilesAvailable = GetDataFilesAvailable();
 
             // 2. check online if not too soon after last update
             var lastUpdateDate = GetLastUpdateDate();
             if (lastUpdateDate <= DateTime.UtcNow.AddHours(-MIN_UPDATE_FREQ_HRS))
             {
+                var downloader = new DataDownloader();
+
                 await downloader.Connect();
                 try
                 {
@@ -43,8 +45,14 @@ namespace KdyPojedeVlak.Engine
                     foreach (var file in availableFilesForDownload)
                     {
                         var filePath = Path.Combine(basePath, file.Key.Replace('/', Path.DirectorySeparatorChar));
+                        if (dataFilesAvailable.TryGetValue(file.Key, out var currentSize) && currentSize == file.Value) continue;
+
                         var fileInfo = new FileInfo(filePath);
-                        if (fileInfo.Exists && file.Value == fileInfo.Length) continue;
+                        if (fileInfo.Exists)
+                        {
+                            DebugLog.LogProblem("Data file {0} size mismatch: {1} expected, {2} found, deleting", file.Key, file.Value, fileInfo.Length);
+                            fileInfo.Delete();
+                        }
 
                         DebugLog.LogDebugMsg("Downloading {0}", file.Key);
                         var dirName = Path.GetDirectoryName(filePath);
@@ -56,10 +64,11 @@ namespace KdyPojedeVlak.Engine
                         var tempFile = Path.ChangeExtension(fileInfo.FullName, ".tmp");
                         var (hash, size) = await downloader.DownloadZip(file.Key, tempFile);
                         File.Move(tempFile, fileInfo.FullName);
+                        dataFilesAvailable[file.Key] = size;
                         DebugLog.LogDebugMsg("Downloaded {0} ({1} B: {2})", file.Key, size, hash);
                     }
 
-                    // WriteLastUpdateDate(downloadTime);
+                    WriteLastUpdateDate(downloadTime);
                 }
                 finally
                 {
@@ -78,10 +87,10 @@ namespace KdyPojedeVlak.Engine
 //            var pathToDir = dataDirectoryPrefix + currentNewestVersionClean;
 //            var dataPath = downloader.ShouldExtractZip ? pathToDir : Path.Combine(pathToDir, $"{currentNewestVersionClean}.zip");
 //            return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataPath), lastUpdateDate);
-            return null;
+            return dataFilesAvailable;
         }
 
-        private Dictionary<string, long> GetDownloadedFiles()
+        private Dictionary<string, long> GetDataFilesAvailable()
         {
             var result = new Dictionary<string, long>();
             foreach (var subdirectory in Directory.GetDirectories(basePath))
@@ -108,7 +117,7 @@ namespace KdyPojedeVlak.Engine
 
         private void WriteLastUpdateDate(DateTime date)
         {
-            var data = new UpdateStatusData { LastUpdate = date };
+            var data = new UpdateStatusData {LastUpdate = date};
             var json = JsonConvert.SerializeObject(data);
             var updateStatusPath = Path.Combine(basePath, updateStatusFileName);
             File.WriteAllText(updateStatusPath, json);
