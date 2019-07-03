@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -60,7 +61,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     continue;
                 }
 
-                var importedData = ImportZip(file.Key);
+                var importedData = ImportZipFile(file.Key, context);
                 StoreToDatabase(dbContext, importedFile);
 
                 context.ImportedFiles.Add(new ImportedFile(file.Key, file.Value));
@@ -261,6 +262,53 @@ namespace KdyPojedeVlak.Engine.Djr
             return file.Length > 2 && file.ReadByte() == 0x1F && file.ReadByte() == 0x8B;
         }
 
+        private void ImportZipFile(string filename, DbModelContext dbModelContext)
+        {
+            DebugLog.LogDebugMsg("Importing {0}", filename);
+            if (IsGzip(filename))
+            {
+                try
+                {
+                    using var fileStream = new GZipStream(File.OpenRead(filename), CompressionMode.Decompress);
+                    var message = LoadXmlFile(fileStream);
+                    ImportToDatabase(message, dbModelContext);
+                }
+                catch (Exception e)
+                {
+                    DebugLog.LogProblem("Error loading XML file {0}: {1}", filename, e);
+                }
+            }
+            else
+            {
+                using var zipFile = ZipFile.OpenRead(filename);
+                foreach (var entry in zipFile.Entries)
+                {
+                    if (entry.FullName.EndsWith("/")) continue;
+
+                    if (String.Compare(Path.GetExtension(entry.Name), ".xml",
+                            StringComparison.InvariantCultureIgnoreCase) != 0)
+                    {
+                        DebugLog.LogProblem("Unknown extension: at {0}", entry.FullName);
+                        continue;
+                    }
+
+                    try
+                    {
+                        CZPTTCISMessage message;
+                        using (var fileStream = entry.Open())
+                        {
+                            message = LoadXmlFile(fileStream);
+                        }
+                        ImportToDatabase(message, dbModelContext);
+                    }
+                    catch (Exception e)
+                    {
+                        DebugLog.LogProblem("Error loading XML file {0}: {1}", entry.FullName, e);
+                    }
+                }
+            }
+        }
+
         public void Load()
         {
             if (points.Count > 0) throw new InvalidOperationException("Already loaded");
@@ -334,11 +382,282 @@ namespace KdyPojedeVlak.Engine.Djr
             DebugLog.LogDebugMsg("{0} trains", trains.Count);
         }
 
-        private void LoadXmlFile(Stream stream)
+        private CZPTTCISMessage LoadXmlFile(Stream stream)
         {
             var ser = new XmlSerializer(typeof(CZPTTCISMessage));
-            var message = (CZPTTCISMessage) ser.Deserialize(stream);
+            return (CZPTTCISMessage) ser.Deserialize(stream);
+        }
 
+        private static void ImportToDatabase(CZPTTCISMessage message, DbModelContext dbModelContext)
+        {
+            var identifiersPerType = message.Identifiers.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
+            var trainId = identifiersPerType["TR"];
+            var pathId = identifiersPerType["PA"];
+
+            if (trainId.TimetableYear != pathId.TimetableYear)
+            {
+                DebugLog.LogProblem("TimetableYear mismatch at {0}: {1} vs {2}", trainId.Core, trainId.TimetableYear, pathId.TimetableYear);
+            }
+
+            var calendarMinDate = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime;
+            var calendarMaxDate = message.CZPTTInformation.PlannedCalendar.ValidityPeriod.EndDateTime ?? calendarMinDate.AddDays(message.CZPTTInformation.PlannedCalendar.BitmapDays.Length - 1);
+
+            var timetableYear = trainId.TimetableYear;
+            var dbTimetableYear = dbModelContext.TimetableYears.SingleOrDefault(y => y.Year == timetableYear);
+            if (dbTimetableYear == null)
+            {
+                dbTimetableYear = new TimetableYear
+                {
+                    Year = timetableYear,
+                    MinDate = calendarMinDate,
+                    MaxDate = calendarMaxDate
+                };
+                dbModelContext.TimetableYears.Add(dbTimetableYear);
+                DebugLog.LogDebugMsg("Created year {0}", timetableYear);
+            }
+            else
+            {
+                if (dbTimetableYear.MinDate > calendarMinDate) dbTimetableYear.MinDate = calendarMinDate;
+                if (dbTimetableYear.MaxDate < calendarMaxDate) dbTimetableYear.MaxDate = calendarMaxDate;
+            }
+
+            var operationalTrainNumber = message.CZPTTInformation.CZPTTLocation.First(loc => loc.OperationalTrainNumber != null).OperationalTrainNumber;
+            foreach (var loc in message.CZPTTInformation.CZPTTLocation.Where(loc => loc.OperationalTrainNumber != null))
+            {
+                if (loc.OperationalTrainNumber != operationalTrainNumber)
+                {
+                    DebugLog.LogProblem("OpTrainNumber mismatch at {0}: {1} vs {2}", trainId.Core, operationalTrainNumber, loc.OperationalTrainNumber);
+                }
+            }
+
+            var trainIdentifier = trainId.Company + "/" + trainId.Core;
+
+            var networkSpecificParameters = message.NetworkSpecificParameter.ToDictionary(param => param.Name, param => param.Value);
+            networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out var trainName);
+//            if (networkSpecificParameters.Count - (trainName != null ? 1 : 0) > 0)
+//            {
+//                Console.WriteLine(trainId.Company + "/" + trainId.Core);
+//            }
+
+            var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == operationalTrainNumber);
+            if (train == null)
+            {
+                train = new DbStorage.Train
+                {
+                    Number = operationalTrainNumber
+                };
+                dbModelContext.Trains.Add(train);
+                DebugLog.LogDebugMsg("Created train {0}", operationalTrainNumber);
+            }
+
+            var trainTimetable = dbModelContext.TrainTimetables.SingleOrDefault(tt => tt.Train == train && tt.TimetableYear == dbTimetableYear);
+            if (trainTimetable == null)
+            {
+                trainTimetable = new TrainTimetable
+                {
+                    Train = train,
+                    TimetableYear = dbTimetableYear,
+                    Name = trainName,
+                    Data = new Dictionary<string, string>
+                    {
+                        {TrainTimetable.AttribTrafficType, train.TrafficType.ToString()},
+                        {TrainTimetable.AttribTrainCategory, train.TrainCategory.ToString()},
+                        {TrainTimetable.AttribTrainType, train.TrainType.ToString()},
+                    },
+                };
+                dbModelContext.TrainTimetables.Add(trainTimetable);
+            }
+            else
+            {
+                DebugLog.LogProblem("Train {0} for year {1} already exists; is it a problem?", operationalTrainNumber, timetableYear);
+            }
+            
+            if (!trains.TryGetValue(trainIdentifier, out var trainDef))
+            {
+                trainDef = new Train
+                {
+                    PathCompany = pathId.Company,
+                    PathCore = pathId.Core,
+                    PathTimetableYear = pathId.TimetableYear,
+                    TrainCompany = trainId.Company,
+                    TrainCore = trainId.Core,
+                    TrainTimetableYear = trainId.TimetableYear,
+                    TrainName = trainName
+                };
+                trains.Add(trainIdentifier, trainDef);
+            }
+
+            if (trainDef.PathCompany != pathId.Company)
+                DebugLog.LogProblem("PathCompany mismatch: '{0}' vs '{1}'", trainDef.PathCompany, pathId.Company);
+            if (trainDef.PathCore != pathId.Core)
+                DebugLog.LogProblem("PathCore mismatch: '{0}' vs '{1}'", trainDef.PathCore, pathId.Core);
+            if (trainDef.PathTimetableYear != pathId.TimetableYear)
+                DebugLog.LogProblem("PathTimetableYear mismatch: '{0}' vs '{1}'", trainDef.PathTimetableYear,
+                    pathId.TimetableYear);
+            if (trainDef.TrainCompany != trainId.Company)
+                DebugLog.LogProblem("TrainCompany mismatch: '{0}' vs '{1}'", trainDef.TrainCompany, trainId.Company);
+            if (trainDef.TrainCore != trainId.Core)
+                DebugLog.LogProblem("TrainCore mismatch: '{0}' vs '{1}'", trainDef.TrainCore, trainId.Core);
+            if (trainDef.TrainTimetableYear != trainId.TimetableYear)
+                DebugLog.LogProblem("TrainTimetableYear mismatch: '{0}' vs '{1}'", trainDef.TrainTimetableYear,
+                    trainId.TimetableYear);
+
+            foreach (var variant in trainDef.RouteVariants)
+            {
+                if (variant.PathVariant == pathId.Variant || variant.TrainVariant == trainId.Variant)
+                {
+                    DebugLog.LogProblem("Duplicate variant in {0}: '{1}', '{2}'", trainId.Core, trainId.Variant,
+                        pathId.Variant);
+                    break;
+                }
+            }
+
+            var routingPoints = new List<TrainRoutePoint>();
+            var trainCalendar = new TrainCalendar(
+                calendarBitmap: new BitArray(message.CZPTTInformation.PlannedCalendar.BitmapDays.Select(c => c == '1')
+                    .ToArray()),
+                validFrom: message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime,
+                validTo: message.CZPTTInformation.PlannedCalendar.ValidityPeriod.EndDateTime ??
+                         message.CZPTTInformation.PlannedCalendar.ValidityPeriod.StartDateTime
+            );
+            if (trainCalendars.TryGetValue(trainCalendar, out var existingCalendar))
+            {
+                trainCalendar = existingCalendar;
+            }
+            else
+            {
+                trainCalendars.Add(trainCalendar, trainCalendar);
+                trainCalendar.ComputeName();
+            }
+
+            var routeVariant = new RouteVariant
+            {
+                Train = trainDef,
+                Calendar = trainCalendar,
+                PathVariant = pathId.Variant,
+                TrainVariant = trainId.Variant,
+                RoutingPoints = routingPoints
+            };
+            trainDef.RouteVariants.Add(routeVariant);
+            var locationIndex = 0;
+            foreach (var location in message.CZPTTInformation.CZPTTLocation)
+            {
+                if (!points.TryGetValue(location.CountryCodeISO + ":" + location.LocationPrimaryCode, out var point))
+                {
+                    var locationID = location.CountryCodeISO + ":" + location.LocationPrimaryCode;
+                    point = new RoutingPoint
+                    {
+                        ID = locationID,
+                        Name = location.PrimaryLocationName,
+                        CodebookEntry = Program.PointCodebook.Find(locationID) ?? new PointCodebookEntry
+                        {
+                            ID = locationID,
+                            LongName = location.PrimaryLocationName,
+                            ShortName = location.PrimaryLocationName,
+                            Type = location.CountryCodeISO == "CZ" ? PointType.Unknown : PointType.Point
+                        }
+                    };
+                    points.Add(point.ID, point);
+                }
+
+                if (location.OperationalTrainNumber != null)
+                {
+                    // TODO: Clarify TrainNumbers
+                    if (trainDef.OperationalTrainNumber == null)
+                    {
+                        trainDef.OperationalTrainNumber = location.OperationalTrainNumber;
+                    }
+
+                    if (trainDef.TrainNumber == null)
+                    {
+                        trainDef.TrainNumber = location.OperationalTrainNumber;
+                    }
+                    else
+                    {
+                        if (!trainDef.AllTrainNumbers.Contains(location.OperationalTrainNumber))
+                        {
+                            DebugLog.LogProblem("Train number mismatch: '{0}' vs '{1}'", trainDef.TrainNumber,
+                                location.OperationalTrainNumber);
+                            // TODO: Remove common prefix?
+                            trainDef.TrainNumber += "/" + location.OperationalTrainNumber;
+                        }
+                    }
+
+                    trainDef.AllTrainNumbers.Add(location.OperationalTrainNumber);
+                }
+
+                if (location.CommercialTrafficType != null)
+                {
+                    var category = defTrainCategory[location.CommercialTrafficType];
+                    if (trainDef.TrainCategory == TrainCategory.Unknown)
+                    {
+                        trainDef.TrainCategory = category;
+                    }
+                    else
+                    {
+                        if (trainDef.TrainCategory != category)
+                        {
+                            DebugLog.LogProblem("Train category mismatch for {0}: {1} vs {2}", trainDef.TrainNumber,
+                                trainDef.TrainCategory, category);
+                        }
+                    }
+                }
+
+                var timingPerType = location.TimingAtLocation?.Timing?.ToDictionary(t => t.TimingQualifierCode);
+                Timing arrivalTiming = null;
+                Timing departureTiming = null;
+                timingPerType?.TryGetValue("ALA", out arrivalTiming);
+                timingPerType?.TryGetValue("ALD", out departureTiming);
+
+                ISet<TrainOperation> trainOperations;
+                if (location.TrainActivity?.Count > 0)
+                {
+                    trainOperations = new SortedSet<TrainOperation>();
+                    foreach (var activity in location.TrainActivity)
+                    {
+                        trainOperations.Add(defTrainOperation[activity.TrainActivityType]);
+                    }
+                }
+                else
+                {
+                    trainOperations = Sets<TrainOperation>.Empty;
+                }
+
+                if (arrivalTiming != null && arrivalTiming.Equals(departureTiming))
+                {
+                    if (!trainOperations.Contains(TrainOperation.ShortStop) &&
+                        !trainOperations.Contains(TrainOperation.RequestStop))
+                    {
+                        arrivalTiming = null;
+                    }
+                }
+
+                routingPoints.Add(new TrainRoutePoint
+                {
+                    RouteVariant = routeVariant,
+                    SequenceIndex = locationIndex++,
+                    Point = point,
+                    PointType = location.JourneyLocationTypeCode == null
+                        ? TrainRoutePointType.Unknown
+                        : defTrainRoutePointType[location.JourneyLocationTypeCode],
+                    ScheduledArrival = arrivalTiming?.ToTimeSpan,
+                    ScheduledDeparture = departureTiming?.ToTimeSpan,
+                    DwellTime = location.TimingAtLocation?.DwellTime,
+                    SubsidiaryLocation = location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code,
+                    SubsidiaryLocationType = location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                                                 ?.LocationSubsidiaryTypeCode == null
+                        ? SubsidiaryLocationType.None
+                        : defSubsidiaryLocationType[
+                            location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                                ?.LocationSubsidiaryTypeCode],
+                    SubsidiaryLocationName = location.LocationSubsidiaryIdentification?.LocationSubsidiaryName,
+                    TrainOperations = trainOperations,
+                });
+            }
+        }
+
+        private void ProcessXmlData(CZPTTCISMessage message)
+        {
             var identifiersPerType =
                 message.Identifiers.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
             var trainId = identifiersPerType["TR"];
