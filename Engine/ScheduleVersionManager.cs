@@ -44,13 +44,14 @@ namespace KdyPojedeVlak.Engine
 
                     foreach (var file in availableFilesForDownload)
                     {
-                        var filePath = Path.Combine(basePath, file.Key.Replace('/', Path.DirectorySeparatorChar));
-                        if (dataFilesAvailable.TryGetValue(file.Key, out var currentSize) && currentSize == file.Value) continue;
+                        var fileName = file.Key.Replace('/', Path.DirectorySeparatorChar);
+                        var filePath = Path.Combine(basePath, fileName);
+                        if (dataFilesAvailable.TryGetValue(filePath, out var currentSize) && currentSize == file.Value) continue;
 
                         var fileInfo = new FileInfo(filePath);
                         if (fileInfo.Exists)
                         {
-                            DebugLog.LogProblem("Data file {0} size mismatch: {1} expected, {2} found, deleting", file.Key, file.Value, fileInfo.Length);
+                            DebugLog.LogProblem("Data file {0} size mismatch: {1} expected, {2}/{3} found, deleting", file.Key, file.Value, fileInfo.Length, currentSize);
                             fileInfo.Delete();
                         }
 

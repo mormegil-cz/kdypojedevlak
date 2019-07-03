@@ -166,16 +166,16 @@ namespace KdyPojedeVlak.Engine.Algorithms
             }
         }
 
-        public static string DetectName(BitArray calendarBitmap, DateTime validFrom, DateTime validTo)
+        public static string DetectName(bool[] calendarBitmap, DateTime validFrom, DateTime validTo)
         {
             // TODO: realStartDate, realEndDate
 
-            if (calendarBitmap.Cast<bool>().All(value => !value))
+            if (calendarBitmap.All(value => !value))
             {
                 return "jede pp";
             }
 
-            if (calendarBitmap.Cast<bool>().All(value => value))
+            if (calendarBitmap.All(value => value))
             {
                 return "jede denně";
             }

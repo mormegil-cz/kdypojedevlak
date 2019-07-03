@@ -18,6 +18,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
     public class DbModelContext : DbContext
     {
+        public DbSet<ImportedFile> ImportedFiles { get; set; }
         public DbSet<TimetableYear> TimetableYears { get; set; }
         public DbSet<Train> Trains { get; set; }
         public DbSet<TrainTimetable> TrainTimetables { get; set; }
@@ -32,6 +33,9 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ImportedFile>()
+                .HasIndex(o => o.FileName).IsUnique();
+
             modelBuilder.Entity<Train>()
                 .HasIndex(o => o.Number).IsUnique();
 
@@ -83,6 +87,16 @@ namespace KdyPojedeVlak.Engine.DbStorage
         }
     }
 
+    public class ImportedFile
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public string FileName{ get; set; }
+
+        public long FileSize{ get; set; }
+    }
+    
     public class TimetableYear
     {
         [Key]
@@ -146,11 +160,11 @@ namespace KdyPojedeVlak.Engine.DbStorage
         {
             var start = StartDate;
             var bits = bitmap;
-            for (int i = 0; i < bits.Length - 1; ++i, start = start.AddDays(1))
+            for (int i = 0; i < bits.Length; ++i, start = start.AddDays(1))
             {
                 if (bits[i])
                 {
-                    return ComputeGuid(start, bits, i + 1);
+                    return ComputeGuid(start, bits, i);
                 }
             }
 
@@ -287,8 +301,14 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public TrainTimetable Timetable { get; set; }
 
         [Required]
-        public CalendarDefinition Calendar { get; set; }
+        public string PathVariant { get; set; }
 
+        [Required]
+        public string TrainVariant { get; set; }
+
+        [Required]
+        public CalendarDefinition Calendar { get; set; }
+        
         public string DataJson { get; set; }
 
         [NotMapped]
@@ -379,7 +399,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
               SubsidiaryLocationName).Trim();
 
         [NotMapped]
-        public HashSet<TrainOperation> TrainOperations => GetAttributeEnumSet<TrainOperation>(Data, AttribTrainOperations);
+        public List<TrainOperation> TrainOperations => GetAttributeEnumList<TrainOperation>(Data, AttribTrainOperations);
 
         [NotMapped]
         public string SubsidiaryLocation => GetAttribute(Data, AttribSubsidiaryLocation, null);
@@ -427,11 +447,11 @@ namespace KdyPojedeVlak.Engine.DbStorage
             where TEnum : struct =>
             Enum.TryParse<TEnum>(GetAttribute(data, key, null), out var result) ? result : defaultValue;
 
-        public static HashSet<TEnum> GetAttributeEnumSet<TEnum>(Dictionary<string, string> data, string key)
+        public static List<TEnum> GetAttributeEnumList<TEnum>(Dictionary<string, string> data, string key)
             where TEnum : struct =>
             GetAttribute(data, key, "")
                 .Split(';', StringSplitOptions.RemoveEmptyEntries)
                 .Select(Enum.Parse<TEnum>)
-                .ToHashSet();
+                .ToList();
     }
 }

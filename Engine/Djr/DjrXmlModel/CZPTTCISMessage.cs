@@ -106,7 +106,7 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
         public string Time { get; set; }
         public int Offset { get; set; }
 
-        public TimeSpan ToTimeSpan => DateTimeOffset.ParseExact(Time, "HH:mm:ss.fffffffzzz", CultureInfo.InvariantCulture).TimeOfDay.Add(TimeSpan.FromDays(Offset));
+        public TimeSpan ToTimeSpan => AsTimeSpan().Add(TimeSpan.FromDays(Offset));
 
         public bool Equals(Timing other)
         {
@@ -114,6 +114,8 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
 
             return other.ToTimeSpan.Equals(ToTimeSpan);
         }
+
+        public TimeSpan AsTimeSpan() => DateTimeOffset.ParseExact(Time, "HH:mm:ss.fffffffzzz", CultureInfo.InvariantCulture).TimeOfDay;
     }
 
     public class TrainActivity

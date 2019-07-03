@@ -18,8 +18,7 @@ namespace KdyPojedeVlak
 {
     public class Startup
     {
-        private static readonly bool RecreateDatabase = false;
-        private static readonly bool ImportData = true;
+        private static readonly bool RecreateDatabase = true;
 
         public Startup(IHostingEnvironment env)
         {
@@ -79,6 +78,16 @@ namespace KdyPojedeVlak
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
+            Program.PointCodebook = new PointCodebook(@"App_Data");
+            try
+            {
+                Program.PointCodebook.Load();
+            }
+            catch (Exception ex)
+            {
+                DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex.Message);
+            }
+
             Dictionary<string, long> availableDataFiles;
             try
             {
@@ -90,17 +99,7 @@ namespace KdyPojedeVlak
                 DebugLog.LogProblem("Error downloading new schedule files: {0}", ex.Message);
                 throw;
             }
-
-            Program.PointCodebook = new PointCodebook(@"App_Data");
-            try
-            {
-                Program.PointCodebook.Load();
-            }
-            catch (Exception ex)
-            {
-                DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex.Message);
-            }
-
+            
             Program.Schedule = new DjrSchedule(@"App_Data\cisjrdata");
             try
             {
@@ -112,7 +111,7 @@ namespace KdyPojedeVlak
                     context.Database.EnsureCreated();
 
                     context.ChangeTracker.AutoDetectChangesEnabled = false;
-
+                    
                     Program.Schedule.ImportNewFiles(context, availableDataFiles);
 
                     context.SaveChanges();
