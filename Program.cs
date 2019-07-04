@@ -9,15 +9,13 @@ using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
 using KdyPojedeVlak.Engine.SR70;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace KdyPojedeVlak
 {
     public class Program
     {
         // TODO: Dependency injection
-        //public static KangoSchedule Schedule;
-        [Obsolete]
-        public static DjrSchedule Schedule;
         public static ScheduleVersionInfo ScheduleVersionInfo;
         public static PointCodebook PointCodebook;
 

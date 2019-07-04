@@ -57,11 +57,11 @@ namespace KdyPojedeVlak.Engine.SR70
                     ShortName = point.Row[2],
                     Type = ParsePointType(point.Row[5]),
                 });
-                
+
                 DebugLog.LogDebugMsg("Additional point in old codebook: {0}", point.ID);
             }
-            
-            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2019-05-22.csv", '\t', Encoding.UTF8)
+
+            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2019-07-04.csv", '\t', Encoding.UTF8)
                 .Skip(1)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
@@ -71,22 +71,19 @@ namespace KdyPojedeVlak.Engine.SR70
                     && Single.TryParse(row.Longitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var longitude)
                 )
                 {
-                    /*
-                    if (entry.Latitude != null || entry.Longitude != null)
+                    if (entry.Latitude == null || entry.Longitude == null)
                     {
-                        DebugLog.LogProblem("Duplicate geographical position for point #{0}", row.ID);
-                        continue;
+                        entry.Latitude = latitude;
+                        entry.Longitude = longitude;
+                        DebugLog.LogDebugMsg("Added coordinates to {0}", row.ID);
                     }
-
-                    entry.Latitude = latitude;
-                    entry.Longitude = longitude;
-                    ++pointsWithPositions;
-                    */
-
-                    var dist = Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude);
-                    if (dist > 0.005)
+                    else
                     {
-                        DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0}: {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f));
+                        var dist = Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude);
+                        if (dist > 0.005)
+                        {
+                            DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0}: {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f));
+                        }
                     }
                 }
             }
