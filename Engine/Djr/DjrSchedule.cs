@@ -24,6 +24,20 @@ namespace KdyPojedeVlak.Engine.Djr
             }
         }
 
+        public static void RenameAllCalendars(DbModelContext dbModelContext)
+        {
+            foreach (var calendar in dbModelContext.CalendarDefinitions)
+            {
+                var newName = CalendarNamer.DetectName(calendar.Bitmap, calendar.StartDate, calendar.EndDate);
+                if (newName != calendar.Description)
+                {
+                    DebugLog.LogDebugMsg("Changed calendar name from '{0}' to '{1}'", calendar.Description, newName);
+                    calendar.Description = newName;
+                }
+            }
+            dbModelContext.SaveChanges();
+        }
+
         private static bool IsGzip(string filename)
         {
             using var file = File.OpenRead(filename);
@@ -266,7 +280,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     };
                     dbModelContext.RoutingPoints.Add(dbPoint);
                     dbModelContext.SaveChanges();
-                    DebugLog.LogDebugMsg("Created point '{0}'", location.PrimaryLocationName);
+                    DebugLog.LogDebugMsg("Created point '{0}'", codebookEntry.LongName);
                 }
 
                 var timingPerType = location.TimingAtLocation?.Timing?.ToDictionary(t => t.TimingQualifierCode);
@@ -314,7 +328,7 @@ namespace KdyPojedeVlak.Engine.Djr
                             PointB = dbPoint
                         });
                         dbModelContext.SaveChanges();
-                        DebugLog.LogDebugMsg("Point '{1}' follows '{0}'", dbPoint.Name, prevPoint.Name);
+                        DebugLog.LogDebugMsg("Point '{0}' follows '{1}'", dbPoint.Name, prevPoint.Name);
                     }
                 }
 

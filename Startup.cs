@@ -18,8 +18,9 @@ namespace KdyPojedeVlak
 {
     public class Startup
     {
-        private static readonly bool RecreateDatabase = true;
+        private static readonly bool RecreateDatabase = false;
         private static readonly bool ImportFiles = true;
+        private static readonly bool RenameAllCalendars = false;
 
         public Startup(IHostingEnvironment env)
         {
@@ -53,7 +54,7 @@ namespace KdyPojedeVlak
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
             });
-            
+
             services.AddDbContext<DbModelContext>(
                 options => options.UseSqlite(Configuration.GetConnectionString("Database")));
         }
@@ -104,7 +105,7 @@ namespace KdyPojedeVlak
                 DebugLog.LogProblem("Error downloading new schedule files: {0}", ex.Message);
                 throw;
             }
-            
+
             try
             {
                 using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
@@ -114,9 +115,14 @@ namespace KdyPojedeVlak
                     if (RecreateDatabase) context.Database.EnsureDeleted();
                     context.Database.EnsureCreated();
 
-                    context.ChangeTracker.AutoDetectChangesEnabled = false;
+                    if (ImportFiles)
+                    {
+                        context.ChangeTracker.AutoDetectChangesEnabled = false;
+                        DjrSchedule.ImportNewFiles(context, availableDataFiles);
+                        context.ChangeTracker.AutoDetectChangesEnabled = true;
+                    }
 
-                    if (ImportFiles) DjrSchedule.ImportNewFiles(context, availableDataFiles);
+                    if (RenameAllCalendars) DjrSchedule.RenameAllCalendars(context);
 
                     context.SaveChanges();
                 }

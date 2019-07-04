@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Newtonsoft.Json.Serialization;
 
 namespace KdyPojedeVlak.Engine.Algorithms
 {
@@ -28,7 +29,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
             SaturdayNonHoliday
         }
 
-        private static readonly string[] monthToRoman = { "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII" };
+        private static readonly string[] monthToRoman = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"};
 
         private static readonly HashSet<DateTime> holidays = new HashSet<DateTime>
         {
@@ -52,20 +53,20 @@ namespace KdyPojedeVlak.Engine.Algorithms
 
         private static readonly Dictionary<DayClass, Predicate<DateTime>> classifiers = new Dictionary<DayClass, Predicate<DateTime>>(7)
         {
-            { DayClass.Monday, MakeDayClassifier(DayOfWeek.Monday) },
-            { DayClass.Tuesday, MakeDayClassifier(DayOfWeek.Tuesday) },
-            { DayClass.Wednesday, MakeDayClassifier(DayOfWeek.Wednesday) },
-            { DayClass.Thursday, MakeDayClassifier(DayOfWeek.Thursday) },
-            { DayClass.Friday, MakeDayClassifier(DayOfWeek.Friday) },
-            { DayClass.Saturday, MakeDayClassifier(DayOfWeek.Saturday) },
-            { DayClass.Sunday, MakeDayClassifier(DayOfWeek.Sunday) },
+            {DayClass.Monday, MakeDayClassifier(DayOfWeek.Monday)},
+            {DayClass.Tuesday, MakeDayClassifier(DayOfWeek.Tuesday)},
+            {DayClass.Wednesday, MakeDayClassifier(DayOfWeek.Wednesday)},
+            {DayClass.Thursday, MakeDayClassifier(DayOfWeek.Thursday)},
+            {DayClass.Friday, MakeDayClassifier(DayOfWeek.Friday)},
+            {DayClass.Saturday, MakeDayClassifier(DayOfWeek.Saturday)},
+            {DayClass.Sunday, MakeDayClassifier(DayOfWeek.Sunday)},
 
-            { DayClass.All, _ => true },
-            { DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt) },
-            { DayClass.Workday, dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt) },
-            { DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt) },
-            { DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt) },
-            { DayClass.NonSaturdayHoliday, dt => dt.DayOfWeek != DayOfWeek.Saturday && holidays.Contains(dt) },
+            {DayClass.All, _ => true},
+            {DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt)},
+            {DayClass.Workday, dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt)},
+            {DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt)},
+            {DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt)},
+            {DayClass.NonSaturdayHoliday, dt => dt.DayOfWeek != DayOfWeek.Saturday && holidays.Contains(dt)},
         };
 
         private class ClassPresence
@@ -170,12 +171,26 @@ namespace KdyPojedeVlak.Engine.Algorithms
         {
             // TODO: realStartDate, realEndDate
 
-            if (calendarBitmap.All(value => !value))
+            var activeCount = calendarBitmap.Count(value => value);
+
+            if (activeCount == 0)
             {
                 return "jede pp";
             }
 
-            if (calendarBitmap.All(value => value))
+            if (activeCount <= 2)
+            {
+                return AppendListOfDays(new StringBuilder("jede "),
+                    new SortedSet<DateTime>(
+                        calendarBitmap
+                            .Select((active, dayIndex) => (Active: active, Date: validFrom.AddDays(dayIndex)))
+                            .Where(r => r.Active)
+                            .Select(r => r.Date)
+                    )
+                ).ToString();
+            }
+
+            if (activeCount == calendarBitmap.Length)
             {
                 return "jede denně";
             }
@@ -285,7 +300,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
             return result.ToString();
         }
 
-        private static void AppendListOfDays(StringBuilder result, SortedSet<DateTime> dates)
+        private static StringBuilder AppendListOfDays(StringBuilder result, SortedSet<DateTime> dates)
         {
             int lastMonth = -1;
             foreach (var exception in dates)
@@ -308,6 +323,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
                 result.Append(monthToRoman[lastMonth]);
                 result.Append('.');
             }
+            return result;
         }
     }
 }
