@@ -233,6 +233,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
     {
         public int Id { get; set; }
 
+        [MaxLength(20)]
         public string Number { get; set; }
     }
 
@@ -303,10 +304,12 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public TrainTimetable Timetable { get; set; }
 
         [Required]
-        public string PathVariant { get; set; }
+        [MaxLength(32)]
+        public string PathVariantId { get; set; }
 
         [Required]
-        public string TrainVariant { get; set; }
+        [MaxLength(32)]
+        public string TrainVariantId { get; set; }
 
         [Required]
         public CalendarDefinition Calendar { get; set; }

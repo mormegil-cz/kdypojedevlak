@@ -10,43 +10,17 @@ using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.DbStorage;
 using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
 using KdyPojedeVlak.Engine.SR70;
+using Microsoft.EntityFrameworkCore;
 
 namespace KdyPojedeVlak.Engine.Djr
 {
     public static class DjrSchedule
     {
-        public static void ImportNewFiles(DbModelContext context, Dictionary<string, long> availableDataFiles)
+        public static void ImportNewFiles(DbModelContext dbModelContext, Dictionary<string, long> availableDataFiles)
         {
             foreach (var file in availableDataFiles)
             {
-                var importedFile = context.ImportedFiles.SingleOrDefault(f => f.FileName == file.Key);
-                if (importedFile != null && importedFile.FileSize == file.Value)
-                {
-                    DebugLog.LogDebugMsg("File {0} already imported", file.Key);
-                    continue;
-                }
-
-                if (importedFile != null)
-                {
-                    DebugLog.LogProblem("Imported file size mismatch: {0} imported as {1} B, now has {2} B");
-                    continue;
-                }
-
-                using (var transaction = context.Database.BeginTransaction())
-                {
-                    ImportZipFile(file.Key, context);
-
-                    context.ImportedFiles.Add(new ImportedFile
-                    {
-                        FileName = file.Key,
-                        FileSize = file.Value
-                    });
-                    context.SaveChanges();
-
-                    transaction.Commit();
-                }
-
-                DebugLog.LogDebugMsg("File {0} imported successfully", file.Key);
+                ImportCompressedDataFile(file.Key, file.Value, dbModelContext);
             }
         }
 
@@ -56,17 +30,12 @@ namespace KdyPojedeVlak.Engine.Djr
             return file.Length > 2 && file.ReadByte() == 0x1F && file.ReadByte() == 0x8B;
         }
 
-        private static void ImportZipFile(string filename, DbModelContext dbModelContext)
+        private static void ImportCompressedDataFile(string filename, long fileSize, DbModelContext dbModelContext)
         {
             DebugLog.LogDebugMsg("Importing {0}", filename);
             if (IsGzip(filename))
             {
-                CZPTTCISMessage message;
-                using (var fileStream = new GZipStream(File.OpenRead(filename), CompressionMode.Decompress))
-                {
-                    message = LoadXmlFile(fileStream);
-                }
-                ImportToDatabase(message, dbModelContext);
+                ImportDataFile(filename, fileSize, dbModelContext, () => ImportGzipFile(filename, dbModelContext));
             }
             else
             {
@@ -81,14 +50,61 @@ namespace KdyPojedeVlak.Engine.Djr
                         continue;
                     }
 
-                    CZPTTCISMessage message;
-                    using (var fileStream = entry.Open())
-                    {
-                        message = LoadXmlFile(fileStream);
-                    }
-                    ImportToDatabase(message, dbModelContext);
+                    ImportDataFile($"{filename}#{entry.FullName}", entry.Length, dbModelContext, () => ImportZipEntry(entry, dbModelContext));
                 }
             }
+        }
+
+        private static void ImportDataFile(string fileName, long fileSize, DbModelContext dbModelContext, Action importAction)
+        {
+            var importedFile = dbModelContext.ImportedFiles.SingleOrDefault(f => f.FileName == fileName);
+            if (importedFile != null && importedFile.FileSize == fileSize)
+            {
+                DebugLog.LogDebugMsg("File {0} already imported", fileName);
+                return;
+            }
+
+            if (importedFile != null)
+            {
+                DebugLog.LogProblem("Imported file size mismatch: {0} imported as {1} B, now has {2} B", fileName, fileSize, importedFile.FileSize);
+                return;
+            }
+
+            using (var transaction = dbModelContext.Database.BeginTransaction())
+            {
+                importAction();
+
+                dbModelContext.ImportedFiles.Add(new ImportedFile
+                {
+                    FileName = fileName,
+                    FileSize = fileSize
+                });
+                dbModelContext.SaveChanges();
+
+                transaction.Commit();
+            }
+
+            DebugLog.LogDebugMsg("File {0} imported successfully", fileName);
+        }
+
+        private static void ImportGzipFile(string filename, DbModelContext dbModelContext)
+        {
+            CZPTTCISMessage message;
+            using (var fileStream = new GZipStream(File.OpenRead(filename), CompressionMode.Decompress))
+            {
+                message = LoadXmlFile(fileStream);
+            }
+            ImportToDatabase(message, dbModelContext);
+        }
+
+        private static void ImportZipEntry(ZipArchiveEntry entry, DbModelContext dbModelContext)
+        {
+            CZPTTCISMessage message;
+            using (var fileStream = entry.Open())
+            {
+                message = LoadXmlFile(fileStream);
+            }
+            ImportToDatabase(message, dbModelContext);
         }
 
         private static CZPTTCISMessage LoadXmlFile(Stream stream)
@@ -102,7 +118,8 @@ namespace KdyPojedeVlak.Engine.Djr
             var identifiersPerType = message.Identifiers.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
             var trainId = identifiersPerType["TR"];
             var pathId = identifiersPerType["PA"];
-            var trainIdentifier = trainId.Company + "/" + trainId.Core;
+            var trainIdentifier = trainId.Company + "/" + trainId.Core + "/" + trainId.Variant;
+            var pathIdentifier = pathId.Company + "/" + pathId.Core + "/" + pathId.Variant;
 
             if (trainId.TimetableYear != pathId.TimetableYear)
             {
@@ -182,7 +199,7 @@ namespace KdyPojedeVlak.Engine.Djr
                 DebugLog.LogProblem("Train {0} contains {1} categories", trainIdentifier, trainCategories.Count);
             }
 
-            var trainTimetable = dbModelContext.TrainTimetables.SingleOrDefault(tt => tt.Train == train && tt.TimetableYear == dbTimetableYear);
+            var trainTimetable = dbModelContext.TrainTimetables.Include(tt => tt.Variants).SingleOrDefault(tt => tt.Train == train && tt.TimetableYear == dbTimetableYear);
             if (trainTimetable == null)
             {
                 trainTimetable = new TrainTimetable
@@ -201,17 +218,17 @@ namespace KdyPojedeVlak.Engine.Djr
                 dbModelContext.TrainTimetables.Add(trainTimetable);
             }
 
-            if (trainTimetable.Variants.Any(ttv => ttv.PathVariant == pathId.Variant && ttv.TrainVariant == trainId.Variant))
+            if (trainTimetable.Variants.Any(ttv => ttv.PathVariantId == pathIdentifier && ttv.TrainVariantId == trainIdentifier))
             {
-                DebugLog.LogProblem("Duplicate variant in {0}: '{1}', '{2}'", trainId.Core, trainId.Variant, pathId.Variant);
+                DebugLog.LogProblem("Duplicate variant: '{0}', '{1}'", pathIdentifier, trainIdentifier);
             }
 
             var trainTimetableVariant = new TrainTimetableVariant
             {
                 Timetable = trainTimetable,
                 Calendar = dbCalendar,
-                PathVariant = pathId.Variant,
-                TrainVariant = trainId.Variant,
+                PathVariantId = pathIdentifier,
+                TrainVariantId = trainIdentifier,
                 Data = new Dictionary<string, string>
                 {
                     // TODO: Train timetable variant data
@@ -248,6 +265,7 @@ namespace KdyPojedeVlak.Engine.Djr
                         }
                     };
                     dbModelContext.RoutingPoints.Add(dbPoint);
+                    dbModelContext.SaveChanges();
                     DebugLog.LogDebugMsg("Created point '{0}'", location.PrimaryLocationName);
                 }
 
@@ -295,6 +313,7 @@ namespace KdyPojedeVlak.Engine.Djr
                             PointA = prevPoint,
                             PointB = dbPoint
                         });
+                        dbModelContext.SaveChanges();
                         DebugLog.LogDebugMsg("Point '{1}' follows '{0}'", dbPoint.Name, prevPoint.Name);
                     }
                 }
@@ -332,6 +351,8 @@ namespace KdyPojedeVlak.Engine.Djr
                 trainTimetableVariant.Points.Add(passage);
                 dbModelContext.Add(passage);
             }
+
+            dbModelContext.SaveChanges();
         }
 
         private static readonly Dictionary<string, SubsidiaryLocationType> defSubsidiaryLocationType =

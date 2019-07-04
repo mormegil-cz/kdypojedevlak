@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Text;
 
 namespace KdyPojedeVlak.Engine
 {
@@ -6,32 +8,35 @@ namespace KdyPojedeVlak.Engine
     public static class DebugLog
     {
         private static bool logDisabled = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOG") == "disabled";
+        private static string logFilename = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOGFILE");
+        private static TextWriter logWriter = logFilename == null ? Console.Out : new StreamWriter(logFilename, false, Encoding.UTF8);
 
-        private static void WriteLogMessage(string msgFormat, params object[] args)
+        private static void WriteLogMessage(string type, string msgFormat, params object[] args)
         {
             if (logDisabled) return;
 
-            Console.WriteLine(msgFormat, args);
+            logWriter.WriteLine(type + "\t" + msgFormat, args);
+            logWriter.Flush();
         }
 
         public static void LogProblem(string msg)
         {
-            WriteLogMessage("{0}", msg);
+            WriteLogMessage("WARN", "{0}", msg);
         }
 
         public static void LogProblem(string msgFormat, params object[] args)
         {
-            WriteLogMessage(msgFormat, args);
+            WriteLogMessage("WARN", msgFormat, args);
         }
 
         public static void LogDebugMsg(string msg)
         {
-            WriteLogMessage("{0}", msg);
+            WriteLogMessage("DEBUG", "{0}", msg);
         }
 
         public static void LogDebugMsg(string msgFormat, params object[] args)
         {
-            WriteLogMessage(msgFormat, args);
+            WriteLogMessage("DEBUG", msgFormat, args);
         }
     }
 }
