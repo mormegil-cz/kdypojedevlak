@@ -44,6 +44,23 @@ namespace KdyPojedeVlak.Engine.SR70
                     Latitude = ParseGeoCoordinate(r.Row[16]),
                 });
 
+            // add historical data for missing points
+            foreach (var point in LoadCsvData(path, @"SR70-2017-12-10.csv", ';', Encoding.GetEncoding(1250))
+                .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
+            {
+                if (codebook.ContainsKey(point.ID)) continue;
+
+                codebook.Add(point.ID, new PointCodebookEntry
+                {
+                    ID = point.ID,
+                    LongName = point.Row[1],
+                    ShortName = point.Row[2],
+                    Type = ParsePointType(point.Row[5]),
+                });
+                
+                DebugLog.LogDebugMsg("Additional point in old codebook: {0}", point.ID);
+            }
+            
             foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2019-05-22.csv", '\t', Encoding.UTF8)
                 .Skip(1)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))

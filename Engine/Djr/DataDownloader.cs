@@ -15,7 +15,7 @@ namespace KdyPojedeVlak.Engine.Djr
         private const string clientName = "KdyPojedeVlak/CoreFTP";
         private static readonly Uri serverBaseUri = new Uri(@"ftp://ftp.cisjr.cz/draha/celostatni/szdc/");
 
-        private static readonly Regex reFilename = new Regex(@"^([^.]+)\.(XML\.)ZIP$",
+        private static readonly Regex reFilename = new Regex(@"^([^.]+)\.(XML\.)?ZIP$",
             RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
         private static readonly Regex reDirectory = new Regex(@"^2[0-9]{3}$",

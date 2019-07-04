@@ -18,7 +18,8 @@ namespace KdyPojedeVlak
 {
     public class Startup
     {
-        private static readonly bool RecreateDatabase = true;
+        private static readonly bool RecreateDatabase = false;
+        private static readonly bool ImportFiles = false;
 
         public Startup(IHostingEnvironment env)
         {
@@ -100,7 +101,6 @@ namespace KdyPojedeVlak
                 throw;
             }
             
-            Program.Schedule = new DjrSchedule(@"App_Data\cisjrdata");
             try
             {
                 using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
@@ -111,13 +111,11 @@ namespace KdyPojedeVlak
                     context.Database.EnsureCreated();
 
                     context.ChangeTracker.AutoDetectChangesEnabled = false;
-                    
-                    Program.Schedule.ImportNewFiles(context, availableDataFiles);
+
+                    if (ImportFiles) DjrSchedule.ImportNewFiles(context, availableDataFiles);
 
                     context.SaveChanges();
                 }
-
-                Program.Schedule.ClearTemps();
             }
             catch (Exception ex)
             {

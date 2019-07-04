@@ -16,6 +16,7 @@ namespace KdyPojedeVlak
     {
         // TODO: Dependency injection
         //public static KangoSchedule Schedule;
+        [Obsolete]
         public static DjrSchedule Schedule;
         public static ScheduleVersionInfo ScheduleVersionInfo;
         public static PointCodebook PointCodebook;

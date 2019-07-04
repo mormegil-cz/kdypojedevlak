@@ -1,4 +1,4 @@
-﻿// #nullable enable
+﻿#nullable enable
 
 using System;
 using System.Collections;
@@ -32,14 +32,13 @@ namespace KdyPojedeVlak.Engine.Djr
 
         public int timetableYear;
 
-        [Obsolete] private readonly ScheduleVersionInfo versionInfo;
-
-        private readonly string basePath;
+        [Obsolete]
+        private readonly ScheduleVersionInfo versionInfo;
 
         public DjrSchedule(string basePath)
         {
             //this.versionInfo = versionInfo;
-            this.basePath = basePath;
+            //this.basePath = basePath;
         }
 
         public void ClearTemps()
@@ -47,7 +46,7 @@ namespace KdyPojedeVlak.Engine.Djr
             trainCalendars = null;
         }
 
-        public void ImportNewFiles(DbModelContext context, Dictionary<string, long> availableDataFiles)
+        public static void ImportNewFiles(DbModelContext context, Dictionary<string, long> availableDataFiles)
         {
             foreach (var file in availableDataFiles)
             {
@@ -64,14 +63,21 @@ namespace KdyPojedeVlak.Engine.Djr
                     continue;
                 }
 
-                ImportZipFile(file.Key, context);
-
-                context.ImportedFiles.Add(new ImportedFile
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    FileName = file.Key,
-                    FileSize = file.Value
-                });
-                context.SaveChanges();
+                    ImportZipFile(file.Key, context);
+
+                    context.ImportedFiles.Add(new ImportedFile
+                    {
+                        FileName = file.Key,
+                        FileSize = file.Value
+                    });
+                    context.SaveChanges();
+
+                    transaction.Commit();
+                }
+
+                DebugLog.LogDebugMsg("File {0} imported successfully", file.Key);
             }
         }
 
@@ -151,9 +157,9 @@ namespace KdyPojedeVlak.Engine.Djr
                         Name = train.TrainName,
                         Data = new Dictionary<string, string>
                         {
-                            { TrainTimetable.AttribTrafficType, train.TrafficType.ToString() },
-                            { TrainTimetable.AttribTrainCategory, train.TrainCategory.ToString() },
-                            { TrainTimetable.AttribTrainType, train.TrainType.ToString() },
+                            {TrainTimetable.AttribTrafficType, train.TrafficType.ToString()},
+                            {TrainTimetable.AttribTrainCategory, train.TrainCategory.ToString()},
+                            {TrainTimetable.AttribTrainType, train.TrainType.ToString()},
                         },
                         Variants = new List<TrainTimetableVariant>()
                     };
@@ -242,10 +248,10 @@ namespace KdyPojedeVlak.Engine.Djr
                             DwellTime = trainRoutePoint.DwellTime,
                             Data = new Dictionary<string, string>
                             {
-                                { Passage.AttribTrainOperations, String.Join(";", trainRoutePoint.TrainOperations.Select(op => op.ToString())) },
-                                { Passage.AttribSubsidiaryLocation, trainRoutePoint.SubsidiaryLocation },
-                                { Passage.AttribSubsidiaryLocationType, trainRoutePoint.SubsidiaryLocationType.ToString() },
-                                { Passage.AttribSubsidiaryLocationName, trainRoutePoint.SubsidiaryLocationName },
+                                {Passage.AttribTrainOperations, String.Join(";", trainRoutePoint.TrainOperations.Select(op => op.ToString()))},
+                                {Passage.AttribSubsidiaryLocation, trainRoutePoint.SubsidiaryLocation},
+                                {Passage.AttribSubsidiaryLocationType, trainRoutePoint.SubsidiaryLocationType.ToString()},
+                                {Passage.AttribSubsidiaryLocationName, trainRoutePoint.SubsidiaryLocationName},
                             }
                         };
                         dbContext.Add(passage);
@@ -274,16 +280,12 @@ namespace KdyPojedeVlak.Engine.Djr
             DebugLog.LogDebugMsg("Importing {0}", filename);
             if (IsGzip(filename))
             {
-                try
+                CZPTTCISMessage message;
+                using (var fileStream = new GZipStream(File.OpenRead(filename), CompressionMode.Decompress))
                 {
-                    using var fileStream = new GZipStream(File.OpenRead(filename), CompressionMode.Decompress);
-                    var message = LoadXmlFile(fileStream);
-                    ImportToDatabase(message, dbModelContext);
+                    message = LoadXmlFile(fileStream);
                 }
-                catch (Exception e)
-                {
-                    DebugLog.LogProblem("Error loading XML file {0}: {1}", filename, e);
-                }
+                ImportToDatabase(message, dbModelContext);
             }
             else
             {
@@ -299,19 +301,12 @@ namespace KdyPojedeVlak.Engine.Djr
                         continue;
                     }
 
-                    try
+                    CZPTTCISMessage message;
+                    using (var fileStream = entry.Open())
                     {
-                        CZPTTCISMessage message;
-                        using (var fileStream = entry.Open())
-                        {
-                            message = LoadXmlFile(fileStream);
-                        }
-                        ImportToDatabase(message, dbModelContext);
+                        message = LoadXmlFile(fileStream);
                     }
-                    catch (Exception e)
-                    {
-                        DebugLog.LogProblem("Error loading XML file {0}: {1}", entry.FullName, e);
-                    }
+                    ImportToDatabase(message, dbModelContext);
                 }
             }
         }
@@ -495,7 +490,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     Data = new Dictionary<string, string>
                     {
                         // { TrainTimetable.AttribTrafficType, train.TrafficType.ToString() },
-                        { TrainTimetable.AttribTrainCategory, trainCategories.FirstOrDefault().ToString() },
+                        {TrainTimetable.AttribTrainCategory, trainCategories.FirstOrDefault().ToString()},
                         // { TrainTimetable.AttribTrainType, train.TrainType.ToString() },
                     },
                     Variants = new List<TrainTimetableVariant>()
@@ -535,7 +530,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     var codebookEntry = Program.PointCodebook.Find(locationID) ?? new PointCodebookEntry
                     {
                         ID = locationID,
-                        LongName = location.PrimaryLocationName,
+                        LongName = location.PrimaryLocationName ?? $"#{location.LocationPrimaryCode}",
                         ShortName = location.PrimaryLocationName,
                         Type = location.CountryCodeISO == "CZ" ? PointType.Unknown : PointType.Point
                     };
@@ -543,7 +538,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     dbPoint = new DbStorage.RoutingPoint
                     {
                         Code = locationID,
-                        Name = location.PrimaryLocationName,
+                        Name = codebookEntry.LongName,
                         Latitude = codebookEntry.Latitude,
                         Longitude = codebookEntry.Longitude,
                         Data = new Dictionary<string, string>
@@ -608,20 +603,21 @@ namespace KdyPojedeVlak.Engine.Djr
 
                 var passage = new Passage
                 {
+                    Year = dbTimetableYear,
                     TrainTimetableVariant = trainTimetableVariant,
                     Order = locationIndex++,
                     Point = dbPoint,
                     ArrivalDay = arrivalTiming?.Offset ?? 0,
                     ArrivalTime = arrivalTiming?.AsTimeSpan(),
                     DepartureDay = departureTiming?.Offset ?? 0,
-                    DepartureTime = departureTiming.AsTimeSpan(),
+                    DepartureTime = departureTiming?.AsTimeSpan(),
                     DwellTime = location.TimingAtLocation?.DwellTime,
                     Data = new Dictionary<string, string>
                     {
                         // TODO: JourneyLocationTypeCode
-                        { Passage.AttribTrainOperations, String.Join(';', trainOperations) },
-                        { Passage.AttribSubsidiaryLocation, location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code },
-                        { Passage.AttribSubsidiaryLocationName, location.LocationSubsidiaryIdentification?.LocationSubsidiaryName },
+                        {Passage.AttribTrainOperations, String.Join(';', trainOperations)},
+                        {Passage.AttribSubsidiaryLocation, location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code},
+                        {Passage.AttribSubsidiaryLocationName, location.LocationSubsidiaryIdentification?.LocationSubsidiaryName},
                         {
                             Passage.AttribSubsidiaryLocationType,
                             (location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
@@ -1068,67 +1064,67 @@ namespace KdyPojedeVlak.Engine.Djr
         private static readonly Dictionary<string, SubsidiaryLocationType> defSubsidiaryLocationType =
             new Dictionary<string, SubsidiaryLocationType>
             {
-                { "0", SubsidiaryLocationType.Unknown },
-                { "1", SubsidiaryLocationType.StationTrack }
+                {"0", SubsidiaryLocationType.Unknown},
+                {"1", SubsidiaryLocationType.StationTrack}
             };
 
         private static readonly Dictionary<string, TrainRoutePointType> defTrainRoutePointType =
             new Dictionary<string, TrainRoutePointType>
             {
-                { "00", TrainRoutePointType.Unknown },
-                { "01", TrainRoutePointType.Origin },
-                { "02", TrainRoutePointType.Intermediate },
-                { "03", TrainRoutePointType.Destination },
-                { "04", TrainRoutePointType.Handover },
-                { "05", TrainRoutePointType.Interchange },
-                { "06", TrainRoutePointType.HandoverAndInterchange },
-                { "07", TrainRoutePointType.StateBorder }
+                {"00", TrainRoutePointType.Unknown},
+                {"01", TrainRoutePointType.Origin},
+                {"02", TrainRoutePointType.Intermediate},
+                {"03", TrainRoutePointType.Destination},
+                {"04", TrainRoutePointType.Handover},
+                {"05", TrainRoutePointType.Interchange},
+                {"06", TrainRoutePointType.HandoverAndInterchange},
+                {"07", TrainRoutePointType.StateBorder}
             };
 
         private static readonly Dictionary<string, TrainCategory> defTrainCategory =
             new Dictionary<string, TrainCategory>
             {
-                { "50", TrainCategory.EuroCity },
-                { "63", TrainCategory.Intercity },
-                { "69", TrainCategory.Express },
-                { "70", TrainCategory.EuroNight },
-                { "84", TrainCategory.Regional },
-                { "94", TrainCategory.SuperCity },
-                { "122", TrainCategory.Rapid },
-                { "157", TrainCategory.FastTrain },
-                { "209", TrainCategory.RailJet },
-                { "9000", TrainCategory.Rex },
-                { "9001", TrainCategory.TrilexExpres },
-                { "9002", TrainCategory.Trilex },
-                { "9003", TrainCategory.LeoExpres },
-                { "9004", TrainCategory.Regiojet },
-                { "9005", TrainCategory.ArrivaExpress },
-                { "9006", TrainCategory.NightJet }
+                {"50", TrainCategory.EuroCity},
+                {"63", TrainCategory.Intercity},
+                {"69", TrainCategory.Express},
+                {"70", TrainCategory.EuroNight},
+                {"84", TrainCategory.Regional},
+                {"94", TrainCategory.SuperCity},
+                {"122", TrainCategory.Rapid},
+                {"157", TrainCategory.FastTrain},
+                {"209", TrainCategory.RailJet},
+                {"9000", TrainCategory.Rex},
+                {"9001", TrainCategory.TrilexExpres},
+                {"9002", TrainCategory.Trilex},
+                {"9003", TrainCategory.LeoExpres},
+                {"9004", TrainCategory.Regiojet},
+                {"9005", TrainCategory.ArrivaExpress},
+                {"9006", TrainCategory.NightJet}
             };
 
         private static readonly Dictionary<string, TrainOperation> defTrainOperation =
             new Dictionary<string, TrainOperation>
             {
-                { "0001", TrainOperation.StopRequested },
-                { "0026", TrainOperation.Customs },
-                { "0027", TrainOperation.Other },
-                { "0028", TrainOperation.EmbarkOnly },
-                { "0029", TrainOperation.DisembarkOnly },
-                { "0030", TrainOperation.RequestStop },
-                { "0031", TrainOperation.DepartOnArrival },
-                { "0032", TrainOperation.DepartAfterDisembark },
-                { "0033", TrainOperation.NoWaitForConnections },
-                { "0035", TrainOperation.Preheating },
-                { "0040", TrainOperation.Passthrough },
-                { "0043", TrainOperation.ConnectedTrains },
-                { "0044", TrainOperation.TrainConnection },
-                { "CZ01", TrainOperation.StopsAfterOpening },
-                { "CZ02", TrainOperation.ShortStop },
-                { "CZ03", TrainOperation.HandicappedEmbark },
-                { "CZ04", TrainOperation.HandicappedDisembark },
-                { "CZ05", TrainOperation.WaitForDelayedTrains },
-                { "0002", TrainOperation.OperationalStopOnly },
-                { "CZ13", TrainOperation.NonpublicStop }
+                {"0001", TrainOperation.StopRequested},
+                {"0026", TrainOperation.Customs},
+                {"0027", TrainOperation.Other},
+                {"0028", TrainOperation.EmbarkOnly},
+                {"0029", TrainOperation.DisembarkOnly},
+                {"0030", TrainOperation.RequestStop},
+                {"0031", TrainOperation.DepartOnArrival},
+                {"0032", TrainOperation.DepartAfterDisembark},
+                {"0033", TrainOperation.NoWaitForConnections},
+                {"0035", TrainOperation.Preheating},
+                {"0040", TrainOperation.Passthrough},
+                {"0043", TrainOperation.ConnectedTrains},
+                {"0044", TrainOperation.TrainConnection},
+                {"CZ01", TrainOperation.StopsAfterOpening},
+                {"CZ02", TrainOperation.ShortStop},
+                {"CZ03", TrainOperation.HandicappedEmbark},
+                {"CZ04", TrainOperation.HandicappedDisembark},
+                {"CZ05", TrainOperation.WaitForDelayedTrains},
+                {"0002", TrainOperation.OperationalStopOnly},
+                {"CZ13", TrainOperation.NonpublicStop}
             };
     }
 
