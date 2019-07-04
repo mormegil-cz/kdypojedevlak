@@ -42,7 +42,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 .HasIndex(o => o.Number).IsUnique();
 
             modelBuilder.Entity<TrainTimetable>()
-                .HasIndex(o => new {o.TrainId, o.YearId}).IsUnique();
+                .HasIndex(o => new { o.TrainId, o.YearId }).IsUnique();
 
             modelBuilder.Entity<TrainTimetable>()
                 .HasIndex(o => o.Name); // TODO: Fulltext
@@ -51,21 +51,21 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 .HasIndex(o => o.Code).IsUnique();
 
             modelBuilder.Entity<RoutingPoint>()
-                .HasIndex(o => new {o.Latitude, o.Longitude}); // TODO: Geographic coordinates (R-Tree)
+                .HasIndex(o => new { o.Latitude, o.Longitude }); // TODO: Geographic coordinates (R-Tree)
             modelBuilder.Entity<RoutingPoint>()
                 .HasIndex(o => o.Name); // TODO: Fulltext
 
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new {o.PointId, o.TrainId, o.Order}).IsUnique();
+                .HasIndex(o => new { o.PointId, o.TrainId, o.Order }).IsUnique();
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new {o.TrainId, o.Order}).IsUnique();
+                .HasIndex(o => new { o.TrainId, o.Order }).IsUnique();
             modelBuilder.Entity<Passage>()
-                .HasIndex(o => new {o.YearId, o.PointId, o.ArrivalTime});
+                .HasIndex(o => new { o.YearId, o.PointId, o.ArrivalTime });
 
             modelBuilder.Entity<NeighboringPoints>()
-                .HasKey(o => new {o.PointAId, o.PointBId});
+                .HasKey(o => new { o.PointAId, o.PointBId });
             modelBuilder.Entity<NeighboringPoints>()
-                .HasIndex(o => new {o.PointBId, o.PointAId});
+                .HasIndex(o => new { o.PointBId, o.PointAId });
         }
 
         public HashSet<RoutingPoint> GetNeighboringPoints(RoutingPoint point)
@@ -94,11 +94,14 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public int Id { get; set; }
 
         [Required]
-        public string FileName{ get; set; }
+        public string FileName { get; set; }
 
-        public long FileSize{ get; set; }
+        public long FileSize { get; set; }
+
+        public DateTime ImportTime { get; set; }
+        public DateTime CreationDate { get; set; }
     }
-    
+
     public class TimetableYear
     {
         [Key]
@@ -313,7 +316,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         [Required]
         public CalendarDefinition Calendar { get; set; }
-        
+
         public string DataJson { get; set; }
 
         [NotMapped]
@@ -401,7 +404,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public string SubsidiaryLocationDescription => SubsidiaryLocation == null
             ? null
             : (DisplayConsts.SubsidiaryLocationTypeNames[SubsidiaryLocationType] + " " + SubsidiaryLocation + " " +
-              SubsidiaryLocationName).Trim();
+               SubsidiaryLocationName).Trim();
 
         [NotMapped]
         public List<TrainOperation> TrainOperations => GetAttributeEnumList<TrainOperation>(Data, AttribTrainOperations);

@@ -24,13 +24,14 @@ namespace KdyPojedeVlak
             CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        private static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>();
 
+        /*
         private static void TestMerge<T>(params List<T>[] lists)
         {
             var merged = ListMerger.MergeLists(lists.ToList());
@@ -59,7 +60,6 @@ namespace KdyPojedeVlak
         {
             return items.ToList();
         }
-
 
         private static void TestSerialize()
         {
@@ -96,5 +96,6 @@ namespace KdyPojedeVlak
                 }
             });
         }
+        */
     }
 }

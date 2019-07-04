@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
-using Newtonsoft.Json.Serialization;
 
 namespace KdyPojedeVlak.Engine.Algorithms
 {
@@ -29,7 +26,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
             SaturdayNonHoliday
         }
 
-        private static readonly string[] monthToRoman = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"};
+        private static readonly string[] monthToRoman = { "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII" };
 
         private static readonly HashSet<DateTime> holidays = new HashSet<DateTime>
         {
@@ -53,26 +50,26 @@ namespace KdyPojedeVlak.Engine.Algorithms
 
         private static readonly Dictionary<DayClass, Predicate<DateTime>> classifiers = new Dictionary<DayClass, Predicate<DateTime>>(7)
         {
-            {DayClass.Monday, MakeDayClassifier(DayOfWeek.Monday)},
-            {DayClass.Tuesday, MakeDayClassifier(DayOfWeek.Tuesday)},
-            {DayClass.Wednesday, MakeDayClassifier(DayOfWeek.Wednesday)},
-            {DayClass.Thursday, MakeDayClassifier(DayOfWeek.Thursday)},
-            {DayClass.Friday, MakeDayClassifier(DayOfWeek.Friday)},
-            {DayClass.Saturday, MakeDayClassifier(DayOfWeek.Saturday)},
-            {DayClass.Sunday, MakeDayClassifier(DayOfWeek.Sunday)},
+            { DayClass.Monday, MakeDayClassifier(DayOfWeek.Monday) },
+            { DayClass.Tuesday, MakeDayClassifier(DayOfWeek.Tuesday) },
+            { DayClass.Wednesday, MakeDayClassifier(DayOfWeek.Wednesday) },
+            { DayClass.Thursday, MakeDayClassifier(DayOfWeek.Thursday) },
+            { DayClass.Friday, MakeDayClassifier(DayOfWeek.Friday) },
+            { DayClass.Saturday, MakeDayClassifier(DayOfWeek.Saturday) },
+            { DayClass.Sunday, MakeDayClassifier(DayOfWeek.Sunday) },
 
-            {DayClass.All, _ => true},
-            {DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt)},
-            {DayClass.Workday, dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt)},
-            {DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt)},
-            {DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt)},
-            {DayClass.NonSaturdayHoliday, dt => dt.DayOfWeek != DayOfWeek.Saturday && holidays.Contains(dt)},
+            { DayClass.All, _ => true },
+            { DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt) },
+            { DayClass.Workday, dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt) },
+            { DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt) },
+            { DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt) },
+            { DayClass.NonSaturdayHoliday, dt => dt.DayOfWeek != DayOfWeek.Saturday && holidays.Contains(dt) },
         };
 
         private class ClassPresence
         {
-            public SortedSet<DateTime> YesDates = new SortedSet<DateTime>();
-            public SortedSet<DateTime> NoDates = new SortedSet<DateTime>();
+            public readonly SortedSet<DateTime> YesDates = new SortedSet<DateTime>();
+            public readonly SortedSet<DateTime> NoDates = new SortedSet<DateTime>();
         }
 
         private class NamingResult

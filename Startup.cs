@@ -19,7 +19,6 @@ namespace KdyPojedeVlak
     public class Startup
     {
         private static readonly bool RecreateDatabase = false;
-        private static readonly bool ImportFiles = true;
         private static readonly bool RenameAllCalendars = false;
 
         public Startup(IHostingEnvironment env)
@@ -84,6 +83,8 @@ namespace KdyPojedeVlak
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
+            var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+
             Program.PointCodebook = new PointCodebook(@"App_Data");
             try
             {
@@ -92,46 +93,27 @@ namespace KdyPojedeVlak
             catch (Exception ex)
             {
                 DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex.Message);
-            }
-
-            Dictionary<string, long> availableDataFiles;
-            try
-            {
-                var scheduleVersionManager = new ScheduleVersionManager(@"App_Data\cisjrdata");
-                availableDataFiles = scheduleVersionManager.DownloadMissingFiles().Result;
-            }
-            catch (Exception ex)
-            {
-                DebugLog.LogProblem("Error downloading new schedule files: {0}", ex.Message);
                 throw;
             }
 
             try
             {
-                using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
-                {
-                    using var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+                using var serviceScope = serviceScopeFactory.CreateScope();
+                using var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
 
-                    if (RecreateDatabase) context.Database.EnsureDeleted();
-                    context.Database.EnsureCreated();
+                if (RecreateDatabase) context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
 
-                    if (ImportFiles)
-                    {
-                        context.ChangeTracker.AutoDetectChangesEnabled = false;
-                        DjrSchedule.ImportNewFiles(context, availableDataFiles);
-                        context.ChangeTracker.AutoDetectChangesEnabled = true;
-                    }
-
-                    if (RenameAllCalendars) DjrSchedule.RenameAllCalendars(context);
-
-                    context.SaveChanges();
-                }
+                if (RenameAllCalendars) DjrSchedule.RenameAllCalendars(context);
+                context.SaveChanges();
             }
             catch (Exception ex)
             {
-                DebugLog.LogProblem("Error loading schedule: {0}", ex.Message);
+                DebugLog.LogProblem("Error initializing database: {0}", ex.Message);
                 throw;
             }
+
+            UpdateManager.Initialize(@"App_Data\cisjrdata", serviceScopeFactory);
         }
     }
 }

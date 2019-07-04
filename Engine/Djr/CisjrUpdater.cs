@@ -1,37 +1,25 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using KdyPojedeVlak.Engine.Djr;
 using Newtonsoft.Json;
 
-namespace KdyPojedeVlak.Engine
+namespace KdyPojedeVlak.Engine.Djr
 {
-    public class ScheduleVersionManager
+    public static class CisjrUpdater
     {
-        private const string dataDirectoryPrefix = "data-";
         private const string dataFilePattern = "*.zip";
-        private const string metadataNameFormat = "{0}._info";
         private const string updateStatusFileName = ".update_info.json";
         private const int MIN_UPDATE_FREQ_HRS = 8;
 
-        private readonly string basePath;
-
-        public ScheduleVersionManager(string basePath)
+        public static async Task<Dictionary<string, long>> DownloadMissingFiles(string basePath)
         {
-            this.basePath = basePath;
-        }
-
-        public async Task<Dictionary<string, long>> DownloadMissingFiles()
-        {
-            var dataFilesAvailable = GetDataFilesAvailable();
+            var dataFilesAvailable = GetDataFilesAvailable(basePath);
 
             // 2. check online if not too soon after last update
-            var lastUpdateDate = GetLastUpdateDate();
+            var lastUpdateDate = GetLastUpdateDate(basePath);
             if (lastUpdateDate <= DateTime.UtcNow.AddHours(-MIN_UPDATE_FREQ_HRS))
             {
                 var downloader = new DataDownloader();
@@ -69,7 +57,7 @@ namespace KdyPojedeVlak.Engine
                         DebugLog.LogDebugMsg("Downloaded {0} ({1} B: {2})", file.Key, size, hash);
                     }
 
-                    WriteLastUpdateDate(downloadTime);
+                    WriteLastUpdateDate(basePath, downloadTime);
                 }
                 finally
                 {
@@ -91,7 +79,7 @@ namespace KdyPojedeVlak.Engine
             return dataFilesAvailable;
         }
 
-        private Dictionary<string, long> GetDataFilesAvailable()
+        private static Dictionary<string, long> GetDataFilesAvailable(string basePath)
         {
             var result = new Dictionary<string, long>();
             foreach (var subdirectory in Directory.GetDirectories(basePath))
@@ -106,7 +94,7 @@ namespace KdyPojedeVlak.Engine
 
         private static string VersionStringToFileName(string versionString) => versionString.Replace('/', '_').Replace('\\', '_');
 
-        private DateTime GetLastUpdateDate()
+        private static DateTime GetLastUpdateDate(string basePath)
         {
             var updateStatusPath = Path.Combine(basePath, updateStatusFileName);
             if (!File.Exists(updateStatusPath)) return DateTime.MinValue;
@@ -116,40 +104,12 @@ namespace KdyPojedeVlak.Engine
             return data.LastUpdate;
         }
 
-        private void WriteLastUpdateDate(DateTime date)
+        private static void WriteLastUpdateDate(string basePath, DateTime date)
         {
-            var data = new UpdateStatusData {LastUpdate = date};
+            var data = new UpdateStatusData { LastUpdate = date };
             var json = JsonConvert.SerializeObject(data);
             var updateStatusPath = Path.Combine(basePath, updateStatusFileName);
             File.WriteAllText(updateStatusPath, json);
-        }
-
-        private string GetCurrentNewestVersion()
-        {
-            var newestDirectory = Directory.EnumerateDirectories(basePath, dataDirectoryPrefix + "*").OrderByDescending(n => n).FirstOrDefault();
-            return newestDirectory == null ? null : Path.GetFileName(newestDirectory).Substring(dataDirectoryPrefix.Length);
-        }
-
-        private void ExtractZip(string zipName, string destinationDir)
-        {
-            using (var stream = new FileStream(zipName, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                using (var zip = new ZipArchive(stream, ZipArchiveMode.Read, true, Encoding.ASCII))
-                {
-                    zip.ExtractToDirectory(destinationDir);
-                }
-            }
-        }
-
-        private void WriteMetadata(string filename, string version, DateTime downloadTime, string zipHash, long zipSize)
-        {
-            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.Read))
-            {
-                using (var writer = new StreamWriter(stream, Encoding.UTF8))
-                {
-                    writer.WriteLine("{{\"version\":\"0\",\"timestamp\":\"{0}\",\"downloaded\":\"{1:o}\",\"zipsize\":\"{2}\",\"ziphash\":\"{3}\"}}", version, downloadTime, zipSize, zipHash);
-                }
-            }
         }
 
         private class UpdateStatusData
