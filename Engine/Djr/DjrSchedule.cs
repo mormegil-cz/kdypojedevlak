@@ -104,6 +104,8 @@ namespace KdyPojedeVlak.Engine.Djr
                 dbModelContext.SaveChanges();
 
                 transaction.Commit();
+
+                ScheduleVersionInfo.ReportFileImported(creationDate);
             }
 
             DebugLog.LogDebugMsg("File {0} imported successfully", fileName);

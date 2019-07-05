@@ -1,22 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Xml.Serialization;
-using KdyPojedeVlak.Engine;
-using KdyPojedeVlak.Engine.Algorithms;
-using KdyPojedeVlak.Engine.Djr;
-using KdyPojedeVlak.Engine.Djr.DjrXmlModel;
+﻿using System.IO;
 using KdyPojedeVlak.Engine.SR70;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace KdyPojedeVlak
 {
     public class Program
     {
         // TODO: Dependency injection
-        public static ScheduleVersionInfo ScheduleVersionInfo;
         public static PointCodebook PointCodebook;
 
         public static void Main(string[] args)

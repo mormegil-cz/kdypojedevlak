@@ -1,4 +1,5 @@
-﻿@model KdyPojedeVlak.Models.VersionInformation
+﻿@using System.Globalization
+@model KdyPojedeVlak.Models.VersionInformation
 @{
     ViewData["Title"] = "O projektu";
 }
@@ -12,10 +13,8 @@
     <li>Tento projekt také používá data z&nbsp;projektu <a href="https://www.openstreetmap.org/">OpenStreetMap</a>, která jsou dostupná za podmínek <a href="https://opendatacommons.org/licenses/odbl/summary/">licence ODbL</a>, © přispěvatelé OpenStreetMap.</li>
 </ul>
 
-@*
 <h4>Aktualizace dat</h4>
 <ul>
     <li>Nejnovější data: @Model.NewestData (naimportována @Model.LatestImport)</li>
-    <li>Poslední kontrola aktualizací: @Model.LastDownload</li>
+    <li>Poslední kontrola aktualizací: @(Model.LastDownload.Year <= 1 ? "—" : Model.LastDownload.ToString(CultureInfo.CurrentCulture))</li>
 </ul>
-*@

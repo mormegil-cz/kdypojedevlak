@@ -19,7 +19,7 @@ namespace KdyPojedeVlak
     {
         private static readonly bool RecreateDatabase = false;
         private static readonly bool EnableUpdates = false;
-        private static readonly bool RenameAllCalendars = true;
+        private static readonly bool RenameAllCalendars = false;
 
         public Startup(IHostingEnvironment env)
         {
@@ -99,15 +99,18 @@ namespace KdyPojedeVlak
             try
             {
                 using var serviceScope = serviceScopeFactory.CreateScope();
-                using var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+                using var dbModelContext = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
 
-                if (RecreateDatabase) context.Database.EnsureDeleted();
-                context.Database.EnsureCreated();
+                if (RecreateDatabase) dbModelContext.Database.EnsureDeleted();
+                dbModelContext.Database.EnsureCreated();
 
-                if (RenameAllCalendars) DjrSchedule.RenameAllCalendars(context);
-                context.SaveChanges();
+                ScheduleVersionInfo.Initialize(dbModelContext);
 
-                context.Database.ExecuteSqlCommand("PRAGMA optimize");
+                if (RenameAllCalendars) DjrSchedule.RenameAllCalendars(dbModelContext);
+
+                dbModelContext.SaveChanges();
+
+                dbModelContext.Database.ExecuteSqlCommand("PRAGMA optimize");
             }
             catch (Exception ex)
             {

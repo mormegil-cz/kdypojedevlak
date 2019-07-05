@@ -18,8 +18,9 @@ namespace KdyPojedeVlak.Engine.Djr
         {
             var dataFilesAvailable = GetDataFilesAvailable(basePath);
 
-            // 2. check online if not too soon after last update
+            // check online if not too soon after last update
             var lastUpdateDate = GetLastUpdateDate(basePath);
+            ScheduleVersionInfo.ReportLastDownload(lastUpdateDate);
             if (lastUpdateDate <= DateTime.UtcNow.AddHours(-MIN_UPDATE_FREQ_HRS))
             {
                 var downloader = new DataDownloader();
@@ -58,6 +59,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     }
 
                     WriteLastUpdateDate(basePath, downloadTime);
+                    ScheduleVersionInfo.ReportDownloadChecked();
                 }
                 finally
                 {
@@ -72,10 +74,6 @@ namespace KdyPojedeVlak.Engine.Djr
                 }
             }
 
-//            var currentNewestVersionClean = VersionStringToFileName(currentNewestVersion);
-//            var pathToDir = dataDirectoryPrefix + currentNewestVersionClean;
-//            var dataPath = downloader.ShouldExtractZip ? pathToDir : Path.Combine(pathToDir, $"{currentNewestVersionClean}.zip");
-//            return new ScheduleVersionInfo(currentNewestVersion, Path.Combine(basePath, dataPath), lastUpdateDate);
             return dataFilesAvailable;
         }
 
@@ -91,8 +89,6 @@ namespace KdyPojedeVlak.Engine.Djr
             }
             return result;
         }
-
-        private static string VersionStringToFileName(string versionString) => versionString.Replace('/', '_').Replace('\\', '_');
 
         private static DateTime GetLastUpdateDate(string basePath)
         {

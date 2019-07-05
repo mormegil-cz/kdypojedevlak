@@ -24,8 +24,6 @@ namespace KdyPojedeVlak.Engine
 
         private volatile bool terminated;
 
-        private DateTime lastUpdateTimestamp;
-
         public static void Initialize(string basePath, IServiceScopeFactory serviceScopeFactory)
         {
             instance = new UpdateManager(basePath, serviceScopeFactory);

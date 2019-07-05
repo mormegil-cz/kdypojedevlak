@@ -1,25 +1,63 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+
+using System;
+using System.Linq;
+using KdyPojedeVlak.Engine.DbStorage;
+using KdyPojedeVlak.Models;
 
 namespace KdyPojedeVlak.Engine
 {
-    public class ScheduleVersionInfo
+    public static class ScheduleVersionInfo
     {
-        public string CurrentVersion { get; }
-        public string CurrentPath { get; }
-        public DateTime LastUpdateDate { get; }
+        private static DateTime lastDownload;
+        private static DateTime latestImport;
+        private static DateTime newestData;
 
-        public List<string> Files { get; }
+        private static readonly object syncObj = new object();
 
-        public HashSet<string> AlreadyImported { get; }
-
-        public ScheduleVersionInfo(string currentVersion, string currentPath, DateTime lastUpdateDate, List<string> files, HashSet<string> alreadyImported)
+        public static void Initialize(DbModelContext dbModelContext)
         {
-            CurrentVersion = currentVersion;
-            CurrentPath = currentPath;
-            LastUpdateDate = lastUpdateDate;
-            Files = files;
-            AlreadyImported = alreadyImported;
+            lock (syncObj)
+            {
+                latestImport = dbModelContext.ImportedFiles.Max(f => f.ImportTime);
+                newestData = dbModelContext.ImportedFiles.Max(f => f.CreationDate);
+            }
+        }
+
+        public static void ReportLastDownload(DateTime lastDownloadTimestamp)
+        {
+            lock (syncObj)
+            {
+                if (lastDownloadTimestamp > lastDownload) lastDownload = lastDownloadTimestamp;
+            }
+        }
+
+        public static void ReportDownloadChecked()
+        {
+            lock (syncObj)
+            {
+                lastDownload = DateTime.UtcNow;
+            }
+        }
+
+        public static void ReportFileImported(DateTime dataTimestamp)
+        {
+            lock (syncObj)
+            {
+                latestImport = DateTime.UtcNow;
+                if (dataTimestamp > newestData) newestData = dataTimestamp;
+            }
+        }
+
+        public static VersionInformation CurrentVersionInformation
+        {
+            get
+            {
+                lock (syncObj)
+                {
+                    return new VersionInformation(lastDownload, latestImport, newestData);
+                }
+            }
         }
     }
 }
