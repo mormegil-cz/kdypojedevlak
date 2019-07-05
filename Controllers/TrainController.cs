@@ -30,17 +30,30 @@ namespace KdyPojedeVlak.Controllers
             if (String.IsNullOrEmpty(search)) return View();
 
             var parsed = reTrainNumber.Match(search);
-            if (!parsed.Success) return View((object) "Nesmyslné zadání. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod.");
-            var id = parsed.Groups["id"].Value;
-            if (String.IsNullOrEmpty(id)) return View((object) "Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod.");
-
-            if (dbModelContext.Trains.Any(t => t.Number == id))
+            if (parsed.Success)
             {
-                return RedirectToAction("Details", new {id});
+                var id = parsed.Groups["id"].Value;
+
+                if (dbModelContext.Trains.Any(t => t.Number == id))
+                {
+                    return RedirectToAction("Details", new {id});
+                }
+                else
+                {
+                    return View((object) String.Format("Vlak č. {0} nebyl nalezen.", id));
+                }
             }
             else
             {
-                return View((object) String.Format("Vlak č. {0} nebyl nalezen.", id));
+                var trainByName = dbModelContext.TrainTimetables.Include(tt => tt.Train).FirstOrDefault(tt => tt.Name == search);
+                if (trainByName != null)
+                {
+                    return RedirectToAction("Details", new {id = trainByName.TrainNumber});
+                }
+                else
+                {
+                    return View((object) "Vlak nebyl nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
+                }
             }
         }
 
