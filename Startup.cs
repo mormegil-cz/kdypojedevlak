@@ -106,6 +106,8 @@ namespace KdyPojedeVlak
 
                 if (RenameAllCalendars) DjrSchedule.RenameAllCalendars(context);
                 context.SaveChanges();
+
+                context.Database.ExecuteSqlCommand("PRAGMA optimize");
             }
             catch (Exception ex)
             {

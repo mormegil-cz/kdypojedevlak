@@ -89,9 +89,16 @@ namespace KdyPojedeVlak.Engine.Algorithms
 
         private class NamingResult
         {
-            public string Name;
-            public SortedSet<DateTime> ExceptionalGo;
-            public SortedSet<DateTime> ExceptionalNoGo;
+            public readonly string Name;
+            public readonly SortedSet<DateTime> ExceptionalGo;
+            public readonly SortedSet<DateTime> ExceptionalNoGo;
+
+            public NamingResult(string name, SortedSet<DateTime> exceptionalGo, SortedSet<DateTime> exceptionalNoGo)
+            {
+                this.Name = name;
+                this.ExceptionalGo = exceptionalGo;
+                this.ExceptionalNoGo = exceptionalNoGo;
+            }
         }
 
         private static readonly List<Func<Dictionary<DayClass, ClassPresence>, NamingResult>> namingStrategies = new List<Func<Dictionary<DayClass, ClassPresence>, NamingResult>>
@@ -124,48 +131,42 @@ namespace KdyPojedeVlak.Engine.Algorithms
                 }
             }
 
-            return new NamingResult
-            {
-                Name = resultName.ToString(),
-                ExceptionalGo = exceptionalGo,
-                ExceptionalNoGo = exceptionalNoGo
-            };
+            return new NamingResult(
+                resultName.ToString(),
+                exceptionalGo,
+                exceptionalNoGo
+            );
         }
 
-        private static NamingResult EverydayStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult
-        {
-            Name = "denně",
-            ExceptionalGo = Sets<DateTime>.EmptySortedSet,
-            ExceptionalNoGo = classPresences[DayClass.All].NoDates
-        };
+        private static NamingResult EverydayStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+            "denně",
+            Sets<DateTime>.EmptySortedSet,
+            classPresences[DayClass.All].NoDates
+        );
 
-        private static NamingResult WorkdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult
-        {
-            Name = "⚒\uFE0E",
-            ExceptionalGo = new SortedSet<DateTime>(classPresences[DayClass.Holiday].YesDates.Concat(classPresences[DayClass.Saturday].YesDates)),
-            ExceptionalNoGo = classPresences[DayClass.Workday].NoDates
-        };
+        private static NamingResult WorkdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+            "⚒\uFE0E",
+            new SortedSet<DateTime>(classPresences[DayClass.Holiday].YesDates.Concat(classPresences[DayClass.Saturday].YesDates)),
+            classPresences[DayClass.Workday].NoDates
+        );
 
-        private static NamingResult WorkdaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult
-        {
-            Name = "⚒\uFE0E⑥",
-            ExceptionalGo = new SortedSet<DateTime>(classPresences[DayClass.Sunday].YesDates.Concat(classPresences[DayClass.NonSaturdayHoliday].YesDates)),
-            ExceptionalNoGo = new SortedSet<DateTime>(classPresences[DayClass.Workday].NoDates.Concat(classPresences[DayClass.Saturday].NoDates))
-        };
+        private static NamingResult WorkdaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+            "⚒\uFE0E⑥",
+            new SortedSet<DateTime>(classPresences[DayClass.Sunday].YesDates.Concat(classPresences[DayClass.NonSaturdayHoliday].YesDates)),
+            new SortedSet<DateTime>(classPresences[DayClass.Workday].NoDates.Concat(classPresences[DayClass.Saturday].NoDates))
+        );
 
-        private static NamingResult HolidaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult
-        {
-            Name = "✝\uFE0E",
-            ExceptionalGo = new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates.Concat(classPresences[DayClass.SaturdayNonHoliday].YesDates)),
-            ExceptionalNoGo = new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates)
-        };
+        private static NamingResult HolidaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+            "✝\uFE0E",
+            new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates.Concat(classPresences[DayClass.SaturdayNonHoliday].YesDates)),
+            new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates)
+        );
 
-        private static NamingResult HolidaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult
-        {
-            Name = "✝\uFE0E⑥",
-            ExceptionalGo = new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates),
-            ExceptionalNoGo = new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates.Concat(classPresences[DayClass.SaturdayNonHoliday].NoDates))
-        };
+        private static NamingResult HolidaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+            "✝\uFE0E⑥",
+            new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates),
+            new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates.Concat(classPresences[DayClass.SaturdayNonHoliday].NoDates))
+        );
 
         private static Predicate<DateTime> MakeDayClassifier(DayOfWeek dayOfWeek)
         {
@@ -243,7 +244,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
             Debug.Assert(firstGoDate != null);
             Debug.Assert(lastGoDate != null);
 
-            NamingResult bestNaming = null;
+            NamingResult? bestNaming = null;
             var bestScore = Int32.MaxValue;
             var bestSuspendedStart = false;
             foreach (var strategy in namingStrategies)

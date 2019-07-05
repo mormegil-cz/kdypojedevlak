@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using KdyPojedeVlak.Engine.DbStorage;
 using KdyPojedeVlak.Engine.Djr;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KdyPojedeVlak.Engine
@@ -24,7 +25,7 @@ namespace KdyPojedeVlak.Engine
         private volatile bool terminated;
 
         private DateTime lastUpdateTimestamp;
-        
+
         public static void Initialize(string basePath, IServiceScopeFactory serviceScopeFactory)
         {
             instance = new UpdateManager(basePath, serviceScopeFactory);
@@ -40,7 +41,7 @@ namespace KdyPojedeVlak.Engine
         {
             this.basePath = basePath;
             this.serviceScopeFactory = serviceScopeFactory;
-            thread = new Thread(Run) { IsBackground = true };
+            thread = new Thread(Run) {IsBackground = true};
         }
 
         private void DoStart()
@@ -87,6 +88,8 @@ namespace KdyPojedeVlak.Engine
                     DjrSchedule.ImportNewFiles(context, availableDataFiles);
 
                     context.SaveChanges();
+
+                    context.Database.ExecuteSqlCommand("PRAGMA optimize");
                 }
                 catch (Exception ex)
                 {
