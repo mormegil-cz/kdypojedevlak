@@ -1,8 +1,11 @@
-﻿@using KdyPojedeVlak.Engine
-@model Train
+﻿@using KdyPojedeVlak.Engine.Djr
+@using KdyPojedeVlak.Models
+@model KdyPojedeVlak.Models.TrainPlan
 @{
-    ViewData["Title"] = "Vlak " + Model.TrainType + " " + Model.TrainNumber + " " + Model.TrainName;
+    ViewData["Title"] = "Vlak " + DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] + " " + Model.Train.TrainNumber + " " + Model.Train.Name;
+    var pointCount = Model.Points.Count;
 
+    /*
     var mainCalendar = Model.Route.Aggregate(new Dictionary<TrainCalendar, int>(), (counters, point) =>
     {
         int count;
@@ -12,13 +15,12 @@
         return counters;
     }).Aggregate(new KeyValuePair<TrainCalendar, int>(null, 0), (max, calendar) => calendar.Value > max.Value ? calendar : max).Key;
     var pointCount = Model.Route.Count;
+    */
 }
 
-<h2>Vlak @Model.TrainType @Model.TrainNumber @Model.TrainName</h2>
-
+<h2>Vlak @DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] @Model.Train.TrainNumber @Model.Train.Name</h2>
 <div class="row">
     <div class="col-md-11">
-        <div>@mainCalendar.Description</div>
     </div>
     <div class="col-md-1">
         <div class="btn-group">
@@ -27,17 +29,17 @@
             </button>
             <ul class="dropdown-menu">
                 <li>
-                    <a href="http://www.zelpage.cz/razeni/16/vlaky/cd-@Model.TrainNumber">Řazení vlaku</a>
+                    <a href="http://www.zelpage.cz/razeni/@(DateTime.Now.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku (ŽelPage)</a>
                 </li>
                 <li>
-                    <a href="https://www.cd.cz/vlak/@Model.TrainNumber">Poloha vlaku</a>
+                    <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku (ČD)</a>
                 </li>
                 <li>
-                    <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.TrainNumber">Zpoždění vlaku</a>
+                    <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
                 </li>
                 <li role="separator" class="divider"></li>
                 <li>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new {id = Model.ID}))">Sdílet na Facebook</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.Train.TrainNumber }))">Sdílet na Facebook</a>
                 </li>
             </ul>
         </div>
@@ -49,29 +51,49 @@
     <tr>
         <th></th>
         <th>Bod</th>
-        <th>Příjezd</th>
-        <th>Odjezd</th>
-        <th></th>
+        @foreach (var variant in Model.Train.Variants)
+        {
+            <th scope="col" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()" colspan="3">@variant.Calendar.Description</th>
+        }
     </tr>
     </thead>
     <tbody>
     @for (var i = 0; i < pointCount; ++i)
     {
-        var point = Model.Route[i];
+        var point = Model.Points[i];
         var rowType = (i == 0 ? "-first" : "") + (i == pointCount - 1 ? "-last" : "");
-        <tr class="@((i == 0 || point.ScheduledArrival != null) && point.ScheduledDeparture != null ? "majorpoint" : "minorpoint")">
+        <tr class="@(Model.MajorPointFlags[i] ? "majorpoint" : "minorpoint")">
             <td class="point-type-col@(rowType)">
-                <span class="point-type-icon point-type-icon-@point.Point.Type@rowType"></span>
+                <span class="point-type-icon point-type-icon-@point.Type@rowType"></span>
             </td>
-            <td><span title="@point.Point.Name">@point.Point.LongName</span></td>
-            <td>@point.ScheduledArrival</td>
-            <td>@point.ScheduledDeparture</td>
             <td>
-                @if (point.Calendar != mainCalendar)
-                {
-                    <em>@point.Calendar.Description</em>
-                }
+                <span title="@point.ShortName">@point.Name</span>
             </td>
+            @foreach (var pointVariant in Model.VariantRoutingPoints[i])
+            {
+                if (pointVariant == null)
+                {
+                    <td></td>
+                    <td class="passthrough-col@(rowType)"></td>
+                    <td></td>
+                }
+                else
+                {
+                    <td class="time-col">@pointVariant.ArrivalTime</td>
+                    <td class="time-col">
+                        <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.DepartureTime</span>
+                    </td>
+                    <td class="operation-icons">
+                        @if (pointVariant.TrainOperations.Count > 0)
+                        {
+                            foreach (var operation in pointVariant.TrainOperations)
+                            {
+                                <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
+                            }
+                        }
+                    </td>
+                }
+            }
         </tr>
     }
     </tbody>

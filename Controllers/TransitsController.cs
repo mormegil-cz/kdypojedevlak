@@ -1,15 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KdyPojedeVlak.Engine;
+using KdyPojedeVlak.Engine.DbStorage;
 using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RoutingPoint = KdyPojedeVlak.Engine.DbStorage.RoutingPoint;
 
 namespace KdyPojedeVlak.Controllers
 {
     public class TransitsController : Controller
     {
         private static readonly IList<KeyValuePair<string, string>> emptyPointList = new KeyValuePair<string, string>[0];
+
+        private static readonly int[] intervals = {1, 3, 5, 10, 15, 30, 60, 120, 240, 300, 480, 720, 1440};
+        private const int GoodMinimum = 4;
+        private const int GoodEnough = 7;
+        private const int AbsoluteMaximum = 40;
+
+        private readonly DbModelContext dbModelContext;
+
+        public TransitsController(DbModelContext dbModelContext)
+        {
+            this.dbModelContext = dbModelContext;
+        }
 
         public IActionResult Index()
         {
@@ -20,13 +34,14 @@ namespace KdyPojedeVlak.Controllers
         {
             if (String.IsNullOrEmpty(search)) return View(emptyPointList);
 
-            // TODO: Proper (indexed) search
-            var searchResults = Program.Schedule.Points
-                .Where(p => p.Value.Name.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0 ||
-                            p.Value.LongName.IndexOf(search, StringComparison.CurrentCultureIgnoreCase) >= 0)
-                .Select(p => new KeyValuePair<string, string>(p.Key, p.Value.LongName))
+            // TODO: Fulltext search
+            var searchResults = dbModelContext.RoutingPoints.Where(p => p.Name.StartsWith(search))
+                .OrderBy(p => p.Name)
+                .Select(p => new {p.Code, p.Name})
                 .Take(100)
+                .Select(p => new KeyValuePair<string, string>(p.Code, p.Name))
                 .ToList();
+            // TODO: Proper model
             return View(searchResults.Count == 0 ? null : searchResults);
         }
 
@@ -37,35 +52,81 @@ namespace KdyPojedeVlak.Controllers
                 return RedirectToAction("ChoosePoint");
             }
 
-            RoutingPoint point;
-            if (!Program.Schedule.Points.TryGetValue(id, out point))
+            var point = dbModelContext.RoutingPoints
+                .Include(p => p.PassingTrains)
+                .ThenInclude(pt => pt.TrainTimetableVariant)
+                .ThenInclude(ttv => ttv.Calendar)
+                .Include(p => p.PassingTrains)
+                .ThenInclude(pt => pt.TrainTimetableVariant)
+                .ThenInclude(ttv => ttv.Timetable)
+                .ThenInclude(tt => tt.Train)
+                .Include(p => p.PassingTrains)
+                .ThenInclude(pt => pt.TrainTimetableVariant)
+                .ThenInclude(ttv => ttv.Points)
+                .ThenInclude(p => p.Point)
+                .SingleOrDefault(p => p.Code == id);
+
+            if (point == null)
             {
                 // TODO: Error message?
                 return NotFound();
             }
 
-            // TODO: dynamic selection of previous trains
             var now = at ?? DateTime.Now;
-            var start = now.AddMinutes(-15);
-            var nowTime = now.TimeOfDay;
-            var startTime = start.TimeOfDay;
-
-            var data = point.PassingTrains.Select(t => new {Day = 0, Train = t}).Concat(point.PassingTrains.Select(t => new {Day = 1, Train = t}))
-                .SkipWhile(p => p.Train.AnyScheduledTime < startTime)
-                .Where(p => CheckInCalendar(p.Train.Calendar, Program.Schedule.BitmapBaseDate, now.Date, p.Day + p.Train.AnyScheduledTime.Days))
-                .TakeWhile((pt, idx) => idx < 5 || (pt.Train.AnyScheduledTime < nowTime && pt.Day == 0));
-
-            return View(new NearestTransits(point, now, data.Select(t => t.Train)));
+            return View(new NearestTransits(point, now, GetTrainList(now, point), dbModelContext.GetNeighboringPoints(point)));
         }
 
-        private static bool CheckInCalendar(TrainCalendar calendar, DateTime baseDate, DateTime day, int dayOffset)
+        private List<Passage> GetTrainList(DateTime now, RoutingPoint point)
         {
-            if (calendar.ValidFrom > day) return false;
-            if (calendar.ValidTo.Year > 1 && calendar.ValidTo < day) return false;
+            var nowTime = now.TimeOfDay;
+            List<Passage> bestList = null;
+            bool bestOverMinimum = false;
+
+            for (int i = 0; i < intervals.Length; ++i)
+            {
+                var intervalWidth = intervals[i];
+                var startTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(-intervalWidth));
+                var endTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(intervals[i]));
+
+                var passingTrains = point.PassingTrains.AsEnumerable().OrderBy(p => p.AnyScheduledTimeOfDay).ToList();
+
+                var data = passingTrains
+                    .Select(t => (Day: 0, Train: t)).Concat(passingTrains.Select(t => (Day: 1, Train: t)))
+                    .SkipWhile(p => p.Day == 0 && p.Train.AnyScheduledTimeOfDay < startTime)
+                    .Where(p => CheckInCalendar(p.Train.TrainTimetableVariant.Calendar, now.Date, p.Day + (p.Train.AnyScheduledTime?.Days ?? 0)))
+                    .TakeWhile(pt => pt.Train.AnyScheduledTime?.Add(TimeSpan.FromDays(pt.Day)) < endTime)
+                    .Take(AbsoluteMaximum)
+                    .ToList();
+
+                if (data.Count == AbsoluteMaximum)
+                {
+                    // too many results…
+                    return bestOverMinimum ? bestList : data.Select(t => t.Train).ToList();
+                }
+
+                var futureTrainCount = data.Count(pt => pt.Day > 0 || pt.Train.AnyScheduledTimeOfDay >= nowTime);
+
+                bestList = data.Select(t => t.Train).ToList();
+
+                if (bestList.Count >= GoodEnough && futureTrainCount >= GoodEnough / 3)
+                {
+                    return bestList;
+                }
+
+                bestOverMinimum = bestList.Count >= GoodMinimum && futureTrainCount >= GoodMinimum / 3;
+            }
+
+            return bestList;
+        }
+
+        private static bool CheckInCalendar(CalendarDefinition calendar, DateTime day, int dayOffset)
+        {
+            if (calendar.StartDate > day) return false;
+            if (calendar.EndDate.Year > 1 && calendar.EndDate < day) return false;
             var bitmap = calendar.Bitmap;
             if (bitmap == null) return true;
 
-            var offset = (int) day.AddDays(-dayOffset).Subtract(baseDate).TotalDays;
+            var offset = (int) day.AddDays(-dayOffset).Subtract(calendar.StartDate).TotalDays;
             if (offset < 0 || offset >= bitmap.Length) return false;
             return bitmap[offset];
         }

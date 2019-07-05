@@ -1,8 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using KdyPojedeVlak.Engine;
+using KdyPojedeVlak.Engine.DbStorage;
+using KdyPojedeVlak.Engine.Djr;
+using KdyPojedeVlak.Engine.SR70;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,6 +17,10 @@ namespace KdyPojedeVlak
 {
     public class Startup
     {
+        private static readonly bool RecreateDatabase = false;
+        private static readonly bool EnableUpdates = false;
+        private static readonly bool RenameAllCalendars = true;
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -26,28 +36,45 @@ namespace KdyPojedeVlak
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
             // Add framework services.
-            services.AddMvc();
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddConfiguration(Configuration.GetSection("Logging"));
+                loggingBuilder.AddConsole();
+                loggingBuilder.AddDebug();
+            });
+
+            services.AddDbContext<DbModelContext>(
+                options => options.UseSqlite(Configuration.GetConnectionString("Database")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         [DebuggerNonUserCode]
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
 
             app.UseMvc(routes =>
             {
@@ -56,27 +83,39 @@ namespace KdyPojedeVlak
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
+            var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+
+            Program.PointCodebook = new PointCodebook(@"App_Data");
             try
             {
-                var scheduleVersionManager = new ScheduleVersionManager(@"App_Data");
-                Program.ScheduleVersionInfo = scheduleVersionManager.TryUpdate().Result;
+                Program.PointCodebook.Load();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine("Error updating schedule: {0}", ex.Message);
+                DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex.Message);
                 throw;
             }
 
-            Program.Schedule = new KangoSchedule(Program.ScheduleVersionInfo.CurrentPath);
             try
             {
-                Program.Schedule.Load();
+                using var serviceScope = serviceScopeFactory.CreateScope();
+                using var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+
+                if (RecreateDatabase) context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+
+                if (RenameAllCalendars) DjrSchedule.RenameAllCalendars(context);
+                context.SaveChanges();
+
+                context.Database.ExecuteSqlCommand("PRAGMA optimize");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine("Error loading schedule: {0}", ex.Message);
+                DebugLog.LogProblem("Error initializing database: {0}", ex.Message);
                 throw;
             }
+
+            if (EnableUpdates) UpdateManager.Initialize(@"App_Data\cisjrdata", serviceScopeFactory);
         }
     }
 }

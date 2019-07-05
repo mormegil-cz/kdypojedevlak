@@ -1,0 +1,9 @@
+[out:csv(::lat,::lon,"railway:ref","name")][timeout:50];
+{{geocodeArea:Czechia}}->.searchArea;
+(
+  node["railway"="station"]["railway:ref"](area.searchArea);
+  node["railway"="halt"]["railway:ref"](area.searchArea);
+);
+out body;
+>;
+out skel qt;

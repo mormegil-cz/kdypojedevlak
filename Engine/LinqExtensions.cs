@@ -15,7 +15,7 @@ namespace KdyPojedeVlak.Engine
                 if (destination.ContainsKey(key))
                 {
                     // WTF?
-                    Console.WriteLine($"Duplicate key '{key}' when preparing dictionary");
+                    DebugLog.LogProblem($"Duplicate key '{key}' when preparing dictionary");
                 }
                 else
                 {

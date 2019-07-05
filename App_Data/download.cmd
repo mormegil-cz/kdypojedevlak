@@ -1,1 +1,0 @@
-@wget ftp://ftp.cisjr.cz/draha/celostatni/*.zip
