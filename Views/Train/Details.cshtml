@@ -29,10 +29,10 @@
             </button>
             <ul class="dropdown-menu">
                 <li>
-                    <a href="http://www.zelpage.cz/razeni/@(DateTime.Now.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku</a>
+                    <a href="http://www.zelpage.cz/razeni/@(DateTime.Now.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku (ŽelPage)</a>
                 </li>
                 <li>
-                    <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku</a>
+                    <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku (ČD)</a>
                 </li>
                 <li>
                     <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
@@ -53,7 +53,7 @@
         <th>Bod</th>
         @foreach (var variant in Model.Train.Variants)
         {
-            <th scope="col" class="time-col" colspan="3">@variant.Calendar.Description</th>
+            <th scope="col" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()" colspan="3">@variant.Calendar.Description</th>
         }
     </tr>
     </thead>

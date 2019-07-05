@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -26,7 +28,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
             SaturdayNonHoliday
         }
 
-        private static readonly string[] monthToRoman = { "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII" };
+        private static readonly string[] monthToRoman = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"};
 
         private static readonly HashSet<DateTime> holidays = new HashSet<DateTime>
         {
@@ -45,25 +47,38 @@ namespace KdyPojedeVlak.Engine.Algorithms
             new DateTime(2018, 11, 17),
             new DateTime(2018, 12, 24),
             new DateTime(2018, 12, 25),
-            new DateTime(2018, 12, 26)
+            new DateTime(2018, 12, 26),
+            new DateTime(2019, 01, 01),
+            new DateTime(2019, 04, 19),
+            new DateTime(2019, 04, 22),
+            new DateTime(2019, 05, 01),
+            new DateTime(2019, 05, 08),
+            new DateTime(2019, 07, 05),
+            new DateTime(2019, 07, 06),
+            new DateTime(2019, 09, 28),
+            new DateTime(2019, 10, 28),
+            new DateTime(2019, 11, 17),
+            new DateTime(2019, 12, 24),
+            new DateTime(2019, 12, 25),
+            new DateTime(2019, 12, 26),
         };
 
         private static readonly Dictionary<DayClass, Predicate<DateTime>> classifiers = new Dictionary<DayClass, Predicate<DateTime>>(7)
         {
-            { DayClass.Monday, MakeDayClassifier(DayOfWeek.Monday) },
-            { DayClass.Tuesday, MakeDayClassifier(DayOfWeek.Tuesday) },
-            { DayClass.Wednesday, MakeDayClassifier(DayOfWeek.Wednesday) },
-            { DayClass.Thursday, MakeDayClassifier(DayOfWeek.Thursday) },
-            { DayClass.Friday, MakeDayClassifier(DayOfWeek.Friday) },
-            { DayClass.Saturday, MakeDayClassifier(DayOfWeek.Saturday) },
-            { DayClass.Sunday, MakeDayClassifier(DayOfWeek.Sunday) },
+            {DayClass.Monday, MakeDayClassifier(DayOfWeek.Monday)},
+            {DayClass.Tuesday, MakeDayClassifier(DayOfWeek.Tuesday)},
+            {DayClass.Wednesday, MakeDayClassifier(DayOfWeek.Wednesday)},
+            {DayClass.Thursday, MakeDayClassifier(DayOfWeek.Thursday)},
+            {DayClass.Friday, MakeDayClassifier(DayOfWeek.Friday)},
+            {DayClass.Saturday, MakeDayClassifier(DayOfWeek.Saturday)},
+            {DayClass.Sunday, MakeDayClassifier(DayOfWeek.Sunday)},
 
-            { DayClass.All, _ => true },
-            { DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt) },
-            { DayClass.Workday, dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt) },
-            { DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt) },
-            { DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt) },
-            { DayClass.NonSaturdayHoliday, dt => dt.DayOfWeek != DayOfWeek.Saturday && holidays.Contains(dt) },
+            {DayClass.All, _ => true},
+            {DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt)},
+            {DayClass.Workday, dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt)},
+            {DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt)},
+            {DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt)},
+            {DayClass.NonSaturdayHoliday, dt => dt.DayOfWeek != DayOfWeek.Saturday && holidays.Contains(dt)},
         };
 
         private class ClassPresence
@@ -108,6 +123,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
                     AddAll(exceptionalGo, presence.YesDates);
                 }
             }
+
             return new NamingResult
             {
                 Name = resultName.ToString(),
@@ -175,7 +191,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
                 return "jede pp";
             }
 
-            if (activeCount <= 2)
+            if (activeCount <= 5)
             {
                 return AppendListOfDays(new StringBuilder("jede "),
                     new SortedSet<DateTime>(
@@ -265,6 +281,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
             {
                 result.Append("jede ");
             }
+
             if (firstGoDate.GetValueOrDefault().Equals(lastGoDate.GetValueOrDefault()))
             {
                 result.Append(firstGoDate.GetValueOrDefault().ToShortDateString());
@@ -277,49 +294,57 @@ namespace KdyPojedeVlak.Engine.Algorithms
                     result.AppendFormat(" od {0:d} do {1:d}", firstGoDate, lastGoDate);
                 }
             }
+
             if (bestNaming.ExceptionalGo.Count > 0)
             {
                 if (bestNaming.Name.Length > 0)
                 {
                     result.Append(" a ");
                 }
+
                 AppendListOfDays(result, bestNaming.ExceptionalGo);
             }
+
             if (bestNaming.ExceptionalNoGo.Count > 0)
             {
                 result.Append(", nejede ");
                 AppendListOfDays(result, bestNaming.ExceptionalNoGo);
             }
+
             if (bestScore > 10)
             {
                 DebugLog.LogProblem("Suspicious calendar: " + result);
             }
+
             return result.ToString();
         }
 
         private static StringBuilder AppendListOfDays(StringBuilder result, SortedSet<DateTime> dates)
         {
             int lastMonth = -1;
-            foreach (var exception in dates)
+            // TODO: Day ranges
+            foreach (var date in dates)
             {
-                if (exception.Month != lastMonth && lastMonth > 0)
+                if (date.Month != lastMonth && lastMonth > 0)
                 {
-                    result.Append(' ');
+                    result.Append('\u00A0');
                     result.Append(monthToRoman[lastMonth]);
                     result.Append('.');
                 }
 
                 if (lastMonth > 0) result.Append(", ");
-                result.Append(exception.Day);
+                result.Append(date.Day);
                 result.Append(".");
-                lastMonth = exception.Month;
+                lastMonth = date.Month;
             }
+
             if (lastMonth > 0)
             {
-                result.Append(' ');
+                result.Append('\u00A0');
                 result.Append(monthToRoman[lastMonth]);
                 result.Append('.');
             }
+
             return result;
         }
     }

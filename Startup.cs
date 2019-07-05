@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.DbStorage;
@@ -19,7 +18,8 @@ namespace KdyPojedeVlak
     public class Startup
     {
         private static readonly bool RecreateDatabase = false;
-        private static readonly bool RenameAllCalendars = false;
+        private static readonly bool EnableUpdates = false;
+        private static readonly bool RenameAllCalendars = true;
 
         public Startup(IHostingEnvironment env)
         {
@@ -113,7 +113,7 @@ namespace KdyPojedeVlak
                 throw;
             }
 
-            UpdateManager.Initialize(@"App_Data\cisjrdata", serviceScopeFactory);
+            if (EnableUpdates) UpdateManager.Initialize(@"App_Data\cisjrdata", serviceScopeFactory);
         }
     }
 }
