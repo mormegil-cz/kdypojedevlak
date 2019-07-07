@@ -73,7 +73,8 @@ namespace KdyPojedeVlak.Controllers
             }
 
             var now = at ?? DateTime.Now;
-            return View(new NearestTransits(point, now, GetTrainList(now, point), dbModelContext.GetNeighboringPoints(point)));
+            var neighbors = dbModelContext.GetNeighboringPoints(point);
+            return View(new NearestTransits(point, now, GetTrainList(now, point), neighbors, GetNearPoints(point, neighbors)));
         }
 
         private List<Passage> GetTrainList(DateTime now, RoutingPoint point)
@@ -129,6 +130,20 @@ namespace KdyPojedeVlak.Controllers
             var offset = (int) day.AddDays(-dayOffset).Subtract(calendar.StartDate).TotalDays;
             if (offset < 0 || offset >= bitmap.Length) return false;
             return bitmap[offset];
+        }
+
+        private List<RoutingPoint> GetNearPoints(RoutingPoint fromPoint, HashSet<RoutingPoint> neighbors)
+        {
+            if (fromPoint.Longitude == null) return null;
+            var neighborCodes = neighbors.Select(p => p.Code).ToHashSet();
+            neighborCodes.Add(fromPoint.Code);
+            var nearestPoints = Program.PointCodebook.FindNearest(fromPoint.Latitude.GetValueOrDefault(), fromPoint.Longitude.GetValueOrDefault(), 6);
+            return nearestPoints
+                .Select(np => np.FullIdentifier)
+                .Where(id => !neighborCodes.Contains(id))
+                .Select(id => dbModelContext.RoutingPoints.SingleOrDefault(rp => rp.Code == id))
+                .Where(p => p != null)
+                .ToList();
         }
     }
 }

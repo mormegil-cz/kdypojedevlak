@@ -10,6 +10,8 @@ namespace KdyPojedeVlak.Engine.SR70
         public PointType Type { get; set; }
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
+
+        public string FullIdentifier => "CZ:" + ID.Substring(0, ID.Length - 1);
     }
 
     public enum PointType

@@ -113,9 +113,9 @@ namespace KdyPojedeVlak.Engine.SR70
             return result;
         }
 
-        public List<PointCodebookEntry> FindNearest(float latitude, float longitude)
+        public List<PointCodebookEntry> FindNearest(float latitude, float longitude, int neighbors)
         {
-            return tree.NearestNeighbors(new[] {latitude, longitude}, 5).Select(point => Find(point.Item2)).Where(x => x != null).ToList();
+            return tree.NearestNeighbors(new[] {latitude, longitude}, neighbors).Select(point => Find(point.Item2)).Where(x => x != null).ToList();
         }
 
         private static PointType ParsePointType(string typeStr)
