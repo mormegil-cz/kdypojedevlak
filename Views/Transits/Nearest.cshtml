@@ -22,7 +22,7 @@
                     var lat = Model.Point.Latitude.GetValueOrDefault().ToString("F5", CultureInfo.InvariantCulture);
                     var lon = Model.Point.Longitude.GetValueOrDefault().ToString("F5", CultureInfo.InvariantCulture);
                     <li>
-                        <a href="https://www.openstreetmap.org/?mlat=@lat&mlon=@lon#map=15/@lat/@lon">Poloha stanice</a>
+                        <a href="https://www.openstreetmap.org/?mlat=@lat&mlon=@lon#map=15/@lat/@lon">Poloha tohoto místa</a>
                     </li>
                 }
                 @if (Model.Point.CountryCodeFromId == "CZ")

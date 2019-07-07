@@ -39,7 +39,7 @@
                 </li>
                 <li role="separator" class="divider"></li>
                 <li>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.Train.TrainNumber }))">Sdílet na Facebook</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Details", new {id = Model.Train.TrainNumber}))">Sdílet na Facebook</a>
                 </li>
             </ul>
         </div>
@@ -67,7 +67,7 @@
                 <span class="point-type-icon point-type-icon-@point.Type@rowType"></span>
             </td>
             <td>
-                <span title="@point.ShortName">@point.Name</span>
+                @Html.ActionLink(point.Name, "Nearest", "Transits", new {id = point.Code}, new {@class = "silent-link", title = point.ShortName})
             </td>
             @foreach (var pointVariant in Model.VariantRoutingPoints[i])
             {

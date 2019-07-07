@@ -29,6 +29,10 @@ textarea {
     color: gray;
 }
 
+a.silent-link {
+    color: black;
+}
+
 .point-type-col {
     text-align: center;
     background: repeat-y center url("../images/point-empty.png");
