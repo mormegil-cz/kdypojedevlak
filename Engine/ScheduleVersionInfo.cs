@@ -12,6 +12,7 @@ namespace KdyPojedeVlak.Engine
         private static DateTime lastDownload;
         private static DateTime latestImport;
         private static DateTime newestData;
+        private static string newestTrainId;
 
         private static readonly object syncObj = new object();
 
@@ -40,12 +41,16 @@ namespace KdyPojedeVlak.Engine
             }
         }
 
-        public static void ReportFileImported(DateTime dataTimestamp)
+        public static void ReportFileImported(DateTime dataTimestamp, string trainId)
         {
             lock (syncObj)
             {
                 latestImport = DateTime.UtcNow;
-                if (dataTimestamp > newestData) newestData = dataTimestamp;
+                if (dataTimestamp > newestData)
+                {
+                    newestData = dataTimestamp;
+                    newestTrainId = trainId;
+                }
             }
         }
 
@@ -55,7 +60,7 @@ namespace KdyPojedeVlak.Engine
             {
                 lock (syncObj)
                 {
-                    return new VersionInformation(lastDownload, latestImport, newestData);
+                    return new VersionInformation(lastDownload, latestImport, newestData, newestTrainId);
                 }
             }
         }

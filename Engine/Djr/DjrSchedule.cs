@@ -91,7 +91,7 @@ namespace KdyPojedeVlak.Engine.Djr
                 {
                     message = LoadXmlFile(stream);
                 }
-                ImportToDatabase(message, dbModelContext);
+                var trainNumber = ImportToDatabase(message, dbModelContext);
                 var creationDate = message.CZPTTCreation;
 
                 dbModelContext.ImportedFiles.Add(new ImportedFile
@@ -105,7 +105,7 @@ namespace KdyPojedeVlak.Engine.Djr
 
                 transaction.Commit();
 
-                ScheduleVersionInfo.ReportFileImported(creationDate);
+                ScheduleVersionInfo.ReportFileImported(creationDate, trainNumber);
             }
 
             DebugLog.LogDebugMsg("File {0} imported successfully", fileName);
@@ -121,7 +121,7 @@ namespace KdyPojedeVlak.Engine.Djr
             return (CZPTTCISMessage) ser.Deserialize(stream);
         }
 
-        private static void ImportToDatabase(CZPTTCISMessage message, DbModelContext dbModelContext)
+        private static string ImportToDatabase(CZPTTCISMessage message, DbModelContext dbModelContext)
         {
             var identifiersPerType = message.Identifiers.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
             var trainId = identifiersPerType["TR"];
@@ -361,6 +361,8 @@ namespace KdyPojedeVlak.Engine.Djr
             }
 
             dbModelContext.SaveChanges();
+
+            return operationalTrainNumber;
         }
 
         private static readonly Dictionary<string, SubsidiaryLocationType> defSubsidiaryLocationType =

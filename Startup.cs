@@ -18,7 +18,7 @@ namespace KdyPojedeVlak
     public class Startup
     {
         private static readonly bool RecreateDatabase = false;
-        private static readonly bool EnableUpdates = false;
+        private static readonly bool EnableUpdates = true;
         private static readonly bool RenameAllCalendars = false;
 
         public Startup(IHostingEnvironment env)

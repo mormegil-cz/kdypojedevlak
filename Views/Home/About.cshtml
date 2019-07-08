@@ -15,6 +15,13 @@
 
 <h4>Aktualizace dat</h4>
 <ul>
-    <li>Nejnovější data: @Model.NewestData (naimportována @Model.LatestImport)</li>
+    @if (Model.NewestTrainId != null)
+    {
+        <li>Nejnovější data: @Html.ActionLink(Model.NewestData.ToString(CultureInfo.CurrentCulture), "Details", "Train", new {id = Model.NewestTrainId}) (naimportována @Model.LatestImport)</li>
+    }
+    else
+    {
+        <li>Nejnovější data: @Model.NewestData (naimportována @Model.LatestImport)</li>
+    }
     <li>Poslední kontrola aktualizací: @(Model.LastDownload.Year <= 1 ? "—" : Model.LastDownload.ToString(CultureInfo.CurrentCulture))</li>
 </ul>
