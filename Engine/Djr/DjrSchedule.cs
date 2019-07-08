@@ -207,6 +207,12 @@ namespace KdyPojedeVlak.Engine.Djr
                 DebugLog.LogProblem("Train {0} contains {1} categories", trainIdentifier, trainCategories.Count);
             }
 
+            var trafficTypes = message.CZPTTInformation.CZPTTLocation.Where(loc => loc.TrafficType != null).Select(loc => defTrafficType[loc.TrafficType]).ToHashSet();
+            if (trafficTypes.Count > 1)
+            {
+                DebugLog.LogProblem("Train {0} contains {1} traffic types", trainIdentifier, trafficTypes.Count);
+            }
+
             var trainTimetable = dbModelContext.TrainTimetables.Include(tt => tt.Variants).SingleOrDefault(tt => tt.Train == train && tt.TimetableYear == dbTimetableYear);
             if (trainTimetable == null)
             {
@@ -217,7 +223,7 @@ namespace KdyPojedeVlak.Engine.Djr
                     Name = trainName,
                     Data = new Dictionary<string, string>
                     {
-                        // { TrainTimetable.AttribTrafficType, train.TrafficType.ToString() },
+                        { TrainTimetable.AttribTrafficType, trafficTypes.FirstOrDefault().ToString() },
                         { TrainTimetable.AttribTrainCategory, trainCategories.FirstOrDefault().ToString() },
                         // { TrainTimetable.AttribTrainType, train.TrainType.ToString() },
                     },
@@ -383,6 +389,15 @@ namespace KdyPojedeVlak.Engine.Djr
                 { "05", TrainRoutePointType.Interchange },
                 { "06", TrainRoutePointType.HandoverAndInterchange },
                 { "07", TrainRoutePointType.StateBorder }
+            };
+
+        private static readonly Dictionary<string, TrafficType> defTrafficType =
+            new Dictionary<string, TrafficType>
+            {
+                { "11", TrafficType.Os },
+                { "C1", TrafficType.Ex },
+                { "C2", TrafficType.R },
+                { "C3", TrafficType.Sp }
             };
 
         private static readonly Dictionary<string, TrainCategory> defTrainCategory =

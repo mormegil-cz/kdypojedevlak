@@ -14,6 +14,7 @@
     <None Update="wwwroot\**\*;Views\**\*;Areas\**\Views">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
+    <None Remove="App_Data\cisjrdata\**" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
@@ -29,5 +30,17 @@
   </Target>
   <ItemGroup>
     <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.9.406" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="App_Data\cisjrdata\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="App_Data\cisjrdata\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="App_Data\cisjrdata\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="App_Data\cisjrdata\.update_info.json" />
   </ItemGroup>
 </Project>
