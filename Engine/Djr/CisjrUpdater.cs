@@ -12,7 +12,7 @@ namespace KdyPojedeVlak.Engine.Djr
     {
         private const string dataFilePattern = "*.zip";
         private const string updateStatusFileName = ".update_info.json";
-        private const int MIN_UPDATE_FREQ_HRS = 8;
+        private const int MIN_UPDATE_FREQ_HRS = 1;
 
         public static async Task<Dictionary<string, long>> DownloadMissingFiles(string basePath)
         {

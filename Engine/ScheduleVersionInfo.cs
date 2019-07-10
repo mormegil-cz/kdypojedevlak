@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using KdyPojedeVlak.Engine.DbStorage;
 using KdyPojedeVlak.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace KdyPojedeVlak.Engine
 {
@@ -20,8 +21,19 @@ namespace KdyPojedeVlak.Engine
         {
             lock (syncObj)
             {
-                latestImport = dbModelContext.ImportedFiles.Max(f => f.ImportTime);
-                newestData = dbModelContext.ImportedFiles.Max(f => f.CreationDate);
+                latestImport = dbModelContext.ImportedFiles.Max(f => (DateTime?) f.ImportTime) ?? DateTime.MinValue;
+                var newestFile = dbModelContext.ImportedFiles.OrderByDescending(f => f.CreationDate).FirstOrDefault();
+                if (newestFile == null)
+                {
+                    newestData = DateTime.MinValue;
+                    newestTrainId = null;
+                }
+                else
+                {
+                    newestData = newestFile.CreationDate;
+                    var newestTimetable = dbModelContext.TrainTimetables.Include(tt => tt.Train).FirstOrDefault(tt => tt.Variants.Exists(ttv => ttv.ImportedFrom == newestFile));
+                    newestTrainId = newestTimetable?.TrainNumber;
+                }
             }
         }
 

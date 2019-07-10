@@ -71,16 +71,16 @@ namespace KdyPojedeVlak.Engine.Djr
 
         private static void ImportDataFile(string fileName, long fileSize, DbModelContext dbModelContext, Func<Stream> fileReader)
         {
-            var importedFile = dbModelContext.ImportedFiles.SingleOrDefault(f => f.FileName == fileName);
-            if (importedFile != null && importedFile.FileSize == fileSize)
+            var alreadyImportedFile = dbModelContext.ImportedFiles.SingleOrDefault(f => f.FileName == fileName);
+            if (alreadyImportedFile != null && alreadyImportedFile.FileSize == fileSize)
             {
                 DebugLog.LogDebugMsg("File {0} already imported", fileName);
                 return;
             }
 
-            if (importedFile != null)
+            if (alreadyImportedFile != null)
             {
-                DebugLog.LogProblem("Imported file size mismatch: {0} imported as {1} B, now has {2} B", fileName, fileSize, importedFile.FileSize);
+                DebugLog.LogProblem("Imported file size mismatch: {0} imported as {1} B, now has {2} B", fileName, fileSize, alreadyImportedFile.FileSize);
                 return;
             }
 
@@ -91,16 +91,19 @@ namespace KdyPojedeVlak.Engine.Djr
                 {
                     message = LoadXmlFile(stream);
                 }
-                var trainNumber = ImportToDatabase(message, dbModelContext);
-                var creationDate = message.CZPTTCreation;
 
-                dbModelContext.ImportedFiles.Add(new ImportedFile
+                var creationDate = message.CZPTTCreation;
+                var importedFile = new ImportedFile
                 {
                     FileName = fileName,
                     FileSize = fileSize,
                     ImportTime = DateTime.Now,
                     CreationDate = creationDate
-                });
+                };
+                dbModelContext.ImportedFiles.Add(importedFile);
+
+                var trainNumber = ImportToDatabase(message, importedFile, dbModelContext);
+
                 dbModelContext.SaveChanges();
 
                 transaction.Commit();
@@ -121,7 +124,7 @@ namespace KdyPojedeVlak.Engine.Djr
             return (CZPTTCISMessage) ser.Deserialize(stream);
         }
 
-        private static string ImportToDatabase(CZPTTCISMessage message, DbModelContext dbModelContext)
+        private static string ImportToDatabase(CZPTTCISMessage message, ImportedFile importedFile, DbModelContext dbModelContext)
         {
             var identifiersPerType = message.Identifiers.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
             var trainId = identifiersPerType["TR"];
@@ -243,6 +246,7 @@ namespace KdyPojedeVlak.Engine.Djr
                 Calendar = dbCalendar,
                 PathVariantId = pathIdentifier,
                 TrainVariantId = trainIdentifier,
+                ImportedFrom = importedFile,
                 Data = new Dictionary<string, string>
                 {
                     // TODO: Train timetable variant data
@@ -397,7 +401,15 @@ namespace KdyPojedeVlak.Engine.Djr
                 { "11", TrafficType.Os },
                 { "C1", TrafficType.Ex },
                 { "C2", TrafficType.R },
-                { "C3", TrafficType.Sp }
+                { "C3", TrafficType.Sp },
+                { "C4", TrafficType.Sv },
+                { "C5", TrafficType.Nex },
+                { "C6", TrafficType.Pn },
+                { "C7", TrafficType.Mn },
+                { "C8", TrafficType.Lv },
+                { "C9", TrafficType.Vleč },
+                { "CA", TrafficType.Služ },
+                { "CB", TrafficType.Pom },
             };
 
         private static readonly Dictionary<string, TrainCategory> defTrainCategory =
@@ -462,6 +474,14 @@ namespace KdyPojedeVlak.Engine.Djr
         Ex,
         R,
         Sp,
+        Sv,
+        Nex,
+        Pn,
+        Mn,
+        Lv,
+        Vleč,
+        Služ,
+        Pom
     }
 
     public enum TrainCategory

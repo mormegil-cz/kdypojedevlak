@@ -13,11 +13,13 @@ namespace KdyPojedeVlak.Engine
     public class UpdateManager
     {
         private const int WakeupInterval = 60 * 60 * 1000;
-        private const int InitialDelay = 1 * 60 * 1000;
+        private const int InitialDelay = 1 * 60 * 100;
 
         private static UpdateManager? instance;
 
         private readonly string basePath;
+//        private readonly int initialDelay;
+//        private readonly int wakeupInterval;
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly Thread thread;
         private readonly object sync = new object();

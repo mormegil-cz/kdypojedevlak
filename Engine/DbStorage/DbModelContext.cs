@@ -294,6 +294,9 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         [NotMapped]
         public TrainCategory TrainCategory => GetAttributeEnum(Data, AttribTrainCategory, TrainCategory.Unknown);
+
+        [NotMapped]
+        public TrafficType TrafficType => GetAttributeEnum(Data, AttribTrafficType, TrafficType.Unknown);
     }
 
     /**
@@ -318,6 +321,8 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public CalendarDefinition Calendar { get; set; }
 
         public string DataJson { get; set; }
+
+        public ImportedFile ImportedFrom { get; set; }
 
         [NotMapped]
         // TODO: Decode data JSON
