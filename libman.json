@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "defaultDestination": "wwwroot/lib",
   "defaultProvider": "cdnjs",
+  "defaultDestination": "wwwroot/lib",
   "libraries": [
     {
       "library": "twitter-bootstrap@3.4.1",
@@ -18,6 +18,10 @@
     {
       "library": "jquery-validation-unobtrusive@3.2.11",
       "destination": "wwwroot/lib/jquery-validation-unobtrusive"
+    },
+    {
+      "library": "leaflet@1.5.1",
+      "destination": "wwwroot/lib/leaflet"
     }
   ]
 }

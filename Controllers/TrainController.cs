@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,6 +12,8 @@ using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RoutingPoint = KdyPojedeVlak.Engine.DbStorage.RoutingPoint;
 
 namespace KdyPojedeVlak.Controllers
@@ -25,7 +29,7 @@ namespace KdyPojedeVlak.Controllers
             this.dbModelContext = dbModelContext;
         }
 
-        public IActionResult Index(string search)
+        public IActionResult Index(string? search)
         {
             if (String.IsNullOrEmpty(search)) return View();
 
@@ -36,7 +40,7 @@ namespace KdyPojedeVlak.Controllers
 
                 if (dbModelContext.Trains.Any(t => t.Number == id))
                 {
-                    return RedirectToAction("Details", new {id});
+                    return RedirectToAction("Details", new { id });
                 }
                 else
                 {
@@ -48,7 +52,7 @@ namespace KdyPojedeVlak.Controllers
                 var trainByName = dbModelContext.TrainTimetables.Include(tt => tt.Train).FirstOrDefault(tt => tt.Name == search);
                 if (trainByName != null)
                 {
-                    return RedirectToAction("Details", new {id = trainByName.TrainNumber});
+                    return RedirectToAction("Details", new { id = trainByName.TrainNumber });
                 }
                 else
                 {
@@ -57,18 +61,31 @@ namespace KdyPojedeVlak.Controllers
             }
         }
 
-        public IActionResult Details(string id)
+        public IActionResult Details(string? id)
         {
-            // TODO: Year
+            var plan = BuildTrainPlan(id);
+            if (plan == null)
+            {
+                return RedirectToAction("Index", new { search = id });
+            }
+
+            return View(plan);
+        }
+
+        public IActionResult Map(string? id)
+        {
             var year = dbModelContext.TimetableYears.Single();
 
             id = id?.Trim();
-            if (String.IsNullOrEmpty(id)) return RedirectToAction("Index");
+            if (String.IsNullOrEmpty(id))
+            {
+                return RedirectToAction("Index");
+            }
 
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null)
             {
-                return RedirectToAction("Index", new {search = id});
+                return RedirectToAction("Index", new { search = id });
             }
 
             var timetable = dbModelContext.TrainTimetables
@@ -78,6 +95,56 @@ namespace KdyPojedeVlak.Controllers
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.Calendar)
                 .SingleOrDefault(t => t.Train == train && t.TimetableYear == year);
+            if (timetable == null)
+            {
+                return RedirectToAction("Index", new { search = id });
+            }
+
+            var pointsInVariants = timetable.Variants.Select(
+                variant => variant.Points
+                    .OrderBy(p => p.Order)
+                    .Select(point => point.Point)
+                    .ToList()
+            ).ToList();
+            
+            var points = new HashSet<RoutingPoint>(pointsInVariants.SelectMany(pl => pl.Where(p => p.Latitude != null))).Select(p => new JObject
+            {
+                new JProperty("coords", new JArray(p.Latitude, p.Longitude)),
+                new JProperty("title", p.Name)
+            }).Cast<object>().ToArray();
+            // TODO: Line titles
+            var lines = pointsInVariants.Select(ttv =>
+                new JArray(ttv.Where(p => p.Latitude != null).Select(p => new JArray(p.Latitude, p.Longitude)).Cast<object>().ToArray())
+            ).Cast<object>().ToArray();
+
+            JObject dataJson = new JObject
+            {
+                new JProperty("lines", new JArray(lines)),
+                new JProperty("points", new JArray(points))
+            };
+
+            return View(new TrainMapData(timetable, dataJson.ToString(Formatting.None)));
+        }
+
+        private TrainPlan? BuildTrainPlan(string? id)
+        {
+            // TODO: Timetable year
+            var year = dbModelContext.TimetableYears.Single();
+
+            id = id?.Trim();
+            if (String.IsNullOrEmpty(id)) return null;
+
+            var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
+            if (train == null) return null;
+
+            var timetable = dbModelContext.TrainTimetables
+                .Include(tt => tt.Variants)
+                .ThenInclude(ttv => ttv.Points)
+                .ThenInclude(p => p.Point)
+                .Include(tt => tt.Variants)
+                .ThenInclude(ttv => ttv.Calendar)
+                .SingleOrDefault(t => t.Train == train && t.TimetableYear == year);
+            if (timetable == null) return null;
 
             var pointsInVariants = timetable.Variants.Select(
                 variant => variant.Points
@@ -140,7 +207,7 @@ namespace KdyPojedeVlak.Controllers
             var pointCount = variantRoutingPoints.Count;
             var majorPointFlags = variantRoutingPoints.Select((point, idx) => idx == 0 || idx == pointCount - 1 || point.Any(variant => variant != null && variant.IsMajorPoint)).ToList();
 
-            return View(new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags));
+            return new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags);
         }
     }
 }

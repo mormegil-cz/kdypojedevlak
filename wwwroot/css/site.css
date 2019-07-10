@@ -178,3 +178,8 @@ a.silent-link {
     /* background: repeat-y center url("../images/passthrough.png"); */
     background: no-repeat top url("../images/passthrough.png");
 }
+
+#mapFrame {
+    width: 100%;
+    height: 800px;
+}
