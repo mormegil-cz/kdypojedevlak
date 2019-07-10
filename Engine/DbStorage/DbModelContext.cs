@@ -390,7 +390,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
         private Dictionary<string, string> data;
 
         [NotMapped]
-        public bool IsMajorPoint => DwellTime != null;
+        public bool IsMajorPoint => ArrivalTime != null || DwellTime != null;
 
         [NotMapped]
         public TimeSpan? AnyScheduledTime => ArrivalTime ?? DepartureTime;

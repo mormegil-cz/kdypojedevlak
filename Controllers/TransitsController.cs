@@ -58,6 +58,9 @@ namespace KdyPojedeVlak.Controllers
                 .ThenInclude(ttv => ttv.Calendar)
                 .Include(p => p.PassingTrains)
                 .ThenInclude(pt => pt.TrainTimetableVariant)
+                .ThenInclude(ttv => ttv.ImportedFrom)
+                .Include(p => p.PassingTrains)
+                .ThenInclude(pt => pt.TrainTimetableVariant)
                 .ThenInclude(ttv => ttv.Timetable)
                 .ThenInclude(tt => tt.Train)
                 .Include(p => p.PassingTrains)
@@ -83,7 +86,11 @@ namespace KdyPojedeVlak.Controllers
             List<Passage> bestList = null;
             bool bestOverMinimum = false;
 
-            var allPassingTrains = point.PassingTrains.AsEnumerable().OrderBy(p => p.AnyScheduledTimeOfDay).ToList();
+            var allPassingTrains = point.PassingTrains
+                .GroupBy(t => t.TrainTimetableVariant.TrainVariantId)
+                .Select(g => g.OrderByDescending(ttv => ttv.TrainTimetableVariant.ImportedFrom.CreationDate).First())
+                .AsEnumerable()
+                .OrderBy(p => p.AnyScheduledTimeOfDay).ToList();
             var passingTrains = allPassingTrains
                 .Select(t => (Day: 0, Train: t)).Concat(allPassingTrains.Select(t => (Day: 1, Train: t)))
                 .Where(p => CheckInCalendar(p.Train.TrainTimetableVariant.Calendar, now.Date, p.Day + (p.Train.AnyScheduledTime?.Days ?? 0)))
