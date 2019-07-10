@@ -13,7 +13,7 @@ namespace KdyPojedeVlak.Engine
         private static DateTime lastDownload;
         private static DateTime latestImport;
         private static DateTime newestData;
-        private static string newestTrainId;
+        private static string? newestTrainId;
 
         private static readonly object syncObj = new object();
 
