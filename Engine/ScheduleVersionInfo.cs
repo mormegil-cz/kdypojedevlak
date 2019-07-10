@@ -31,7 +31,7 @@ namespace KdyPojedeVlak.Engine
                 else
                 {
                     newestData = newestFile.CreationDate;
-                    var newestTimetable = dbModelContext.TrainTimetables.Include(tt => tt.Train).FirstOrDefault(tt => tt.Variants.Exists(ttv => ttv.ImportedFrom == newestFile));
+                    var newestTimetable = dbModelContext.TrainTimetables.Include(tt => tt.Train).FirstOrDefault(tt => tt.Variants.Any(ttv => ttv.ImportedFrom == newestFile));
                     newestTrainId = newestTimetable?.TrainNumber;
                 }
             }
