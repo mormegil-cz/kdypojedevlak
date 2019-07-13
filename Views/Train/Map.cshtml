@@ -1,4 +1,3 @@
-@using KdyPojedeVlak.Engine.Djr
 @using KdyPojedeVlak.Models
 @model KdyPojedeVlak.Models.TrainMapData
 @{
@@ -11,7 +10,7 @@
 @section scripts
 {
     <script src="~/lib/leaflet/leaflet.js"></script>
-    <script>$(function() {initMapFrame(@Html.Raw(Model.DataJson.Replace(@"</", @"\x3C/")))});</script>
+    <script>$(function() {window['kdyPojedeVlak'].initMapFrame(@Html.Raw(Model.DataJson.Replace(@"</", @"\x3C/")))});</script>
 }
 
 <h2 title="@DisplayConsts.TrafficTypeNames[Model.Train.TrafficType]">Vlak @DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] @Model.Train.TrainNumber @Model.Train.Name</h2>

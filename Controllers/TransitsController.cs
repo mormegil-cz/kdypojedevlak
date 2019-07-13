@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using KdyPojedeVlak.Engine.DbStorage;
@@ -30,7 +32,7 @@ namespace KdyPojedeVlak.Controllers
             return RedirectToAction("ChoosePoint");
         }
 
-        public IActionResult ChoosePoint(string search)
+        public IActionResult ChoosePoint(string? search)
         {
             if (String.IsNullOrEmpty(search)) return View(emptyPointList);
 
@@ -43,6 +45,16 @@ namespace KdyPojedeVlak.Controllers
                 .ToList();
             // TODO: Proper model
             return View(searchResults.Count == 0 ? null : searchResults);
+        }
+
+        public IActionResult GeoLocateMe(float? lat, float? lon, string? embed)
+        {
+            if (lat == null || lon == null) return RedirectToAction("ChoosePoint");
+
+            var nearestPoints = Program.PointCodebook.FindNearest(lat.GetValueOrDefault(), lon.GetValueOrDefault(), 10)
+                .Where(p => dbModelContext.RoutingPoints.SingleOrDefault(rp => rp.Code == p.FullIdentifier) != null)
+                .ToList();
+            return View(!String.IsNullOrEmpty(embed) ? "NearestPointsEmbed" : "NearestPoints", nearestPoints);
         }
 
         public IActionResult Nearest(string id, DateTime? at)

@@ -9,12 +9,16 @@
     <div class="alert alert-success" role="alert">Požadované místo nebylo nalezeno, zkuste něco jiného.</div>
 }
 
+<div>
 @using (Html.BeginForm(FormMethod.Get))
 {
     <label for="search">Zadejte místo:</label>
     @Html.TextBox("search", null, new { id = "search" })
     <input type="submit" value="Hledat" />
+    <span id="locateMe"></span>
 }
+</div>
+<div id="geoLocateResults"></div>
 
 @if (Model != null && Model.Count != 0)
 {
@@ -25,4 +29,11 @@
         <li>@Html.ActionLink(result.Value, "Nearest", new { id = result.Key })</li>
     }
     </ul>
+}
+
+@section scripts
+{
+    <script>
+    $(function(){window['kdyPojedeVlak'].initGeoLocationButton('#locateMe', '@Html.Raw(Url.Action("GeoLocateMe", new { lat = "$lat", lon = "$lon", embed = "1"}))', '#geoLocateResults')});
+    </script>
 }
