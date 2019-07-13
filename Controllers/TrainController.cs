@@ -44,7 +44,7 @@ namespace KdyPojedeVlak.Controllers
                 }
                 else
                 {
-                    return View((object) String.Format("Vlak č. {0} nebyl nalezen.", id));
+                    return View((object) $"Vlak č. {id} nebyl nalezen.");
                 }
             }
             else
@@ -59,6 +59,12 @@ namespace KdyPojedeVlak.Controllers
                     return View((object) "Vlak nebyl nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
                 }
             }
+        }
+
+        public IActionResult Newest()
+        {
+            var newestTrains = dbModelContext.TrainTimetables.OrderByDescending(tt => tt.Variants.Max(ttv => (DateTime?) ttv.ImportedFrom.CreationDate)).Include(tt => tt.Train).Take(10).ToList();
+            return View(newestTrains);
         }
 
         public IActionResult Details(string? id)
@@ -106,7 +112,7 @@ namespace KdyPojedeVlak.Controllers
                     .Select(point => point.Point)
                     .ToList()
             ).ToList();
-            
+
             var points = new HashSet<RoutingPoint>(pointsInVariants.SelectMany(pl => pl.Where(p => p.Latitude != null))).Select(p => new JObject
             {
                 new JProperty("coords", new JArray(p.Latitude, p.Longitude)),

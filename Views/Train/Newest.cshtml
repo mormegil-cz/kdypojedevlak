@@ -1,0 +1,15 @@
+@using KdyPojedeVlak.Engine.DbStorage
+@using KdyPojedeVlak.Models
+@model List<TrainTimetable>
+@{
+    ViewData["Title"] = "Vlaky s nejnovějšími údaji";
+}
+<h2>Vlaky s nejnovějšími údaji</h2>
+<ul>
+    @foreach (var timetable in Model)
+    {
+        <li>
+            <a href="@Url.Action("Details", new { id = timetable.TrainNumber })" title="@DisplayConsts.TrafficTypeNames[timetable.TrafficType]">@DisplayConsts.TrainCategoryNames[timetable.TrainCategory] @timetable.TrainNumber @timetable.Name</a>
+        </li>
+    }
+</ul>

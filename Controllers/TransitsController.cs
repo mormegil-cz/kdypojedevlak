@@ -123,7 +123,7 @@ namespace KdyPojedeVlak.Controllers
                 if (data.Count == AbsoluteMaximum)
                 {
                     // too many results…
-                    return bestOverMinimum ? bestList : data.Select(t => t.Train).ToList();
+                    return bestOverMinimum ? bestList! : data.Select(t => t.Train).ToList();
                 }
 
                 var futureTrainCount = data.Count(pt => pt.Day > 0 || pt.Train.AnyScheduledTimeOfDay >= nowTime);
@@ -138,7 +138,7 @@ namespace KdyPojedeVlak.Controllers
                 bestOverMinimum = bestList.Count >= GoodMinimum && futureTrainCount >= GoodMinimum / 3;
             }
 
-            return bestList;
+            return bestList!;
         }
 
         private static bool CheckInCalendar(CalendarDefinition calendar, DateTime day, int dayOffset)
@@ -153,7 +153,7 @@ namespace KdyPojedeVlak.Controllers
             return bitmap[offset];
         }
 
-        private List<RoutingPoint> GetNearPoints(RoutingPoint fromPoint, HashSet<RoutingPoint> neighbors)
+        private List<RoutingPoint>? GetNearPoints(RoutingPoint fromPoint, HashSet<RoutingPoint> neighbors)
         {
             if (fromPoint.Longitude == null) return null;
             var neighborCodes = neighbors.Select(p => p.Code).ToHashSet();

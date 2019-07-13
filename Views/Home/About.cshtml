@@ -17,7 +17,7 @@
 <ul>
     @if (Model.NewestTrainId != null)
     {
-        <li>Nejnovější data: @Html.ActionLink(Model.NewestData.ToString(CultureInfo.CurrentCulture), "Details", "Train", new {id = Model.NewestTrainId}) (naimportována @Model.LatestImport)</li>
+        <li>Nejnovější data: @Html.ActionLink(Model.NewestData.ToString(CultureInfo.CurrentCulture), "Newest", "Train") (naimportována @Model.LatestImport)</li>
     }
     else
     {
