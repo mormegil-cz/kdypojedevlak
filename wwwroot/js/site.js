@@ -53,6 +53,7 @@
             }, function(error) {
                 $(resultContainerId).html('<div class="alert alert-danger" role="alert">Nepodařilo se zjistit vaši polohu</div>');
             });
+            return false;
         });
         $(buttonContainerId).append($button);
     }

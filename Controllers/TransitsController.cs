@@ -95,7 +95,7 @@ namespace KdyPojedeVlak.Controllers
         private List<Passage> GetTrainList(DateTime now, RoutingPoint point)
         {
             var nowTime = now.TimeOfDay;
-            List<Passage> bestList = null;
+            List<Passage>? bestList = null;
             bool bestOverMinimum = false;
 
             var allPassingTrains = point.PassingTrains
