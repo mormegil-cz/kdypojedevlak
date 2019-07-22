@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -32,7 +31,7 @@ namespace KdyPojedeVlak.Engine.SR70
             if (codebook != null) throw new InvalidOperationException("Already loaded");
 
             codebook = new Dictionary<string, PointCodebookEntry>();
-            LoadCsvData(path, @"SR70-2019-01-01.csv", ';', Encoding.GetEncoding(1250))
+            CodebookHelpers.LoadCsvData(path, @"SR70-2019-01-01.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r))
                 .IntoDictionary(codebook, r => r.ID, r => new PointCodebookEntry
                 {
@@ -45,7 +44,7 @@ namespace KdyPojedeVlak.Engine.SR70
                 });
 
             // add historical data for missing points
-            foreach (var point in LoadCsvData(path, @"SR70-2017-12-10.csv", ';', Encoding.GetEncoding(1250))
+            foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2017-12-10.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
             {
                 if (codebook.ContainsKey(point.ID)) continue;
@@ -61,7 +60,7 @@ namespace KdyPojedeVlak.Engine.SR70
                 DebugLog.LogDebugMsg("Additional point in old codebook: {0}", point.ID);
             }
 
-            foreach (var row in LoadCsvData(path, @"osm-overpass-stations-2019-07-04.csv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"osm-overpass-stations-2019-07-04.csv", '\t', Encoding.UTF8)
                 .Skip(1)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
@@ -144,42 +143,6 @@ namespace KdyPojedeVlak.Engine.SR70
             }
 
             return result;
-        }
-
-        private static IEnumerable<string[]> LoadCsvData(string path, string fileName, char fieldSeparator, Encoding encoding)
-        {
-            using (var stream = new FileStream(Path.Combine(path, fileName), FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                using (var reader = new StreamReader(stream, encoding))
-                {
-                    string line;
-                    bool firstLine = true;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        // TODO: Real CSV processing
-                        if (line.Contains('"'))
-                        {
-                            yield return line.Split(fieldSeparator).Select(field =>
-                            {
-                                if (!field.Contains('"')) return field;
-                                if (field.Length < 2 || field[0] != '"' || field[field.Length - 1] != '"') throw new FormatException($"Invalid or unsupported CSV file: '{field}' at '{line}'");
-                                if (field.Count(c => c == '"') % 2 != 0) throw new FormatException($"Unsupported CSV file: '{field}' at '{line}'");
-                                return field.Substring(1, field.Length - 2).Replace("\"\"", "\"");
-                            }).ToArray();
-                        }
-                        else
-                        {
-                            if (firstLine)
-                            {
-                                firstLine = false;
-                                continue;
-                            }
-
-                            yield return line.Split(fieldSeparator);
-                        }
-                    }
-                }
-            }
         }
 
         private static readonly Dictionary<string, PointType> pointTypePerName = new Dictionary<string, PointType>(StringComparer.OrdinalIgnoreCase)

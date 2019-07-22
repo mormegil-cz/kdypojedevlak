@@ -213,7 +213,7 @@ namespace KdyPojedeVlak.Controllers
             var pointCount = variantRoutingPoints.Count;
             var majorPointFlags = variantRoutingPoints.Select((point, idx) => idx == 0 || idx == pointCount - 1 || point.Any(variant => variant != null && variant.IsMajorPoint)).ToList();
 
-            return new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags);
+            return new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags, null);
         }
     }
 }
