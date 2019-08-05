@@ -40,7 +40,7 @@ namespace KdyPojedeVlak.Controllers
 
                 if (dbModelContext.Trains.Any(t => t.Number == id))
                 {
-                    return RedirectToAction("Details", new { id });
+                    return RedirectToAction("Details", new {id});
                 }
                 else
                 {
@@ -52,7 +52,7 @@ namespace KdyPojedeVlak.Controllers
                 var trainByName = dbModelContext.TrainTimetables.Include(tt => tt.Train).FirstOrDefault(tt => tt.Name == search);
                 if (trainByName != null)
                 {
-                    return RedirectToAction("Details", new { id = trainByName.TrainNumber });
+                    return RedirectToAction("Details", new {id = trainByName.TrainNumber});
                 }
                 else
                 {
@@ -63,7 +63,7 @@ namespace KdyPojedeVlak.Controllers
 
         public IActionResult Newest()
         {
-            var newestTrains = dbModelContext.TrainTimetables.OrderByDescending(tt => tt.Variants.Max(ttv => (DateTime?) ttv.ImportedFrom.CreationDate)).Include(tt => tt.Train).Take(10).ToList();
+            var newestTrains = dbModelContext.Set<TrainTimetableVariant>().OrderByDescending(ttv => ttv.ImportedFrom.CreationDate).Include(ttv => ttv.Points).ThenInclude(rp => rp.Point).Include(ttv => ttv.Timetable).ThenInclude(tt => tt.Train).Take(10).ToList();
             return View(newestTrains);
         }
 
@@ -72,7 +72,7 @@ namespace KdyPojedeVlak.Controllers
             var plan = BuildTrainPlan(id);
             if (plan == null)
             {
-                return RedirectToAction("Index", new { search = id });
+                return RedirectToAction("Index", new {search = id});
             }
 
             return View(plan);
@@ -91,7 +91,7 @@ namespace KdyPojedeVlak.Controllers
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null)
             {
-                return RedirectToAction("Index", new { search = id });
+                return RedirectToAction("Index", new {search = id});
             }
 
             var timetable = dbModelContext.TrainTimetables
@@ -103,7 +103,7 @@ namespace KdyPojedeVlak.Controllers
                 .SingleOrDefault(t => t.Train == train && t.TimetableYear == year);
             if (timetable == null)
             {
-                return RedirectToAction("Index", new { search = id });
+                return RedirectToAction("Index", new {search = id});
             }
 
             var pointsInVariants = timetable.Variants.Select(
