@@ -7,14 +7,11 @@ using System.Text.RegularExpressions;
 using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.Algorithms;
 using KdyPojedeVlak.Engine.DbStorage;
-using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RoutingPoint = KdyPojedeVlak.Engine.DbStorage.RoutingPoint;
 
 namespace KdyPojedeVlak.Controllers
 {
@@ -134,8 +131,9 @@ namespace KdyPojedeVlak.Controllers
 
         private TrainPlan? BuildTrainPlan(string? id)
         {
-            // TODO: Timetable year
-            var year = dbModelContext.TimetableYears.Single();
+            // TODO: Explicit timetable year?
+            var now = DateTime.Now;
+            var year = dbModelContext.TimetableYears.SingleOrDefault(y => y.MinDate <= now && y.MaxDate >= now);
 
             id = id?.Trim();
             if (String.IsNullOrEmpty(id)) return null;

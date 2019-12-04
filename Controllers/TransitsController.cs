@@ -7,7 +7,6 @@ using KdyPojedeVlak.Engine.DbStorage;
 using KdyPojedeVlak.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RoutingPoint = KdyPojedeVlak.Engine.DbStorage.RoutingPoint;
 
 namespace KdyPojedeVlak.Controllers
 {
@@ -15,7 +14,7 @@ namespace KdyPojedeVlak.Controllers
     {
         private static readonly IList<KeyValuePair<string, string>> emptyPointList = new KeyValuePair<string, string>[0];
 
-        private static readonly int[] intervals = { 1, 3, 5, 10, 15, 30, 60, 120, 240, 300, 480, 720, 1440 };
+        private static readonly int[] intervals = {1, 3, 5, 10, 15, 30, 60, 120, 240, 300, 480, 720, 1440};
         private const int GoodMinimum = 4;
         private const int GoodEnough = 7;
         private const int AbsoluteMaximum = 40;
@@ -39,7 +38,7 @@ namespace KdyPojedeVlak.Controllers
             // TODO: Fulltext search
             var searchResults = dbModelContext.RoutingPoints.Where(p => p.Name.StartsWith(search))
                 .OrderBy(p => p.Name)
-                .Select(p => new { p.Code, p.Name })
+                .Select(p => new {p.Code, p.Name})
                 .Take(100)
                 .Select(p => new KeyValuePair<string, string>(p.Code, p.Name))
                 .ToList();
@@ -115,8 +114,9 @@ namespace KdyPojedeVlak.Controllers
                 var endTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(intervals[i]));
 
                 var data = passingTrains
+                    .Where(p => p.Train.AnyScheduledTimeOfDay != null)
                     .SkipWhile(p => p.Day == 0 && p.Train.AnyScheduledTimeOfDay < startTime)
-                    .TakeWhile(pt => pt.Train.AnyScheduledTime?.Add(TimeSpan.FromDays(pt.Day)) < endTime)
+                    .TakeWhile(p => p.Train.AnyScheduledTime?.Add(TimeSpan.FromDays(p.Day)) < endTime)
                     .Take(AbsoluteMaximum)
                     .ToList();
 
