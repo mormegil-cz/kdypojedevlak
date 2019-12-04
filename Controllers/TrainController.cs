@@ -64,9 +64,9 @@ namespace KdyPojedeVlak.Controllers
             return View(newestTrains);
         }
 
-        public IActionResult Details(string? id)
+        public IActionResult Details(string? id, int? year)
         {
-            var plan = BuildTrainPlan(id);
+            var plan = BuildTrainPlan(id, year);
             if (plan == null)
             {
                 return RedirectToAction("Index", new {search = id});
@@ -75,15 +75,15 @@ namespace KdyPojedeVlak.Controllers
             return View(plan);
         }
 
-        public IActionResult Map(string? id)
+        public IActionResult Map(string? id, int? yearNumber)
         {
-            var year = dbModelContext.TimetableYears.Single();
-
             id = id?.Trim();
             if (String.IsNullOrEmpty(id))
             {
                 return RedirectToAction("Index");
             }
+
+            var year = GetYear(yearNumber);
 
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null)
@@ -129,14 +129,12 @@ namespace KdyPojedeVlak.Controllers
             return View(new TrainMapData(timetable, dataJson.ToString(Formatting.None)));
         }
 
-        private TrainPlan? BuildTrainPlan(string? id)
+        private TrainPlan? BuildTrainPlan(string? id, int? yearNumber)
         {
-            // TODO: Explicit timetable year?
-            var now = DateTime.Now;
-            var year = dbModelContext.TimetableYears.SingleOrDefault(y => y.MinDate <= now && y.MaxDate >= now);
-
             id = id?.Trim();
             if (String.IsNullOrEmpty(id)) return null;
+
+            var year = GetYear(yearNumber);
 
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null) return null;
@@ -212,6 +210,19 @@ namespace KdyPojedeVlak.Controllers
             var majorPointFlags = variantRoutingPoints.Select((point, idx) => idx == 0 || idx == pointCount - 1 || point.Any(variant => variant != null && variant.IsMajorPoint)).ToList();
 
             return new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags, null);
+        }
+
+        private TimetableYear GetYear(int? yearNumber)
+        {
+            if (yearNumber == null)
+            {
+                var now = DateTime.Now;
+                return dbModelContext.TimetableYears.SingleOrDefault(y => y.MinDate <= now && y.MaxDate >= now);
+            }
+            else
+            {
+                return dbModelContext.TimetableYears.SingleOrDefault(y => y.Year == yearNumber);
+            }
         }
     }
 }
