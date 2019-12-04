@@ -290,7 +290,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
         }
 
         [NotMapped]
-        public string TrainNumber => Train.Number;
+        public string TrainNumber => Train?.Number;
 
         [NotMapped]
         public TrainCategory TrainCategory => GetAttributeEnum(Data, AttribTrainCategory, TrainCategory.Unknown);

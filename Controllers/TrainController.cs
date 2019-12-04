@@ -60,7 +60,14 @@ namespace KdyPojedeVlak.Controllers
 
         public IActionResult Newest()
         {
-            var newestTrains = dbModelContext.Set<TrainTimetableVariant>().OrderByDescending(ttv => ttv.ImportedFrom.CreationDate).Include(ttv => ttv.Points).ThenInclude(rp => rp.Point).Include(ttv => ttv.Timetable).ThenInclude(tt => tt.Train).Take(10).ToList();
+            var newestTrains = dbModelContext
+                .Set<TrainTimetableVariant>()
+                .OrderByDescending(ttv => ttv.ImportedFrom.CreationDate)
+                .Where(ttv => ttv.Timetable.Train != null && ttv.Timetable.Train.Number != null)
+                .Include(ttv => ttv.Points).ThenInclude(rp => rp.Point)
+                .Include(ttv => ttv.Timetable).ThenInclude(tt => tt.Train)
+                .Take(10)
+                .ToList();
             return View(newestTrains);
         }
 
@@ -91,13 +98,19 @@ namespace KdyPojedeVlak.Controllers
                 return RedirectToAction("Index", new {search = id});
             }
 
-            var timetable = dbModelContext.TrainTimetables
+            var timetableQuery = dbModelContext.TrainTimetables
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.Points)
                 .ThenInclude(p => p.Point)
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.Calendar)
-                .SingleOrDefault(t => t.Train == train && t.TimetableYear == year);
+                .Where(t => t.Train == train);
+
+            var timetable = timetableQuery.SingleOrDefault(t => t.TimetableYear == year);
+            if (timetable == null && yearNumber == null)
+            {
+                timetable = timetableQuery.OrderByDescending(t => t.TimetableYear.Year).FirstOrDefault();
+            }
             if (timetable == null)
             {
                 return RedirectToAction("Index", new {search = id});
@@ -139,13 +152,19 @@ namespace KdyPojedeVlak.Controllers
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null) return null;
 
-            var timetable = dbModelContext.TrainTimetables
+            var timetableQuery = dbModelContext.TrainTimetables
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.Points)
                 .ThenInclude(p => p.Point)
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.Calendar)
-                .SingleOrDefault(t => t.Train == train && t.TimetableYear == year);
+                .Where(t => t.Train == train);
+
+            var timetable = timetableQuery.SingleOrDefault(t => t.TimetableYear == year);
+            if (timetable == null && yearNumber == null)
+            {
+                timetable = timetableQuery.OrderByDescending(t => t.TimetableYear.Year).FirstOrDefault();
+            }
             if (timetable == null) return null;
 
             var pointsInVariants = timetable.Variants.Select(
