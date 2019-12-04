@@ -75,7 +75,7 @@ namespace KdyPojedeVlak.Engine
                 }
                 catch (Exception ex)
                 {
-                    DebugLog.LogProblem("Error downloading new schedule files: {0}", ex.Message);
+                    DebugLog.LogProblem("Error downloading new schedule files: {0}", ex);
                     return;
                 }
 
@@ -93,7 +93,7 @@ namespace KdyPojedeVlak.Engine
                 }
                 catch (Exception ex)
                 {
-                    DebugLog.LogProblem("Error loading schedule: {0}", ex.Message);
+                    DebugLog.LogProblem("Error loading schedule: {0}", ex);
                     return;
                 }
 

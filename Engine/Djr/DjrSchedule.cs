@@ -430,7 +430,8 @@ namespace KdyPojedeVlak.Engine.Djr
                 { "9003", TrainCategory.LeoExpres },
                 { "9004", TrainCategory.Regiojet },
                 { "9005", TrainCategory.ArrivaExpress },
-                { "9006", TrainCategory.NightJet }
+                { "9006", TrainCategory.NightJet },
+                { "9007", TrainCategory.LeoExpresTenders },
             };
 
         private static readonly Dictionary<string, TrainOperation> defTrainOperation =
@@ -502,7 +503,8 @@ namespace KdyPojedeVlak.Engine.Djr
         LeoExpres,
         Regiojet,
         ArrivaExpress,
-        NightJet
+        NightJet,
+        LeoExpresTenders,
     }
 
     public enum TrainRoutePointType

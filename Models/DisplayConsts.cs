@@ -75,6 +75,7 @@ namespace KdyPojedeVlak.Models
             {TrainCategory.Regiojet, "RJ"},
             {TrainCategory.ArrivaExpress, "AEx"},
             {TrainCategory.NightJet, "NJ"},
+            {TrainCategory.LeoExpresTenders, "LET"},
         };
 
         public static Dictionary<TrafficType, string> TrafficTypeNames = new Dictionary<TrafficType, string>

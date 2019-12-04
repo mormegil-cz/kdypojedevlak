@@ -92,7 +92,7 @@ namespace KdyPojedeVlak
             }
             catch (Exception ex)
             {
-                DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex.Message);
+                DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex);
                 throw;
             }
 
@@ -114,7 +114,7 @@ namespace KdyPojedeVlak
             }
             catch (Exception ex)
             {
-                DebugLog.LogProblem("Error initializing database: {0}", ex.Message);
+                DebugLog.LogProblem("Error initializing database: {0}", ex);
                 throw;
             }
 
