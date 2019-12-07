@@ -1,0 +1,6 @@
+select ?item ?itemLabel ?coords ?code {
+  ?item wdt:P722 ?code.
+  ?item wdt:P17 wd:Q213.
+  ?item wdt:P625 ?coords.
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "cs". }
+}
