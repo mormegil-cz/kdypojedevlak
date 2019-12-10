@@ -25,6 +25,13 @@
                         <a href="https://www.openstreetmap.org/?mlat=@lat&mlon=@lon#map=15/@lat/@lon">Poloha tohoto místa</a>
                     </li>
                 }
+                @if (Model.Point.WikidataItem != null)
+                {
+                    hasTools = true;
+                    <li>
+                        <a href="https://www.wikidata.org/wiki/@(Model.Point.WikidataItem)">Místo na Wikidatech</a>
+                    </li>
+                }
                 @if (Model.Point.CountryCodeFromId == "CZ")
                 {
                     hasTools = true;
@@ -64,7 +71,13 @@
         @* TODO: Do not show tomorrow trains as past *@
         <li class="@(train.AnyScheduledTime < now ? "past" : "future")">
             @train.AnyScheduledTime
-            @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.TrainTimetableVariant.Timetable.TrainCategory] + " " + train.TrainTimetableVariant.Timetable.TrainNumber + " " + train.TrainTimetableVariant.Timetable.Name, "Details", "Train", new {id = train.TrainTimetableVariant.Timetable.TrainNumber})
+            @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.TrainTimetableVariant.Timetable.TrainCategory] + " " + train.TrainTimetableVariant.Timetable.TrainNumber + " " + train.TrainTimetableVariant.Timetable.Name,
+                "Details", "Train",
+                new
+                {
+                    id = train.TrainTimetableVariant.Timetable.TrainNumber,
+                    year = Model.CurrentTimetableYear == train.Year ? null : train.Year.Year.ToString(CultureInfo.InvariantCulture)
+                })
             @{
                 var descriptionPieces = new List<string>();
                 if (!String.IsNullOrEmpty(train.SubsidiaryLocationDescription))

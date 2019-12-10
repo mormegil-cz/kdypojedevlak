@@ -225,6 +225,9 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [NotMapped]
         public string ShortCzechIdentifier => Code.Substring(Math.Max(Code.IndexOf(':'), -1) + 1);
 
+        [NotMapped]
+        public string WikidataItem => Program.PointCodebook.Find(Code)?.WikidataItem;
+
         [InverseProperty("Point")]
         public List<Passage> PassingTrains { get; set; }
     }

@@ -65,6 +65,8 @@ namespace KdyPojedeVlak.Controllers
 
             var point = dbModelContext.RoutingPoints
                 .Include(p => p.PassingTrains)
+                .ThenInclude(pt => pt.Year)
+                .Include(p => p.PassingTrains)
                 .ThenInclude(pt => pt.TrainTimetableVariant)
                 .ThenInclude(ttv => ttv.Calendar)
                 .Include(p => p.PassingTrains)
@@ -86,9 +88,11 @@ namespace KdyPojedeVlak.Controllers
                 return NotFound();
             }
 
-            var now = at ?? DateTime.Now;
+            var now = DateTime.Now;
+            var startDate = at ?? now;
             var neighbors = dbModelContext.GetNeighboringPoints(point);
-            return View(new NearestTransits(point, now, GetTrainList(now, point), neighbors, GetNearPoints(point, neighbors)));
+            var currentTimetableYear = dbModelContext.TimetableYears.SingleOrDefault(y => y.MinDate <= now && y.MaxDate >= now);
+            return View(new NearestTransits(point, startDate, currentTimetableYear, GetTrainList(startDate, point), neighbors, GetNearPoints(point, neighbors)));
         }
 
         private List<Passage> GetTrainList(DateTime now, RoutingPoint point)

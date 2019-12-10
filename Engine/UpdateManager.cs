@@ -13,7 +13,7 @@ namespace KdyPojedeVlak.Engine
     public class UpdateManager
     {
         private const int WakeupInterval = 60 * 60 * 1000;
-        private const int InitialDelay = 1 * 60 * 100;
+        private const int InitialDelay = 1 * 20 * 1000;
 
         private static UpdateManager? instance;
 

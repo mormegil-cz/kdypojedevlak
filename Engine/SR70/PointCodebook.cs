@@ -10,7 +10,7 @@ namespace KdyPojedeVlak.Engine.SR70
 {
     public class PointCodebook
     {
-        private static Regex regexGeoCoordinate = new Regex(@"\s*^[NE]\s*(?<deg>[0-9]+)\s*°\s*(?<min>[0-9]+)\s*'\s*(?<sec>[0-9]+\s*(,\s*([0-9]+)?)?)\s*""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
+        private static Regex regexGeoCoordinate = new Regex(@"\s*^[NE]\s*(?<deg>[0-9]+)\s*°\s*(?<min>[0-9]*)\s*'\s*(?<sec>[0-9]*\s*(,\s*([0-9]+)?)?)\s*""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
 
         private readonly string path;
         private Dictionary<string, PointCodebookEntry> codebook;
@@ -31,16 +31,16 @@ namespace KdyPojedeVlak.Engine.SR70
             if (codebook != null) throw new InvalidOperationException("Already loaded");
 
             codebook = new Dictionary<string, PointCodebookEntry>();
-            CodebookHelpers.LoadCsvData(path, @"SR70-2019-01-01.csv", ';', Encoding.GetEncoding(1250))
+            CodebookHelpers.LoadCsvData(path, @"SR70-2019-12-15.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r))
                 .IntoDictionary(codebook, r => r.ID, r => new PointCodebookEntry
                 {
                     ID = r.Row[0],
                     LongName = r.Row[1],
-                    ShortName = r.Row[2],
-                    Type = ParsePointType(r.Row[6]),
-                    Longitude = ParseGeoCoordinate(r.Row[15]),
-                    Latitude = ParseGeoCoordinate(r.Row[16]),
+                    ShortName = r.Row[3],
+                    Type = ParsePointType(r.Row[9]),
+                    Longitude = ParseGeoCoordinate(r.Row[21]),
+                    Latitude = ParseGeoCoordinate(r.Row[22]),
                 });
 
             // add historical data for missing points
@@ -57,11 +57,59 @@ namespace KdyPojedeVlak.Engine.SR70
                     Type = ParsePointType(point.Row[5]),
                 });
 
-                DebugLog.LogDebugMsg("Additional point in old codebook: {0}", point.ID);
+                DebugLog.LogDebugMsg("Additional point in 2017 codebook: {0}", point.ID);
+            }
+            foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2013-12-15.csv", ';', Encoding.GetEncoding(1250))
+                .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
+            {
+                if (codebook.ContainsKey(point.ID)) continue;
+
+                codebook.Add(point.ID, new PointCodebookEntry
+                {
+                    ID = point.ID,
+                    LongName = point.Row[1],
+                    ShortName = point.Row[2],
+                    Type = ParsePointType(point.Row[7]),
+                });
+
+                DebugLog.LogDebugMsg("Additional point in 2013 codebook: {0}", point.ID);
             }
 
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"osm-overpass-stations-2019-07-04.csv", '\t', Encoding.UTF8)
-                .Skip(1)
+            var problematicPoints = new HashSet<String>();
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2019-12-11.tsv", '\t', Encoding.UTF8)
+                .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
+            )
+            {
+                if (codebook.TryGetValue("CZ:" + row.ID.Substring(2), out var entry)
+                    && Single.TryParse(row.Latitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var latitude)
+                    && Single.TryParse(row.Longitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var longitude)
+                )
+                {
+                    entry.WikidataItem = row.ItemQ;
+                    if (entry.Latitude == null || entry.Longitude == null)
+                    {
+                        entry.Latitude = latitude;
+                        entry.Longitude = longitude;
+                        DebugLog.LogDebugMsg("Added coordinates to {0} from Wikidata", row.ID);
+                    }
+                    else
+                    {
+                        var dist = Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude);
+                        if (dist > 0.005)
+                        {
+                            DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f, row.ItemQ));
+                            problematicPoints.Add(entry.FullIdentifier);
+                        }
+                    }
+                }
+                else
+                {
+                    DebugLog.LogProblem("Unknown point {0} from Wikidata", row.ID);
+                }
+            }
+
+            /*
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"osm-overpass-stations-2019-12-11.csv", '\t', Encoding.UTF8)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
             {
@@ -79,13 +127,19 @@ namespace KdyPojedeVlak.Engine.SR70
                     else
                     {
                         var dist = Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude);
-                        if (dist > 0.005)
+                        if (dist > 0.005 && !problematicPoints.Contains(entry.FullIdentifier))
                         {
                             DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0}: {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f));
+                            problematicPoints.Add(entry.FullIdentifier);
                         }
                     }
                 }
+                else
+                {
+                    DebugLog.LogProblem("Unknown point {0} from OSM", row.ID);
+                }
             }
+            */
 
             DebugLog.LogDebugMsg("{0} point(s)", codebook.Count);
 
@@ -125,6 +179,7 @@ namespace KdyPojedeVlak.Engine.SR70
         private static float? ParseGeoCoordinate(string posStr)
         {
             if (String.IsNullOrEmpty(posStr)) return null;
+            if (posStr == "E  °',   \"" || posStr == "N  °',   \"") return null;
             var match = regexGeoCoordinate.Match(posStr);
             if (!match.Success) throw new FormatException($"Invalid geographical coordinate '{posStr}'");
             var deg = ParseFloat(match.Groups["deg"].Value);
@@ -136,6 +191,8 @@ namespace KdyPojedeVlak.Engine.SR70
         private static float ParseFloat(string str)
         {
             str = str.Replace(" ", "");
+            if (str == "") return 0;
+            if (str.StartsWith(".")) str = '0' + str;
             if (str.EndsWith(".")) str += '0';
             if (!Single.TryParse(str, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var result))
             {

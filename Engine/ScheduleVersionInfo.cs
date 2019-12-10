@@ -31,10 +31,12 @@ namespace KdyPojedeVlak.Engine
                 else
                 {
                     newestData = newestFile.CreationDate;
-                    var newestTimetable = dbModelContext.TrainTimetables
-                        .Include(tt => tt.Train)
-                        .FirstOrDefault(tt => tt.Train != null && tt.Train.Number != null && tt.Variants.Any(ttv => ttv.ImportedFrom == newestFile));
-                    newestTrainId = newestTimetable?.TrainNumber;
+                    newestTrainId = dbModelContext
+                        .Set<TrainTimetableVariant>()
+                        .OrderByDescending(ttv => ttv.ImportedFrom.CreationDate)
+                        .Where(ttv => ttv.Timetable.Train != null && ttv.Timetable.Train.Number != null)
+                        .Select(ttv => ttv.Timetable.Train.Number)
+                        .FirstOrDefault();
                 }
             }
         }
