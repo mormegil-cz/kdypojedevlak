@@ -13,7 +13,7 @@
     <div class="col-md-2">
         <div class=btn-toolbar>
             <div class="btn-group" role="group">
-                <a href="@Url.Action("Map", new { id = Model.Train.Train.Number })" class="btn btn-default"><span class="glyphicon glyphicon-globe" aria-label="Mapa"></span></a>
+                <a href="@Url.Action("Map", new { id = Model.Train.Train.Number, year = Model.Train.TimetableYear.Year })" class="btn btn-default"><span class="glyphicon glyphicon-globe" aria-label="Mapa"></span></a>
             </div>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -21,7 +21,7 @@
                 </button>
                 <ul class="dropdown-menu">
                     <li>
-                        <a href="http://www.zelpage.cz/razeni/@(DateTime.Now.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku (ŽelPage)</a>
+                        <a href="https://www.zelpage.cz/razeni/@(Model.Train.TimetableYear.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku (ŽelPage)</a>
                     </li>
                     <li>
                         <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku (ČD)</a>
@@ -31,7 +31,7 @@
                     </li>
                     <li role="separator" class="divider"></li>
                     <li>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=https://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.Train.TrainNumber }))">Sdílet na Facebook</a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=https://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year }))">Sdílet na Facebook</a>
                     </li>
                 </ul>
             </div>

@@ -82,7 +82,7 @@ namespace KdyPojedeVlak.Controllers
             return View(plan);
         }
 
-        public IActionResult Map(string? id, int? yearNumber)
+        public IActionResult Map(string? id, int? year)
         {
             id = id?.Trim();
             if (String.IsNullOrEmpty(id))
@@ -90,7 +90,7 @@ namespace KdyPojedeVlak.Controllers
                 return RedirectToAction("Index");
             }
 
-            var year = GetYear(yearNumber);
+            var dbYear = GetYear(year);
 
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null)
@@ -106,8 +106,8 @@ namespace KdyPojedeVlak.Controllers
                 .ThenInclude(ttv => ttv.Calendar)
                 .Where(t => t.Train == train);
 
-            var timetable = timetableQuery.SingleOrDefault(t => t.TimetableYear == year);
-            if (timetable == null && yearNumber == null)
+            var timetable = timetableQuery.SingleOrDefault(t => t.TimetableYear == dbYear);
+            if (timetable == null && year == null)
             {
                 timetable = timetableQuery.OrderByDescending(t => t.TimetableYear.Year).FirstOrDefault();
             }
