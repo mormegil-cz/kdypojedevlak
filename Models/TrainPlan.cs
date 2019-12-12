@@ -12,15 +12,17 @@ namespace KdyPojedeVlak.Models
         public List<RoutingPoint> Points { get; }
         public List<List<Passage>> VariantRoutingPoints { get; }
         public List<bool> MajorPointFlags { get; }
-        public CompanyCodebookEntry CompanyCodebookEntry { get; }
+        public string VagonWebCompanyID { get; }
+        public List<CompanyCodebookEntry> CompanyCodebookEntries { get; }
 
-        public TrainPlan(TrainTimetable train, List<RoutingPoint> points, List<List<Passage>> variantRoutingPoints, List<bool> majorPointFlags, CompanyCodebookEntry companyCodebookEntry)
+        public TrainPlan(TrainTimetable train, List<RoutingPoint> points, List<List<Passage>> variantRoutingPoints, List<bool> majorPointFlags, List<CompanyCodebookEntry> companyCodebookEntries, string vagonWebCompanyId)
         {
             Train = train;
             Points = points;
             VariantRoutingPoints = variantRoutingPoints;
             MajorPointFlags = majorPointFlags;
-            CompanyCodebookEntry = companyCodebookEntry;
+            CompanyCodebookEntries = companyCodebookEntries;
+            VagonWebCompanyID = vagonWebCompanyId;
         }
     }
 }

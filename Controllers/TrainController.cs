@@ -153,6 +153,7 @@ namespace KdyPojedeVlak.Controllers
             if (train == null) return null;
 
             var timetableQuery = dbModelContext.TrainTimetables
+                .Include(tt => tt.TimetableYear)
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.Points)
                 .ThenInclude(p => p.Point)
@@ -228,7 +229,22 @@ namespace KdyPojedeVlak.Controllers
             var pointCount = variantRoutingPoints.Count;
             var majorPointFlags = variantRoutingPoints.Select((point, idx) => idx == 0 || idx == pointCount - 1 || point.Any(variant => variant != null && variant.IsMajorPoint)).ToList();
 
-            return new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags, null);
+            var companies = timetable.Variants
+                .Select(v => v.TrainVariantId.Substring(0, 4))
+                .GroupBy(code => code)
+                .OrderByDescending(g => g.Count())
+                .AsEnumerable()
+                .Select(g => Program.CompanyCodebook.Find(g.Key))
+                .Where(c => c != null)
+                .ToList();
+
+            string vagonWebCompanyId = null;
+            if (companies.Count > 0)
+            {
+                VagonWebCodes.CompanyCodes.TryGetValue(companies.First().ID, out vagonWebCompanyId);
+            }
+
+            return new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags, companies, vagonWebCompanyId);
         }
 
         private TimetableYear GetYear(int? yearNumber)

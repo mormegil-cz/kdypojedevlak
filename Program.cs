@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using KdyPojedeVlak.Engine.SR70;
+using KdyPojedeVlak.Engine.Uic;
 using Microsoft.AspNetCore.Hosting;
 
 namespace KdyPojedeVlak
@@ -8,6 +9,7 @@ namespace KdyPojedeVlak
     {
         // TODO: Dependency injection
         public static PointCodebook PointCodebook;
+        public static CompanyCodebook CompanyCodebook;
 
         public static void Main(string[] args)
         {

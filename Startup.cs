@@ -4,6 +4,7 @@ using KdyPojedeVlak.Engine;
 using KdyPojedeVlak.Engine.DbStorage;
 using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.SR70;
+using KdyPojedeVlak.Engine.Uic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -93,6 +94,17 @@ namespace KdyPojedeVlak
             catch (Exception ex)
             {
                 DebugLog.LogProblem("Error loading SR70 codebook: {0}", ex);
+                throw;
+            }
+
+            Program.CompanyCodebook = new CompanyCodebook(@"App_Data");
+            try
+            {
+                Program.CompanyCodebook.Load();
+            }
+            catch (Exception ex)
+            {
+                DebugLog.LogProblem("Error loading company codebook: {0}", ex);
                 throw;
             }
 
