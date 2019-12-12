@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using KdyPojedeVlak.Engine.DbStorage;
-using KdyPojedeVlak.Engine.Djr;
 using KdyPojedeVlak.Engine.Uic;
 using RoutingPoint = KdyPojedeVlak.Engine.DbStorage.RoutingPoint;
 

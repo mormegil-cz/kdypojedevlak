@@ -238,7 +238,7 @@ namespace KdyPojedeVlak.Controllers
                 .Where(c => c != null)
                 .ToList();
 
-            string vagonWebCompanyId = null;
+            string? vagonWebCompanyId = null;
             if (companies.Count > 0)
             {
                 VagonWebCodes.CompanyCodes.TryGetValue(companies.First().ID, out vagonWebCompanyId);
