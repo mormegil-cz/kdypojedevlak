@@ -76,7 +76,7 @@ namespace KdyPojedeVlak.Engine.SR70
             }
 
             var problematicPoints = new HashSet<String>();
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2019-12-11.tsv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2019-12-17.tsv", '\t', Encoding.UTF8)
                 .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
             )
             {
@@ -86,13 +86,7 @@ namespace KdyPojedeVlak.Engine.SR70
                 )
                 {
                     entry.WikidataItem = row.ItemQ;
-                    if (entry.Latitude == null || entry.Longitude == null)
-                    {
-                        entry.Latitude = latitude;
-                        entry.Longitude = longitude;
-                        DebugLog.LogDebugMsg("Added coordinates to {0} from Wikidata", row.ID);
-                    }
-                    else
+                    if (entry.Latitude != null && entry.Longitude != null)
                     {
                         var dist = Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude);
                         if (dist > 0.005)
@@ -101,6 +95,9 @@ namespace KdyPojedeVlak.Engine.SR70
                             problematicPoints.Add(entry.FullIdentifier);
                         }
                     }
+
+                    entry.Latitude = latitude;
+                    entry.Longitude = longitude;
                 }
                 else
                 {

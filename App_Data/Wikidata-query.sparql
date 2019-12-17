@@ -4,6 +4,7 @@ select ?qid ?itemLabel ?lon ?lat ?code {
   ?item wdt:P625 ?coords.
   BIND (geof:latitude(?coords) AS ?lat)
   BIND (geof:longitude(?coords) AS ?lon)
-  BIND (SUBSTR(STR(?item), 31) AS ?qid)
+  BIND (SUBSTR(STR(?item), 32) AS ?qid)
   SERVICE wikibase:label { bd:serviceParam wikibase:language "cs". }
 }
+ORDER BY ?code
