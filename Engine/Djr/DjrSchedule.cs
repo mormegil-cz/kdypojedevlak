@@ -162,7 +162,7 @@ namespace KdyPojedeVlak.Engine.Djr
 
             // TODO: Clarify TrainNumbers
             var operationalTrainNumbers = message.CZPTTInformation.CZPTTLocation.Select(loc => loc.OperationalTrainNumber).Where(n => n != null).ToHashSet();
-            if (operationalTrainNumbers.Count > 1)
+            if (operationalTrainNumbers.Count != 1)
             {
                 DebugLog.LogProblem("Train {0} contains {1} operational numbers", trainIdentifier, operationalTrainNumbers.Count);
             }

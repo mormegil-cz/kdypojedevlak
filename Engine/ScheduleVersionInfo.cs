@@ -62,7 +62,7 @@ namespace KdyPojedeVlak.Engine
             lock (syncObj)
             {
                 latestImport = DateTime.UtcNow;
-                if (dataTimestamp > newestData)
+                if (dataTimestamp > newestData && trainId != null)
                 {
                     newestData = dataTimestamp;
                     newestTrainId = trainId;
