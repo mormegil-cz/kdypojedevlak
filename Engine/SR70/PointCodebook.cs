@@ -76,7 +76,7 @@ namespace KdyPojedeVlak.Engine.SR70
             }
 
             var problematicPoints = new HashSet<String>();
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2019-12-17.tsv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2020-02-12.tsv", '\t', Encoding.UTF8)
                 .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
             )
             {

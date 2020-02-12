@@ -54,7 +54,7 @@ namespace KdyPojedeVlak.Engine.Djr
                         var tempFile = Path.ChangeExtension(fileInfo.FullName, ".tmp");
                         var (hash, size) = await downloader.DownloadZip(file.Key, tempFile);
                         File.Move(tempFile, fileInfo.FullName);
-                        dataFilesAvailable[fileInfo.FullName] = size;
+                        dataFilesAvailable[filePath] = size;
                         DebugLog.LogDebugMsg("Downloaded {0} ({1} B: {2})", file.Key, size, hash);
                     }
 
