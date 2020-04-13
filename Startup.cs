@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace KdyPojedeVlak
@@ -20,9 +21,16 @@ namespace KdyPojedeVlak
     {
         private static readonly bool RecreateDatabase = false;
         private static readonly bool EnableUpdates = true;
-        private static readonly bool RenameAllCalendars = false;
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        /*
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -33,20 +41,24 @@ namespace KdyPojedeVlak
         }
 
         public IConfigurationRoot Configuration { get; }
+        */
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
+            // services.Configure<CookiePolicyOptions>(options =>
+            // {
+            //     // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+            //     options.CheckConsentNeeded = context => true;
+            //     options.MinimumSameSitePolicy = SameSiteMode.None;
+            // });
+
+
+            services.AddControllersWithViews();
 
             // Add framework services.
             services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddLogging(loggingBuilder =>
             {
@@ -61,7 +73,7 @@ namespace KdyPojedeVlak
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         [DebuggerNonUserCode]
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -77,11 +89,12 @@ namespace KdyPojedeVlak
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 
             var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
@@ -118,11 +131,9 @@ namespace KdyPojedeVlak
 
                 ScheduleVersionInfo.Initialize(dbModelContext);
 
-                if (RenameAllCalendars) DjrSchedule.RenameAllCalendars(dbModelContext);
-
                 dbModelContext.SaveChanges();
 
-                dbModelContext.Database.ExecuteSqlCommand("PRAGMA optimize");
+                dbModelContext.Database.ExecuteSqlRaw("PRAGMA optimize");
             }
             catch (Exception ex)
             {

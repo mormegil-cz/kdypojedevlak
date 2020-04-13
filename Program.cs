@@ -2,6 +2,7 @@
 using KdyPojedeVlak.Engine.SR70;
 using KdyPojedeVlak.Engine.Uic;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace KdyPojedeVlak
 {
@@ -16,13 +17,12 @@ namespace KdyPojedeVlak
             CreateWebHostBuilder(args).Build().Run();
         }
 
-        private static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            new WebHostBuilder()
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
-                .UseStartup<Startup>();
-
+        private static IHostBuilder CreateWebHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
         /*
         private static void TestMerge<T>(params List<T>[] lists)
         {

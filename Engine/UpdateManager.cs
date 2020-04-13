@@ -89,7 +89,7 @@ namespace KdyPojedeVlak.Engine
 
                     context.SaveChanges();
 
-                    context.Database.ExecuteSqlCommand("PRAGMA optimize");
+                    context.Database.ExecuteSqlRaw("PRAGMA optimize");
                 }
                 catch (Exception ex)
                 {
