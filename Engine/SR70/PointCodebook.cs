@@ -31,19 +31,38 @@ namespace KdyPojedeVlak.Engine.SR70
             if (codebook != null) throw new InvalidOperationException("Already loaded");
 
             codebook = new Dictionary<string, PointCodebookEntry>();
-            CodebookHelpers.LoadCsvData(path, @"SR70-2019-12-15.csv", ';', Encoding.GetEncoding(1250))
+
+            CodebookHelpers.LoadCsvData(path, @"SR70-2020-06-14.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r))
                 .IntoDictionary(codebook, r => r.ID, r => new PointCodebookEntry
                 {
                     ID = r.Row[0],
-                    LongName = r.Row[1],
-                    ShortName = r.Row[3],
-                    Type = ParsePointType(r.Row[9]),
-                    Longitude = ParseGeoCoordinate(r.Row[21]),
-                    Latitude = ParseGeoCoordinate(r.Row[22]),
+                    LongName = r.Row[2],
+                    ShortName = r.Row[4],
+                    Type = ParsePointType(r.Row[11]),
+                    Longitude = ParseGeoCoordinate(r.Row[29]),
+                    Latitude = ParseGeoCoordinate(r.Row[30]),
                 });
 
             // add historical data for missing points
+            foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2019-12-15.csv", ';', Encoding.GetEncoding(1250))
+                .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
+            {
+                if (codebook.ContainsKey(point.ID)) continue;
+
+                codebook.Add(point.ID, new PointCodebookEntry
+                {
+                    ID = point.Row[0],
+                    LongName = point.Row[1],
+                    ShortName = point.Row[3],
+                    Type = ParsePointType(point.Row[9]),
+                    Longitude = ParseGeoCoordinate(point.Row[21]),
+                    Latitude = ParseGeoCoordinate(point.Row[22]),
+                });
+
+                DebugLog.LogDebugMsg("Additional point in 2019 codebook: {0}", point.ID);
+            }
+
             foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2017-12-10.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
             {
@@ -76,7 +95,7 @@ namespace KdyPojedeVlak.Engine.SR70
             }
 
             var problematicPoints = new HashSet<String>();
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2020-02-12.tsv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2020-06-29.tsv", '\t', Encoding.UTF8)
                 .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
             )
             {
@@ -142,7 +161,7 @@ namespace KdyPojedeVlak.Engine.SR70
 
             var pointList = codebook.Where(p => p.Value.Latitude != null).ToList();
             var pointIDs = pointList.Select(p => p.Key).ToArray();
-            var pointCoordinates = pointList.Select(p => new[] {p.Value.Latitude.GetValueOrDefault(), p.Value.Longitude.GetValueOrDefault()}).ToArray();
+            var pointCoordinates = pointList.Select(p => new[] { p.Value.Latitude.GetValueOrDefault(), p.Value.Longitude.GetValueOrDefault() }).ToArray();
             tree = new KDTree<float, string>(2, pointCoordinates, pointIDs, L2Norm);
         }
 
@@ -165,7 +184,7 @@ namespace KdyPojedeVlak.Engine.SR70
 
         public List<PointCodebookEntry> FindNearest(float latitude, float longitude, int neighbors)
         {
-            return tree.NearestNeighbors(new[] {latitude, longitude}, neighbors).Select(point => Find(point.Item2)).Where(x => x != null).ToList();
+            return tree.NearestNeighbors(new[] { latitude, longitude }, neighbors).Select(point => Find(point.Item2)).Where(x => x != null).ToList();
         }
 
         private static PointType ParsePointType(string typeStr)
@@ -177,6 +196,7 @@ namespace KdyPojedeVlak.Engine.SR70
         {
             if (String.IsNullOrEmpty(posStr)) return null;
             if (posStr == "E  °',   \"" || posStr == "N  °',   \"") return null;
+            if (posStr == "E  °00'00,   \"" || posStr == "N  °00'00,   \"") return null;
             var match = regexGeoCoordinate.Match(posStr);
             if (!match.Success) throw new FormatException($"Invalid geographical coordinate '{posStr}'");
             var deg = ParseFloat(match.Groups["deg"].Value);
@@ -201,46 +221,46 @@ namespace KdyPojedeVlak.Engine.SR70
 
         private static readonly Dictionary<string, PointType> pointTypePerName = new Dictionary<string, PointType>(StringComparer.OrdinalIgnoreCase)
         {
-            {"Automatické hradlo", PointType.Point},
-            {"Automatické hradlo a zastávka", PointType.Stop},
-            {"Automatické hradlo, nákladiště a zastávka", PointType.Stop},
-            {"Dopr.body na cizím území (blíže neurčené)", PointType.Point},
-            {"Dopravna D3", PointType.Point},
-            {"Dopravna radiobloku", PointType.Point},
-            {"Hláska", PointType.Point},
-            {"Hláska a zastávka", PointType.Stop},
-            {"Hláska, nákladiště a zastávka", PointType.Stop},
-            {"Hradlo", PointType.Point},
-            {"Hradlo a zastávka", PointType.Stop},
-            {"Hranice infrastruktur", PointType.InnerBoundary},
-            {"Hranice oblastí", PointType.InnerBoundary},
-            {"Hranice OPŘ totožná s hranicí VÚSC", PointType.InnerBoundary},
-            {"Hranice TUDU (začátek nebo konec TUDU)", PointType.InnerBoundary},
-            {"Hranice třídy sklonu", PointType.InnerBoundary},
-            {"Jiné dopravní body", PointType.Point},
-            {"Kolejová křižovatka", PointType.Crossing},
-            {"Kolejová skupina stanice nebo jiného DVM", PointType.Point},
-            {"Nákladiště", PointType.Point},
-            {"Nákladiště a zastávka", PointType.Stop},
-            {"Obvod DVM nebo staniční kolejová skupina se zastávkou", PointType.Stop},
-            {"Odbočení ve stanici nebo v jiném DVM", PointType.Crossing},
-            {"Odbočení vlečky", PointType.Crossing},
-            {"Odbočka (dopravna s kolejovým rozvětvením)", PointType.Crossing},
-            {"Odbočka (dopravna) a zastávka", PointType.Stop},
-            {"Odbočka (dopravna), nákladiště a zastávka", PointType.Stop},
-            {"Odstup nezavěšeného postrku (na širé trati)", PointType.Point},
-            {"Samostatné kolejiště vlečky", PointType.Point},
-            {"Samostatné tarif.místo v rámci stanice nebo jiného DVM", PointType.Point},
-            {"Skok ve staničení", PointType.Point},
-            {"Stanice (z přepravního hlediska blíže neurčená)", PointType.Station},
-            {"Státní hranice", PointType.StateBoundary},
-            {"Trasovací bod TUDU, SENA", PointType.Point},
-            {"Výhybna", PointType.Siding},
-            {"Zastávka", PointType.Stop},
-            {"Zastávka lanové dráhy", PointType.Stop},
-            {"Zastávka náhradní autobusové dopravy", PointType.Stop},
-            {"Zastávka v obvodu stanice", PointType.Stop},
-            {"Závorářské stanoviště", PointType.Point}
+            { "Automatické hradlo", PointType.Point },
+            { "Automatické hradlo a zastávka", PointType.Stop },
+            { "Automatické hradlo, nákladiště a zastávka", PointType.Stop },
+            { "Dopr.body na cizím území (blíže neurčené)", PointType.Point },
+            { "Dopravna D3", PointType.Point },
+            { "Dopravna radiobloku", PointType.Point },
+            { "Hláska", PointType.Point },
+            { "Hláska a zastávka", PointType.Stop },
+            { "Hláska, nákladiště a zastávka", PointType.Stop },
+            { "Hradlo", PointType.Point },
+            { "Hradlo a zastávka", PointType.Stop },
+            { "Hranice infrastruktur", PointType.InnerBoundary },
+            { "Hranice oblastí", PointType.InnerBoundary },
+            { "Hranice OPŘ totožná s hranicí VÚSC", PointType.InnerBoundary },
+            { "Hranice TUDU (začátek nebo konec TUDU)", PointType.InnerBoundary },
+            { "Hranice třídy sklonu", PointType.InnerBoundary },
+            { "Jiné dopravní body", PointType.Point },
+            { "Kolejová křižovatka", PointType.Crossing },
+            { "Kolejová skupina stanice nebo jiného DVM", PointType.Point },
+            { "Nákladiště", PointType.Point },
+            { "Nákladiště a zastávka", PointType.Stop },
+            { "Obvod DVM nebo staniční kolejová skupina se zastávkou", PointType.Stop },
+            { "Odbočení ve stanici nebo v jiném DVM", PointType.Crossing },
+            { "Odbočení vlečky", PointType.Crossing },
+            { "Odbočka (dopravna s kolejovým rozvětvením)", PointType.Crossing },
+            { "Odbočka (dopravna) a zastávka", PointType.Stop },
+            { "Odbočka (dopravna), nákladiště a zastávka", PointType.Stop },
+            { "Odstup nezavěšeného postrku (na širé trati)", PointType.Point },
+            { "Samostatné kolejiště vlečky", PointType.Point },
+            { "Samostatné tarif.místo v rámci stanice nebo jiného DVM", PointType.Point },
+            { "Skok ve staničení", PointType.Point },
+            { "Stanice (z přepravního hlediska blíže neurčená)", PointType.Station },
+            { "Státní hranice", PointType.StateBoundary },
+            { "Trasovací bod TUDU, SENA", PointType.Point },
+            { "Výhybna", PointType.Siding },
+            { "Zastávka", PointType.Stop },
+            { "Zastávka lanové dráhy", PointType.Stop },
+            { "Zastávka náhradní autobusové dopravy", PointType.Stop },
+            { "Zastávka v obvodu stanice", PointType.Stop },
+            { "Závorářské stanoviště", PointType.Point }
         };
     }
 }
