@@ -125,7 +125,7 @@ namespace KdyPojedeVlak.Engine.SR70
             }
 
             /*
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"osm-overpass-stations-2019-12-11.csv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"osm-overpass-stations-2020-07-17.csv", '\t', Encoding.UTF8)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
             {
@@ -145,7 +145,7 @@ namespace KdyPojedeVlak.Engine.SR70
                         var dist = Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude);
                         if (dist > 0.005 && !problematicPoints.Contains(entry.FullIdentifier))
                         {
-                            DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0}: {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f));
+                            DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0}: {1}, {2} versus OSM: {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f));
                             problematicPoints.Add(entry.FullIdentifier);
                         }
                     }
