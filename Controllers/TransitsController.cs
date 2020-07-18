@@ -14,7 +14,7 @@ namespace KdyPojedeVlak.Controllers
     {
         private static readonly IList<KeyValuePair<string, string>> emptyPointList = new KeyValuePair<string, string>[0];
 
-        private static readonly int[] intervals = {1, 3, 5, 10, 15, 30, 60, 120, 240, 300, 480, 720, 1440};
+        private static readonly int[] intervals = { 1, 3, 5, 10, 15, 30, 60, 120, 240, 300, 480, 720, 1440 };
         private const int GoodMinimum = 4;
         private const int GoodEnough = 7;
         private const int AbsoluteMaximum = 40;
@@ -38,7 +38,7 @@ namespace KdyPojedeVlak.Controllers
             // TODO: Fulltext search
             var searchResults = dbModelContext.RoutingPoints.Where(p => p.Name.StartsWith(search))
                 .OrderBy(p => p.Name)
-                .Select(p => new {p.Code, p.Name})
+                .Select(p => new { p.Code, p.Name })
                 .Take(100)
                 .Select(p => new KeyValuePair<string, string>(p.Code, p.Name))
                 .ToList();
@@ -63,6 +63,7 @@ namespace KdyPojedeVlak.Controllers
                 return RedirectToAction("ChoosePoint");
             }
 
+            /*
             var point = dbModelContext.RoutingPoints
                 .Include(p => p.PassingTrains)
                 .ThenInclude(pt => pt.Year)
@@ -81,12 +82,23 @@ namespace KdyPojedeVlak.Controllers
                 .ThenInclude(ttv => ttv.Points)
                 .ThenInclude(p => p.Point)
                 .SingleOrDefault(p => p.Code == id);
+            */
+
+            var point = dbModelContext.RoutingPoints.SingleOrDefault(p => p.Code == id);
 
             if (point == null)
             {
                 // TODO: Error message?
                 return NotFound();
             }
+
+            var pointEntry = dbModelContext.Entry(point);
+            var passingTrainsCollection = pointEntry.Collection(p => p.PassingTrains);
+            passingTrainsCollection.Query().Include(pt => pt.Year).Load();
+            passingTrainsCollection.Query().Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Calendar).Load();
+            passingTrainsCollection.Query().Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.ImportedFrom).Load();
+            passingTrainsCollection.Query().Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Timetable).ThenInclude(tt => tt.Train).Load();
+            passingTrainsCollection.Query().Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Points).ThenInclude(tt => tt.Point).Load();
 
             var now = DateTime.Now;
             var startDate = at ?? now;
