@@ -38,6 +38,36 @@ namespace KdyPojedeVlak.Engine.Djr
             dbModelContext.SaveChanges();
         }
 
+        public static void RecomputeYearLimits(DbModelContext dbModelContext)
+        {
+            foreach (var year in dbModelContext.TimetableYears)
+            {
+                var minDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Min(c => (DateTime?) c.StartDate);
+                var maxDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Max(c => (DateTime?) c.EndDate);
+
+                if (minDate != null && year.MinDate > minDate)
+                {
+                    DebugLog.LogProblem("Changed MinDate for {0} from {1} to {2}", year.Year, year.MinDate, minDate);
+                    year.MinDate = minDate.GetValueOrDefault();
+                }
+                if (maxDate != null && year.MaxDate < maxDate)
+                {
+                    DebugLog.LogProblem("Changed MaxDate for {0} from {1} to {2}", year.Year, year.MaxDate, maxDate);
+                    year.MaxDate = maxDate.GetValueOrDefault();
+                }
+
+                if (minDate != null && year.MinDate != minDate)
+                {
+                    DebugLog.LogProblem("MinDate mismatch for {0}: {1} vs {2}", year.Year, year.MinDate, minDate);
+                }
+                if (maxDate != null && year.MaxDate != maxDate)
+                {
+                    DebugLog.LogProblem("MaxDate mismatch for {0}: {1} vs {2}", year.Year, year.MaxDate, maxDate);
+                }
+            }
+            dbModelContext.SaveChanges();
+        }
+
         private static bool IsGzip(string filename)
         {
             using var file = File.OpenRead(filename);
@@ -358,7 +388,7 @@ namespace KdyPojedeVlak.Engine.Djr
                         {
                             Passage.AttribSubsidiaryLocationType,
                             (location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
-                                 ?.LocationSubsidiaryTypeCode == null
+                                ?.LocationSubsidiaryTypeCode == null
                                 ? SubsidiaryLocationType.None
                                 : defSubsidiaryLocationType[
                                     location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode

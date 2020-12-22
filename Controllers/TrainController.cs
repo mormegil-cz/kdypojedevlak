@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using KdyPojedeVlak.Engine;
@@ -91,6 +92,10 @@ namespace KdyPojedeVlak.Controllers
             }
 
             var dbYear = GetYear(year);
+            if (year == null)
+            {
+                DebugLog.LogProblem("No year found for {0}", year);
+            }
 
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null)
@@ -148,6 +153,10 @@ namespace KdyPojedeVlak.Controllers
             if (String.IsNullOrEmpty(id)) return null;
 
             var year = GetYear(yearNumber);
+            if (year == null)
+            {
+                DebugLog.LogProblem("No year found for {0}", year);
+            }
 
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null) return null;
@@ -168,12 +177,13 @@ namespace KdyPojedeVlak.Controllers
             }
             if (timetable == null) return null;
 
-            var pointsInVariants = timetable.Variants.Select(
+            var passagesInVariants = timetable.Variants.Select(
                 variant => variant.Points
                     .OrderBy(p => p.Order)
-                    .Select(point => point.Point)
+                    .Select(point => point)
                     .ToList()
             ).ToList();
+            var pointsInVariants = passagesInVariants.Select(variant => variant.Select(passage => passage.Point).ToList()).ToList();
             var pointList = ListMerger.MergeLists(pointsInVariants);
             var pointIndices = new Dictionary<RoutingPoint, int>(pointList.Count);
             for (var i = 0; i < pointList.Count; ++i)
@@ -188,11 +198,11 @@ namespace KdyPojedeVlak.Controllers
             // pointList.Select((point, index) => (point, index)).ToDictionary(tuple => tuple.point, tuple => tuple.index);
 
             var columns = new List<List<Passage>>(timetable.Variants.Count);
-            foreach (var variant in timetable.Variants)
+            foreach(var pointsInVariant in passagesInVariants)
             {
-                var column = new Passage[pointList.Count];
+                var column = new Passage?[pointList.Count];
                 var lastIndex = -1;
-                foreach (var point in variant.Points)
+                foreach (var point in pointsInVariant)
                 {
                     var pointIndex = pointIndices[point.Point];
                     if (column[pointIndex] != null)
@@ -211,7 +221,7 @@ namespace KdyPojedeVlak.Controllers
                     lastIndex = pointIndex;
                 }
 
-                columns.Add(column.ToList());
+                columns.Add(column.ToList()!);
             }
 
             var variantRoutingPoints = new List<List<Passage>>(pointList.Count);
@@ -247,7 +257,7 @@ namespace KdyPojedeVlak.Controllers
             return new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags, companies, vagonWebCompanyId);
         }
 
-        private TimetableYear GetYear(int? yearNumber)
+        private TimetableYear? GetYear(int? yearNumber)
         {
             if (yearNumber == null)
             {

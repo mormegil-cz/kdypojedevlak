@@ -32,7 +32,8 @@ namespace KdyPojedeVlak.Engine.SR70
 
             codebook = new Dictionary<string, PointCodebookEntry>();
 
-            CodebookHelpers.LoadCsvData(path, @"SR70-2020-06-14.csv", ';', Encoding.GetEncoding(1250))
+
+            CodebookHelpers.LoadCsvData(path, @"SR70-2020-12-08.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r))
                 .IntoDictionary(codebook, r => r.ID, r => new PointCodebookEntry
                 {
@@ -45,6 +46,41 @@ namespace KdyPojedeVlak.Engine.SR70
                 });
 
             // add historical data for missing points
+            /*
+            foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2020-09-14.csv", ';', Encoding.GetEncoding(1250))
+                .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
+            {
+                if (codebook.ContainsKey(point.ID)) continue;
+
+                codebook.Add(point.ID, new PointCodebookEntry
+                {
+                    ID = point.Row[0],
+                    LongName = point.Row[1],
+                    ShortName = point.Row[3],
+                    Type = ParsePointType(point.Row[10]),
+                    Longitude = ParseGeoCoordinate(point.Row[28]),
+                    Latitude = ParseGeoCoordinate(point.Row[29]),
+                });
+
+                DebugLog.LogDebugMsg("Additional point in 2020-09 codebook: {0}", point.ID);
+            }
+            foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2020-06-14.csv", ';', Encoding.GetEncoding(1250))
+                .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
+            {
+                if (codebook.ContainsKey(point.ID)) continue;
+
+                codebook.Add(point.ID, new PointCodebookEntry
+                {
+                    ID = point.Row[0],
+                    LongName = point.Row[2],
+                    ShortName = point.Row[4],
+                    Type = ParsePointType(point.Row[11]),
+                    Longitude = ParseGeoCoordinate(point.Row[29]),
+                    Latitude = ParseGeoCoordinate(point.Row[30]),
+                });
+
+                DebugLog.LogDebugMsg("Additional point in 2020-06 codebook: {0}", point.ID);
+            }
             foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2019-12-15.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
             {
@@ -62,6 +98,7 @@ namespace KdyPojedeVlak.Engine.SR70
 
                 DebugLog.LogDebugMsg("Additional point in 2019 codebook: {0}", point.ID);
             }
+            */
 
             foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2017-12-10.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
@@ -95,7 +132,7 @@ namespace KdyPojedeVlak.Engine.SR70
             }
 
             var problematicPoints = new HashSet<String>();
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2020-06-29.tsv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2020-12-22.tsv", '\t', Encoding.UTF8)
                 .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
             )
             {
@@ -125,7 +162,7 @@ namespace KdyPojedeVlak.Engine.SR70
             }
 
             /*
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"osm-overpass-stations-2020-07-17.csv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"osm-overpass-stations-2020-12-22.csv", '\t', Encoding.UTF8)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
             {
@@ -159,6 +196,25 @@ namespace KdyPojedeVlak.Engine.SR70
 
             DebugLog.LogDebugMsg("{0} point(s)", codebook.Count);
 
+            var pointsWithWikidata = new Dictionary<PointType, Tuple<int, int>>(codebook.Count);
+            foreach (var entry in codebook.Values.Where(value => value.Latitude != null))
+            {
+                if (String.IsNullOrEmpty(entry.WikidataItem) && (entry.Type == PointType.Stop || entry.Type == PointType.Station))
+                {
+                    Console.WriteLine($"'{entry.LongName}' ({entry.ID}) {entry.Type} missing");
+                }
+                pointsWithWikidata.TryGetValue(entry.Type, out var currentCount);
+                if (currentCount == null) currentCount = Tuple.Create(0, 0);
+                if (String.IsNullOrEmpty(entry.WikidataItem)) currentCount = Tuple.Create(currentCount.Item1, currentCount.Item2 + 1);
+                else currentCount = Tuple.Create(currentCount.Item1 + 1, currentCount.Item2);
+                pointsWithWikidata[entry.Type] = currentCount;
+            }
+            Console.WriteLine("Wikidata statistics per point type:");
+            foreach (var count in pointsWithWikidata)
+            {
+                Console.WriteLine($"{count.Key}: {count.Value.Item1} with Wikidata, {count.Value.Item2} without ({100.0m * count.Value.Item1 / (count.Value.Item1 + count.Value.Item2):N1} %)");
+            }
+
             var pointList = codebook.Where(p => p.Value.Latitude != null).ToList();
             var pointIDs = pointList.Select(p => p.Key).ToArray();
             var pointCoordinates = pointList.Select(p => new[] { p.Value.Latitude.GetValueOrDefault(), p.Value.Longitude.GetValueOrDefault() }).ToArray();
@@ -189,7 +245,7 @@ namespace KdyPojedeVlak.Engine.SR70
 
         private static PointType ParsePointType(string typeStr)
         {
-            return !pointTypePerName.TryGetValue(typeStr, out var type) ? PointType.Unknown : type;
+            return !pointTypePerName.TryGetValue(typeStr.Trim(), out var type) ? PointType.Unknown : type;
         }
 
         private static float? ParseGeoCoordinate(string posStr)
@@ -225,8 +281,8 @@ namespace KdyPojedeVlak.Engine.SR70
             { "Automatické hradlo a zastávka", PointType.Stop },
             { "Automatické hradlo, nákladiště a zastávka", PointType.Stop },
             { "Dopr.body na cizím území (blíže neurčené)", PointType.Point },
-            { "Dopravna D3", PointType.Point },
-            { "Dopravna radiobloku", PointType.Point },
+            { "Dopravna D3", PointType.Stop },
+            { "Dopravna radiobloku", PointType.Stop },
             { "Hláska", PointType.Point },
             { "Hláska a zastávka", PointType.Stop },
             { "Hláska, nákladiště a zastávka", PointType.Stop },
@@ -252,13 +308,14 @@ namespace KdyPojedeVlak.Engine.SR70
             { "Samostatné kolejiště vlečky", PointType.Point },
             { "Samostatné tarif.místo v rámci stanice nebo jiného DVM", PointType.Point },
             { "Skok ve staničení", PointType.Point },
+            { "Stanice", PointType.Station },
             { "Stanice (z přepravního hlediska blíže neurčená)", PointType.Station },
             { "Státní hranice", PointType.StateBoundary },
             { "Trasovací bod TUDU, SENA", PointType.Point },
             { "Výhybna", PointType.Siding },
             { "Zastávka", PointType.Stop },
             { "Zastávka lanové dráhy", PointType.Stop },
-            { "Zastávka náhradní autobusové dopravy", PointType.Stop },
+            { "Zastávka náhradní autobusové dopravy", PointType.Point },
             { "Zastávka v obvodu stanice", PointType.Stop },
             { "Závorářské stanoviště", PointType.Point }
         };

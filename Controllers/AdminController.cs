@@ -77,6 +77,11 @@ namespace KdyPojedeVlak.Controllers
                     InfoMessage.RegisterMessage(TempData, MessageClass.Success, "Pojmenování všech kalendářů přepočítáno");
                     return RedirectToAction("Index");
 
+                case "RecomputeYearLimits":
+                    DjrSchedule.RecomputeYearLimits(dbModelContext);
+                    InfoMessage.RegisterMessage(TempData, MessageClass.Success, "Rozsahy všech roků přepočítány");
+                    return RedirectToAction("Index");
+
                 default:
                     InfoMessage.RegisterMessage(TempData, MessageClass.Danger, "Cože?");
                     return RedirectToAction("Index");
