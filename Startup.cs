@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -68,7 +69,10 @@ namespace KdyPojedeVlak
             });
 
             services.AddDbContext<DbModelContext>(
-                options => options.UseSqlite(Configuration.GetConnectionString("Database")));
+                options => options
+                    .UseSqlite(Configuration.GetConnectionString("Database"))
+                    .ConfigureWarnings(w => w.Log(RelationalEventId.MultipleCollectionIncludeWarning))
+            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
