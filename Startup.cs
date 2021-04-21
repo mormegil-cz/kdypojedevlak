@@ -130,8 +130,12 @@ namespace KdyPojedeVlak
                 using var serviceScope = serviceScopeFactory.CreateScope();
                 using var dbModelContext = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
 
-                if (RecreateDatabase) dbModelContext.Database.EnsureDeleted();
-                dbModelContext.Database.EnsureCreated();
+                if (RecreateDatabase)
+                {
+                    dbModelContext.Database.EnsureDeleted();
+                    dbModelContext.Database.EnsureCreated();
+                }
+                dbModelContext.Database.Migrate();
 
                 ScheduleVersionInfo.Initialize(dbModelContext);
 
