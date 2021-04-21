@@ -183,3 +183,7 @@ a.silent-link {
     width: 100%;
     height: 800px;
 }
+
+.note-icons {
+    font-family: 'Segoe UI Symbol', 'Arial Unicode MS', 'Cambria', "Helvetica Neue", Helvetica, Arial, sans-serif;
+}

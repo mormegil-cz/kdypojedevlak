@@ -66,6 +66,13 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 .HasKey(o => new { o.PointAId, o.PointBId });
             modelBuilder.Entity<NeighboringPoints>()
                 .HasIndex(o => new { o.PointBId, o.PointAId });
+
+            modelBuilder.Entity<PttNoteForVariant>()
+                .HasDiscriminator<int>("Kind")
+                .HasValue<CentralPttNoteForVariant>(1)
+                .HasValue<NonCentralPttNoteForVariant>(2);
+            modelBuilder.Entity<PttNoteForVariant>()
+                .HasIndex(o => o.TrainId);
         }
 
         public HashSet<RoutingPoint> GetNeighboringPoints(RoutingPoint point)
@@ -178,7 +185,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
 
         private static Guid ComputeGuid(DateTime startDate, bool[] bitmap, int startIndex)
         {
-            return BuildGuidFromHash(String.Format("{0}|{1}", startDate.ToString("o", CultureInfo.InvariantCulture),
+            return BuildGuidFromHash(String.Format(CultureInfo.InvariantCulture, "{0:o}|{1}", startDate,
                 bitmap.Skip(startIndex).Aggregate(new StringBuilder(bitmap.Length - startIndex), (sb, value) =>
                 {
                     sb.Append(value ? '1' : '0');
@@ -186,10 +193,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
                 }).ToString()));
         }
 
-        private static Guid BuildGuidFromHash(string data)
-        {
-            return new Guid(GuidEx.NewGuid(data, calendarNamespaceGuid).ToByteArray());
-        }
+        private static Guid BuildGuidFromHash(string data) => new(GuidEx.NewGuid(data, calendarNamespaceGuid).ToByteArray());
     }
 
     public class RoutingPoint
@@ -323,15 +327,11 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [Required]
         public CalendarDefinition Calendar { get; set; }
 
-        public string DataJson { get; set; }
-
         public ImportedFile ImportedFrom { get; set; }
 
-        [NotMapped]
-        // TODO: Decode data JSON
-        public Dictionary<string, string> Data { get; set; }
-
         public virtual List<Passage> Points { get; set; }
+
+        public virtual List<PttNoteForVariant> PttNotes { get; set; }
     }
 
     public class Passage
@@ -451,9 +451,53 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public RoutingPoint PointB { get; set; }
     }
 
+    public abstract class PttNoteForVariant
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public int TrainId { get; set; }
+
+        [ForeignKey("TrainId")]
+        public TrainTimetableVariant TrainTimetableVariant { get; set; }
+
+        [Required]
+        public Passage From { get; set; }
+
+        [Required]
+        public Passage To { get; set; }
+
+        [Required]
+        public bool OnArrival { get; set; }
+
+        [Required]
+        public CalendarDefinition Calendar { get; set; }
+    }
+
+    public class CentralPttNoteForVariant : PttNoteForVariant
+    {
+        [Required]
+        public CentralPttNote Type { get; set; }
+    }
+
+    public class NonCentralPttNoteForVariant : PttNoteForVariant
+    {
+        [Required]
+        public string Text { get; set; }
+
+        [Required]
+        public HeaderDisplay ShowInHeader { get; set; }
+
+        [Required]
+        public FooterDisplay ShowInFooter { get; set; }
+
+        [Required]
+        public bool IsTariff { get; set; }
+    }
+
     internal static class DbModelUtils
     {
-        public static Dictionary<string, string> LoadDataJson(string json) => JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+        public static Dictionary<string, string> LoadDataJson(string json) => JsonConvert.DeserializeObject<Dictionary<string, string>>(json ?? "{}");
 
         public static string StoreDataJson(Dictionary<string, string> json) => JsonConvert.SerializeObject(json);
 

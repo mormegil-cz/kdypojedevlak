@@ -1,7 +1,9 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -18,10 +20,12 @@ namespace KdyPojedeVlak.Engine.Djr
     {
         public static void ImportNewFiles(DbModelContext dbModelContext, Dictionary<string, long> availableDataFiles)
         {
-            foreach (var file in availableDataFiles)
+            // %%NOCOMMIT: remove temporary patch
+            foreach (var file in availableDataFiles.Where(df => df.Key.Contains(@"\2021\")))
             {
                 ImportCompressedDataFile(file.Key, file.Value, dbModelContext);
             }
+            DebugLog.LogDebugMsg("Import done");
         }
 
         public static void RenameAllCalendars(DbModelContext dbModelContext)
@@ -198,12 +202,15 @@ namespace KdyPojedeVlak.Engine.Djr
             }
             var operationalTrainNumber = operationalTrainNumbers.FirstOrDefault();
 
-            var networkSpecificParameters = message.NetworkSpecificParameter.ToDictionary(param => param.Name, param => param.Value);
-            networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out var trainName);
-//            if (networkSpecificParameters.Count - (trainName != null ? 1 : 0) > 0)
-//            {
-//                Console.WriteLine(trainId.Company + "/" + trainId.Core);
-//            }
+            var networkSpecificParameters = new Dictionary<string, List<string>>();
+            foreach (var param in message.NetworkSpecificParameter)
+            {
+                if (!networkSpecificParameters.TryGetValue(param.Name, out var currList)) currList = new List<string>(1);
+                currList.Add(param.Value);
+                networkSpecificParameters[param.Name] = currList;
+            }
+            networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out var trainNames);
+            var trainName = trainNames == null ? null : String.Join('/', trainNames);
 
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == operationalTrainNumber);
             if (train == null)
@@ -217,7 +224,7 @@ namespace KdyPojedeVlak.Engine.Djr
             }
 
             var calendarBitmap = plannedCalendar.BitmapDays.Select(c => c == '1').ToArray();
-            var trainCalendar = new CalendarDefinition
+            var dbCalendar = FindOrCreateCalendar(dbModelContext, new CalendarDefinition
             {
                 // TODO: trainCalendar.BaseDate??
                 Description = CalendarNamer.DetectName(calendarBitmap, calendarMinDate, calendarMaxDate),
@@ -225,14 +232,7 @@ namespace KdyPojedeVlak.Engine.Djr
                 EndDate = calendarMaxDate,
                 TimetableYear = dbTimetableYear,
                 Bitmap = calendarBitmap
-            };
-            var dbCalendar = dbModelContext.CalendarDefinitions.SingleOrDefault(c => c.Guid == trainCalendar.Guid);
-            if (dbCalendar == null)
-            {
-                dbCalendar = trainCalendar;
-                dbModelContext.CalendarDefinitions.Add(dbCalendar);
-                DebugLog.LogDebugMsg("Created calendar {0}", trainCalendar.Guid);
-            }
+            });
 
             var trainCategories = message.CZPTTInformation.CZPTTLocation.Where(loc => loc.CommercialTrafficType != null).Select(loc => defTrainCategory[loc.CommercialTrafficType]).ToHashSet();
             if (trainCategories.Count > 1)
@@ -277,18 +277,16 @@ namespace KdyPojedeVlak.Engine.Djr
                 PathVariantId = pathIdentifier,
                 TrainVariantId = trainIdentifier,
                 ImportedFrom = importedFile,
-                Data = new Dictionary<string, string>
-                {
-                    // TODO: Train timetable variant data
-                },
                 Points = new List<Passage>()
             };
             dbModelContext.Add(trainTimetableVariant);
 
             var locationIndex = 0;
             RoutingPoint? prevPoint = null;
-            foreach (var location in message.CZPTTInformation.CZPTTLocation)
+            var passages = new Dictionary<string, List<Passage>>(message.CZPTTInformation.CZPTTLocation.Count);
+            foreach (var location in LinqExtensions.ConcatExisting<LocationBasicInfo>(message.CZPTTHeader?.CZForeignOriginLocation, message.CZPTTInformation.CZPTTLocation, message.CZPTTHeader?.CZForeignDestinationLocation))
             {
+                var locationRawID = location.CountryCodeISO + location.LocationPrimaryCode;
                 var locationID = location.CountryCodeISO + ":" + location.LocationPrimaryCode;
                 var dbPoint = dbModelContext.RoutingPoints.SingleOrDefault(rp => rp.Code == locationID);
                 if (dbPoint == null)
@@ -317,17 +315,18 @@ namespace KdyPojedeVlak.Engine.Djr
                     DebugLog.LogDebugMsg("Created point '{0}'", codebookEntry.LongName);
                 }
 
-                var timingPerType = location.TimingAtLocation?.Timing?.ToDictionary(t => t.TimingQualifierCode);
+                var locationFull = location as CZPTTLocation;
+                var timingPerType = locationFull?.TimingAtLocation?.Timing?.ToDictionary(t => t.TimingQualifierCode);
                 Timing? arrivalTiming = null;
                 Timing? departureTiming = null;
                 timingPerType?.TryGetValue("ALA", out arrivalTiming);
                 timingPerType?.TryGetValue("ALD", out departureTiming);
 
                 ISet<TrainOperation> trainOperations;
-                if (location.TrainActivity?.Count > 0)
+                if ((locationFull?.TrainActivity?.Count ?? 0) > 0)
                 {
                     trainOperations = new SortedSet<TrainOperation>();
-                    foreach (var activity in location.TrainActivity)
+                    foreach (var activity in locationFull!.TrainActivity)
                     {
                         trainOperations.Add(defTrainOperation[activity.TrainActivityType]);
                     }
@@ -378,42 +377,184 @@ namespace KdyPojedeVlak.Engine.Djr
                     ArrivalTime = arrivalTiming?.AsTimeSpan(),
                     DepartureDay = departureTiming?.Offset ?? 0,
                     DepartureTime = departureTiming?.AsTimeSpan(),
-                    DwellTime = location.TimingAtLocation?.DwellTime,
+                    DwellTime = locationFull?.TimingAtLocation?.DwellTime,
                     Data = new Dictionary<string, string?>
                     {
                         // TODO: JourneyLocationTypeCode
                         { Passage.AttribTrainOperations, String.Join(';', trainOperations) },
-                        { Passage.AttribSubsidiaryLocation, location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code },
-                        { Passage.AttribSubsidiaryLocationName, location.LocationSubsidiaryIdentification?.LocationSubsidiaryName },
+                        { Passage.AttribSubsidiaryLocation, locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code },
+                        { Passage.AttribSubsidiaryLocationName, locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryName },
                         {
                             Passage.AttribSubsidiaryLocationType,
-                            (location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                            (locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
                                 ?.LocationSubsidiaryTypeCode == null
                                 ? SubsidiaryLocationType.None
                                 : defSubsidiaryLocationType[
-                                    location.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                                    locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
                                         ?.LocationSubsidiaryTypeCode ?? "0"]).ToString()
                         },
                     }
                 };
                 trainTimetableVariant.Points.Add(passage);
                 dbModelContext.Add(passage);
+
+                if (passages.Count == 0) passages["_FIRST"] = new List<Passage>(1) { passage };
+
+                if (!passages.TryGetValue(locationRawID, out var passageListPerID)) passageListPerID = new List<Passage>(2);
+                passageListPerID.Add(passage);
+                passages[locationRawID] = passageListPerID;
             }
 
+            if (prevPoint != null)
+            {
+                passages["_LAST"] = new List<Passage>(1) { trainTimetableVariant.Points.Last() };
+            }
+
+            dbModelContext.SaveChanges();
+
+            // 0. List<string> → List<string[]>
+            var calendarDefinitionPieces = networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZCalendarPTTNote.ToString(), out var calendarPttNoteDefinitionLines) ? calendarPttNoteDefinitionLines.Select(line => line.Split('|')).ToList() : null;
+
+            // 1. List<string> → Dictionary<string, string>
+            var calendarDefinitionStrings = calendarDefinitionPieces == null ? null : MergeNetworkSpecificCalendarDefinitions(calendarDefinitionPieces);
+
+            // 2. Dictionary<string, string> → Dictionary<string, CalendarDefinition>
+            var pttNoteCalendars = calendarDefinitionStrings == null ? null : ParseNetworkSpecificCalendarDefinitions(calendarDefinitionStrings, dbTimetableYear, dbModelContext);
+
+            if (networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZCentralPTTNote.ToString(), out var centralPttNoteDefinitions))
+            {
+                dbModelContext.AddRange(centralPttNoteDefinitions.Select(def => ParseCentralPttNoteDefinition(def, passages, pttNoteCalendars, trainTimetableVariant)));
+            }
+            if (networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZNonCentralPTTNote.ToString(), out var nonCentralPttNoteDefinitions))
+            {
+                dbModelContext.AddRange(nonCentralPttNoteDefinitions.Select(def => ParseNonCentralPttNoteDefinition(def, passages, pttNoteCalendars, trainTimetableVariant)));
+            }
             dbModelContext.SaveChanges();
 
             return operationalTrainNumber;
         }
 
+        private static CalendarDefinition FindOrCreateCalendar(DbModelContext dbModelContext, CalendarDefinition trainCalendar)
+        {
+            var dbCalendar = dbModelContext.CalendarDefinitions.SingleOrDefault(c => c.Guid == trainCalendar.Guid);
+            if (dbCalendar != null) return dbCalendar;
+
+            dbModelContext.CalendarDefinitions.Add(trainCalendar);
+            dbModelContext.SaveChanges();
+            DebugLog.LogDebugMsg("Created calendar {0}", trainCalendar.Guid);
+            return trainCalendar;
+        }
+
+        private static IDictionary<string, string[]> MergeNetworkSpecificCalendarDefinitions(List<string[]> lines)
+        {
+            var result = lines.ToDictionaryLax(pieces => pieces[0], pieces => pieces);
+            var merged = new HashSet<string>();
+            foreach (var entry in result)
+            {
+                var mergeId = entry.Value.Length < 5 ? null : entry.Value[4];
+                if (!String.IsNullOrEmpty(mergeId))
+                {
+                    entry.Value[3] += result[mergeId][3];
+                    merged.Add(mergeId);
+                }
+            }
+            result.RemoveAll(merged);
+            return result;
+        }
+
+        private static IDictionary<string, CalendarDefinition> ParseNetworkSpecificCalendarDefinitions(IDictionary<string, string[]> calendarDefinitionStrings, TimetableYear dbTimetableYear, DbModelContext dbModelContext)
+        {
+            var pttNoteCalendars = new Dictionary<string, CalendarDefinition>(calendarDefinitionStrings.Count);
+            foreach (var def in calendarDefinitionStrings)
+            {
+                var pieces = def.Value;
+                var id = pieces[0];
+                if (id != def.Key) throw new FormatException("Calendar ID mismatch");
+                var bitmapStr = pieces[3];
+                var bitmap = bitmapStr.Select(c => c == '1').ToArray();
+                var startDate = DateTime.ParseExact(pieces[1], "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                var endDate = pieces[2].Length == 0 ? startDate.AddDays(bitmap.Length - 1) : DateTime.ParseExact(pieces[2], "yyyyMMdd", CultureInfo.InvariantCulture);
+                if ((endDate - startDate).TotalDays >= bitmap.Length)
+                {
+                    throw new FormatException("Too short bitmap");
+                }
+                var calendar = FindOrCreateCalendar(dbModelContext, new CalendarDefinition
+                {
+                    TimetableYear = dbTimetableYear,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Bitmap = bitmap,
+                    Description = CalendarNamer.DetectName(bitmap, startDate, endDate)
+                });
+                pttNoteCalendars.Add(id, calendar);
+            }
+            return pttNoteCalendars;
+        }
+
+        private static CentralPttNoteForVariant ParseCentralPttNoteDefinition(string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition> calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
+        {
+            var pieces = definition.Split('|');
+
+            var fromCode = pieces[1];
+            var fromOccurrence = Int32.Parse(pieces[2]);
+            var toCode = pieces[3];
+            var toOccurrence = Int32.Parse(pieces[4]);
+
+            if (!passages.TryGetValue(fromCode, out var fromList)) fromList = passages["_FIRST"];
+            if (!passages.TryGetValue(toCode, out var toList)) toList = passages["_LAST"];
+
+            var from = fromList[fromOccurrence];
+            var to = toList[toOccurrence];
+
+            return new CentralPttNoteForVariant
+            {
+                TrainTimetableVariant = trainTimetableVariant,
+                Type = defCentralPttNote[pieces[0]],
+                From = from,
+                To = to,
+                OnArrival = pieces[5] == "1",
+                Calendar = calendarDefinitions[pieces[6]]
+            };
+        }
+
+        private static NonCentralPttNoteForVariant ParseNonCentralPttNoteDefinition(string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition> calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
+        {
+            var pieces = definition.Split('|');
+
+            var fromCode = pieces[0];
+            var fromOccurrence = Int32.Parse(pieces[1]);
+            var toCode = pieces[2];
+            var toOccurrence = Int32.Parse(pieces[3]);
+
+            if (!passages.TryGetValue(fromCode, out var fromList)) fromList = passages["_FIRST"];
+            if (!passages.TryGetValue(toCode, out var toList)) toList = passages["_LAST"];
+
+            var from = fromList[fromOccurrence];
+            var to = toList[toOccurrence];
+
+            return new NonCentralPttNoteForVariant
+            {
+                TrainTimetableVariant = trainTimetableVariant,
+                Text = pieces[4],
+                From = from,
+                To = to,
+                ShowInHeader = defShowInHeader[pieces[5]],
+                ShowInFooter = defShowInFooter[pieces[6]],
+                IsTariff = pieces[7] == "1",
+                OnArrival = pieces[8] == "1",
+                Calendar = calendarDefinitions[pieces[9]],
+            };
+        }
+
         private static readonly Dictionary<string, SubsidiaryLocationType> defSubsidiaryLocationType =
-            new Dictionary<string, SubsidiaryLocationType>
+            new()
             {
                 { "0", SubsidiaryLocationType.Unknown },
                 { "1", SubsidiaryLocationType.StationTrack }
             };
 
         private static readonly Dictionary<string, TrainRoutePointType> defTrainRoutePointType =
-            new Dictionary<string, TrainRoutePointType>
+            new()
             {
                 { "00", TrainRoutePointType.Unknown },
                 { "01", TrainRoutePointType.Origin },
@@ -426,7 +567,7 @@ namespace KdyPojedeVlak.Engine.Djr
             };
 
         private static readonly Dictionary<string, TrafficType> defTrafficType =
-            new Dictionary<string, TrafficType>
+            new()
             {
                 { "11", TrafficType.Os },
                 { "C1", TrafficType.Ex },
@@ -443,7 +584,7 @@ namespace KdyPojedeVlak.Engine.Djr
             };
 
         private static readonly Dictionary<string, TrainCategory> defTrainCategory =
-            new Dictionary<string, TrainCategory>
+            new()
             {
                 { "50", TrainCategory.EuroCity },
                 { "63", TrainCategory.Intercity },
@@ -465,7 +606,7 @@ namespace KdyPojedeVlak.Engine.Djr
             };
 
         private static readonly Dictionary<string, TrainOperation> defTrainOperation =
-            new Dictionary<string, TrainOperation>
+            new()
             {
                 { "0001", TrainOperation.StopRequested },
                 { "0026", TrainOperation.Customs },
@@ -487,6 +628,61 @@ namespace KdyPojedeVlak.Engine.Djr
                 { "CZ05", TrainOperation.WaitForDelayedTrains },
                 { "0002", TrainOperation.OperationalStopOnly },
                 { "CZ13", TrainOperation.NonpublicStop }
+            };
+
+        private static readonly Dictionary<string, CentralPttNote> defCentralPttNote =
+            new()
+            {
+                { "10", CentralPttNote.Class12 },
+                { "11", CentralPttNote.Class1 },
+                { "12", CentralPttNote.Class2 },
+                { "13", CentralPttNote.SleepingCar },
+                { "14", CentralPttNote.CouchetteCar },
+                { "15", CentralPttNote.DirectCar },
+                { "16", CentralPttNote.Cars },
+                { "17", CentralPttNote.Disabled },
+                { "18", CentralPttNote.Restaurant },
+                { "19", CentralPttNote.Reservation },
+                { "20", CentralPttNote.ObligatoryReservation },
+                { "21", CentralPttNote.Baggage },
+                { "22", CentralPttNote.Bicycle },
+                { "23", CentralPttNote.Transfer },
+                { "24", CentralPttNote.Refreshments },
+                { "25", CentralPttNote.Cafe },
+                { "26", CentralPttNote.BaggageReservation },
+                { "27", CentralPttNote.BaggageObligatoryReservation },
+                { "28", CentralPttNote.BicycleReservation },
+                { "29", CentralPttNote.BicycleObligatoryReservation },
+                { "30", CentralPttNote.PowerSocket },
+                { "32", CentralPttNote.ReplacementBus },
+                { "33", CentralPttNote.Children },
+                { "34", CentralPttNote.DisabledPlatform },
+                { "35", CentralPttNote.SelfService },
+                { "36", CentralPttNote.NoBicycles },
+                { "37", CentralPttNote.HistoricTrain },
+                { "38", CentralPttNote.WomenSectionCD },
+                { "39", CentralPttNote.SilentSectionCD },
+                { "40", CentralPttNote.WifiCD },
+                { "41", CentralPttNote.PortalCD },
+                { "42", CentralPttNote.CinemaCD },
+                { "44", CentralPttNote.IntegratedTransportSystem },
+                { "45", CentralPttNote.DirectedBoarding }
+            };
+
+        private static readonly Dictionary<String, HeaderDisplay> defShowInHeader =
+            new()
+            {
+                { "1", HeaderDisplay.None },
+                { "2", HeaderDisplay.Icon },
+                { "3", HeaderDisplay.IconIfWholeRoute },
+            };
+
+        private static readonly Dictionary<String, FooterDisplay> defShowInFooter =
+            new()
+            {
+                { "0", FooterDisplay.None },
+                { "1", FooterDisplay.Everything },
+                { "2", FooterDisplay.EverythingExceptSection },
             };
     }
 
@@ -581,6 +777,46 @@ namespace KdyPojedeVlak.Engine.Djr
         NonpublicStop
     }
 
+    public enum CentralPttNote
+    {
+        Unknown,
+        Class12,
+        Class1,
+        Class2,
+        SleepingCar,
+        CouchetteCar,
+        DirectCar,
+        Cars,
+        Disabled,
+        Restaurant,
+        Reservation,
+        ObligatoryReservation,
+        Baggage,
+        Bicycle,
+        Transfer,
+        Refreshments,
+        Cafe,
+        BaggageReservation,
+        BaggageObligatoryReservation,
+        BicycleReservation,
+        BicycleObligatoryReservation,
+        PowerSocket,
+        ReplacementBus,
+        Children,
+        DisabledPlatform,
+        SelfService,
+        NoBicycles,
+        HistoricTrain,
+        WomenSectionCD,
+        SilentSectionCD,
+        WifiCD,
+        PortalCD,
+        CinemaCD,
+        Unknown43,
+        IntegratedTransportSystem,
+        DirectedBoarding,
+    }
+
     public enum NetworkSpecificParameterGlobal
     {
         Unknown,
@@ -592,5 +828,26 @@ namespace KdyPojedeVlak.Engine.Djr
         CZNonCentralPTTNote,
         CZCalendarPTTNote,
         CZTrainName
+    }
+
+    public enum NetworkSpecificParameterPassage
+    {
+        Unknown,
+        CZPublicService,
+        CZAlternativeTransport
+    }
+
+    public enum HeaderDisplay
+    {
+        None,
+        Icon,
+        IconIfWholeRoute
+    }
+
+    public enum FooterDisplay
+    {
+        None,
+        Everything,
+        EverythingExceptSection
     }
 }

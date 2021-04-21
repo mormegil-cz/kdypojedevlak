@@ -1,9 +1,12 @@
 ﻿@using KdyPojedeVlak.Helpers
 @using KdyPojedeVlak.Models
+@using KdyPojedeVlak.Engine.Djr
+@using KdyPojedeVlak.Engine.DbStorage
 @model KdyPojedeVlak.Models.TrainPlan
 @{
     ViewData["Title"] = "Vlak " + DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] + " " + Model.Train.TrainNumber + " " + Model.Train.Name;
     var pointCount = Model.Points.Count;
+    var isFirstStop = true;
 }
 
 <h2 title="@DisplayConsts.TrafficTypeNames[Model.Train.TrafficType]">
@@ -15,7 +18,7 @@
     <div class="col-md-2">
         <div class=btn-toolbar>
             <div class="btn-group" role="group">
-                <a href="@Url.Action("Map", new {id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year})" class="btn btn-default">
+                <a href="@Url.Action("Map", new { id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year })" class="btn btn-default">
                     <span class="glyphicon glyphicon-globe" aria-label="Mapa"></span>
                 </a>
             </div>
@@ -51,7 +54,7 @@
                     }
                     <li role="separator" class="divider"></li>
                     <li>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=https://kdypojedevlak.cz@(Url.Action("Details", new {id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year}))">Sdílet na Facebook</a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=https://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year }))">Sdílet na Facebook</a>
                     </li>
                 </ul>
             </div>
@@ -64,9 +67,25 @@
     <tr>
         <th></th>
         <th>Bod</th>
-        @foreach (var variant in Model.Train.Variants)
+        @foreach (var variant in Model.Train.Variants.OrderBy(v => v.ImportedFrom.CreationDate))
         {
-            <th scope="col" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()" colspan="3">@variant.Calendar.Description</th>
+            var pttNotes = variant.PttNotes;
+            <th scope="col" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()" colspan="3">
+                <div class="calendar-def">@variant.Calendar.Description</div>
+                @if (pttNotes.Count > 0)
+                {
+                    <div class="note-icons">
+                        @foreach (var note in pttNotes.OfType<CentralPttNoteForVariant>())
+                        {
+                            <span class="note-icon-@note.Type" title="@DisplayConsts.CentralPttNoteDescriptions[note.Type]">@DisplayConsts.CentralPttNoteIcons[note.Type]</span>
+                        }
+                        @foreach (var note in pttNotes.OfType<NonCentralPttNoteForVariant>())
+                        {
+                            <span class="note-noncentral-icon" title="@note.Text">🛈</span>
+                        }
+                    </div>
+                }
+            </th>
         }
     </tr>
     </thead>
@@ -80,7 +99,7 @@
                 <span class="point-type-icon point-type-icon-@point.Type@rowType"></span>
             </td>
             <td>
-                @Html.ActionLink(point.Name, "Nearest", "Transits", new {id = point.Code}, new {@class = "silent-link", title = point.ShortName})
+                @Html.ActionLink(point.Name, "Nearest", "Transits", new { id = point.Code }, new { @class = "silent-link", title = point.ShortName })
             </td>
             @foreach (var pointVariant in Model.VariantRoutingPoints[i])
             {
@@ -113,12 +132,9 @@
                         }
                     </td>
                     <td class="operation-icons">
-                        @if (pointVariant.TrainOperations.Count > 0)
+                        @foreach (var operation in pointVariant.TrainOperations)
                         {
-                            foreach (var operation in pointVariant.TrainOperations)
-                            {
-                                <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
-                            }
+                            <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
                         }
                     </td>
                 }

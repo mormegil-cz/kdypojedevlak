@@ -6,8 +6,8 @@
     <PackageId>kdypojedevlak</PackageId>
     <UserSecretsId>aspnet-KdyPojedeVlak-20160915124940</UserSecretsId>
     <RuntimeIdentifiers>win10-x64;win81-x64;win8-x64;win7-x64</RuntimeIdentifiers>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <LangVersion>8</LangVersion>
+    <TargetFramework>net5.0</TargetFramework>
+    <LangVersion>9</LangVersion>
     <RootNamespace>KdyPojedeVlak</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

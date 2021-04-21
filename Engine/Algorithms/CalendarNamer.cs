@@ -28,9 +28,9 @@ namespace KdyPojedeVlak.Engine.Algorithms
             SaturdayNonHoliday
         }
 
-        private static readonly string[] monthToRoman = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"};
+        private static readonly string[] monthToRoman = { "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII" };
 
-        private static readonly HashSet<DateTime> holidays = new HashSet<DateTime>
+        private static readonly HashSet<DateTime> holidays = new()
         {
             new DateTime(2017, 12, 24),
             new DateTime(2017, 12, 25),
@@ -74,30 +74,56 @@ namespace KdyPojedeVlak.Engine.Algorithms
             new DateTime(2020, 12, 24),
             new DateTime(2020, 12, 25),
             new DateTime(2020, 12, 26),
+            new DateTime(2021, 01, 01),
+            new DateTime(2021, 04, 02),
+            new DateTime(2021, 04, 05),
+            new DateTime(2021, 05, 01),
+            new DateTime(2021, 05, 08),
+            new DateTime(2021, 07, 05),
+            new DateTime(2021, 07, 06),
+            new DateTime(2021, 09, 28),
+            new DateTime(2021, 10, 28),
+            new DateTime(2021, 11, 17),
+            new DateTime(2021, 12, 24),
+            new DateTime(2021, 12, 25),
+            new DateTime(2021, 12, 26),
+            new DateTime(2022, 01, 01),
+            new DateTime(2022, 04, 15),
+            new DateTime(2022, 04, 18),
+            new DateTime(2022, 05, 01),
+            new DateTime(2022, 05, 08),
+            new DateTime(2022, 07, 05),
+            new DateTime(2022, 07, 06),
+            new DateTime(2022, 09, 28),
+            new DateTime(2022, 10, 28),
+            new DateTime(2022, 11, 17),
+            new DateTime(2022, 12, 24),
+            new DateTime(2022, 12, 25),
+            new DateTime(2022, 12, 26),
         };
 
-        private static readonly Dictionary<DayClass, Predicate<DateTime>> classifiers = new Dictionary<DayClass, Predicate<DateTime>>(7)
+        private static readonly Dictionary<DayClass, Predicate<DateTime>> classifiers = new(7)
         {
-            {DayClass.Monday, MakeDayClassifier(DayOfWeek.Monday)},
-            {DayClass.Tuesday, MakeDayClassifier(DayOfWeek.Tuesday)},
-            {DayClass.Wednesday, MakeDayClassifier(DayOfWeek.Wednesday)},
-            {DayClass.Thursday, MakeDayClassifier(DayOfWeek.Thursday)},
-            {DayClass.Friday, MakeDayClassifier(DayOfWeek.Friday)},
-            {DayClass.Saturday, MakeDayClassifier(DayOfWeek.Saturday)},
-            {DayClass.Sunday, MakeDayClassifier(DayOfWeek.Sunday)},
+            { DayClass.Monday, MakeDayClassifier(DayOfWeek.Monday) },
+            { DayClass.Tuesday, MakeDayClassifier(DayOfWeek.Tuesday) },
+            { DayClass.Wednesday, MakeDayClassifier(DayOfWeek.Wednesday) },
+            { DayClass.Thursday, MakeDayClassifier(DayOfWeek.Thursday) },
+            { DayClass.Friday, MakeDayClassifier(DayOfWeek.Friday) },
+            { DayClass.Saturday, MakeDayClassifier(DayOfWeek.Saturday) },
+            { DayClass.Sunday, MakeDayClassifier(DayOfWeek.Sunday) },
 
-            {DayClass.All, _ => true},
-            {DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt)},
-            {DayClass.Workday, dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt)},
-            {DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt)},
-            {DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt)},
-            {DayClass.NonSaturdayHoliday, dt => dt.DayOfWeek != DayOfWeek.Saturday && holidays.Contains(dt)},
+            { DayClass.All, _ => true },
+            { DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt) },
+            { DayClass.Workday, dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt) },
+            { DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt) },
+            { DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt) },
+            { DayClass.NonSaturdayHoliday, dt => dt.DayOfWeek != DayOfWeek.Saturday && holidays.Contains(dt) },
         };
 
         private class ClassPresence
         {
-            public readonly SortedSet<DateTime> YesDates = new SortedSet<DateTime>();
-            public readonly SortedSet<DateTime> NoDates = new SortedSet<DateTime>();
+            public readonly SortedSet<DateTime> YesDates = new();
+            public readonly SortedSet<DateTime> NoDates = new();
         }
 
         private class NamingResult
@@ -114,7 +140,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
             }
         }
 
-        private static readonly List<Func<Dictionary<DayClass, ClassPresence>, NamingResult>> namingStrategies = new List<Func<Dictionary<DayClass, ClassPresence>, NamingResult>>
+        private static readonly List<Func<Dictionary<DayClass, ClassPresence>, NamingResult>> namingStrategies = new()
         {
             EverydayStrategy,
             WorkdaysStrategy,
@@ -136,11 +162,11 @@ namespace KdyPojedeVlak.Engine.Algorithms
                 {
                     // U+2460 = ①
                     resultName.Append((char) (((int) cls) - ((int) DayClass.Monday) + 0x2460));
-                    AddAll(exceptionalNoGo, presence.NoDates);
+                    exceptionalNoGo.AddAll(presence.NoDates);
                 }
                 else
                 {
-                    AddAll(exceptionalGo, presence.YesDates);
+                    exceptionalGo.AddAll(presence.YesDates);
                 }
             }
 
@@ -151,31 +177,31 @@ namespace KdyPojedeVlak.Engine.Algorithms
             );
         }
 
-        private static NamingResult EverydayStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+        private static NamingResult EverydayStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
             "denně",
             Sets<DateTime>.EmptySortedSet,
             classPresences[DayClass.All].NoDates
         );
 
-        private static NamingResult WorkdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+        private static NamingResult WorkdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
             "⚒\uFE0E",
             new SortedSet<DateTime>(classPresences[DayClass.Holiday].YesDates.Concat(classPresences[DayClass.Saturday].YesDates)),
             classPresences[DayClass.Workday].NoDates
         );
 
-        private static NamingResult WorkdaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+        private static NamingResult WorkdaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
             "⚒\uFE0E⑥",
             new SortedSet<DateTime>(classPresences[DayClass.Sunday].YesDates.Concat(classPresences[DayClass.NonSaturdayHoliday].YesDates)),
             new SortedSet<DateTime>(classPresences[DayClass.Workday].NoDates.Concat(classPresences[DayClass.Saturday].NoDates))
         );
 
-        private static NamingResult HolidaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+        private static NamingResult HolidaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
             "✝\uFE0E",
             new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates.Concat(classPresences[DayClass.SaturdayNonHoliday].YesDates)),
             new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates)
         );
 
-        private static NamingResult HolidaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new NamingResult(
+        private static NamingResult HolidaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
             "✝\uFE0E⑥",
             new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates),
             new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates.Concat(classPresences[DayClass.SaturdayNonHoliday].NoDates))
@@ -184,14 +210,6 @@ namespace KdyPojedeVlak.Engine.Algorithms
         private static Predicate<DateTime> MakeDayClassifier(DayOfWeek dayOfWeek)
         {
             return dt => dt.DayOfWeek == dayOfWeek;
-        }
-
-        private static void AddAll<T>(ISet<T> set, IEnumerable<T> elems)
-        {
-            foreach (var elem in elems)
-            {
-                set.Add(elem);
-            }
         }
 
         public static string DetectName(bool[] calendarBitmap, DateTime validFrom, DateTime validTo)

@@ -14,7 +14,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
 
         private static class Implementation<T>
         {
-            private static readonly ListSection<T> emptyList = new ListSection<T>(new List<T>(0), 0, 0);
+            private static readonly ListSection<T> emptyList = new(new List<T>(0), 0, 0);
 
             public static List<T> MergeLists(List<List<T>> lists)
             {

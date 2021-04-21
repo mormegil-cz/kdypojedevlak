@@ -38,7 +38,7 @@ namespace KdyPojedeVlak.Controllers
 
                 if (dbModelContext.Trains.Any(t => t.Number == id))
                 {
-                    return RedirectToAction("Details", new {id});
+                    return RedirectToAction("Details", new { id });
                 }
                 else
                 {
@@ -50,7 +50,7 @@ namespace KdyPojedeVlak.Controllers
                 var trainByName = dbModelContext.TrainTimetables.Include(tt => tt.Train).FirstOrDefault(tt => tt.Name == search);
                 if (trainByName != null)
                 {
-                    return RedirectToAction("Details", new {id = trainByName.TrainNumber});
+                    return RedirectToAction("Details", new { id = trainByName.TrainNumber });
                 }
                 else
                 {
@@ -77,7 +77,7 @@ namespace KdyPojedeVlak.Controllers
             var plan = BuildTrainPlan(id, year);
             if (plan == null)
             {
-                return RedirectToAction("Index", new {search = id});
+                return RedirectToAction("Index", new { search = id });
             }
 
             return View(plan);
@@ -100,7 +100,7 @@ namespace KdyPojedeVlak.Controllers
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null)
             {
-                return RedirectToAction("Index", new {search = id});
+                return RedirectToAction("Index", new { search = id });
             }
 
             var timetableQuery = dbModelContext.TrainTimetables
@@ -118,7 +118,7 @@ namespace KdyPojedeVlak.Controllers
             }
             if (timetable == null)
             {
-                return RedirectToAction("Index", new {search = id});
+                return RedirectToAction("Index", new { search = id });
             }
 
             var pointsInVariants = timetable.Variants.Select(
@@ -162,12 +162,16 @@ namespace KdyPojedeVlak.Controllers
             if (train == null) return null;
 
             var timetableQuery = dbModelContext.TrainTimetables
+                .Include(tt => tt.Variants)
+                .ThenInclude(ttv => ttv.ImportedFrom)
                 .Include(tt => tt.TimetableYear)
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.Points)
                 .ThenInclude(p => p.Point)
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.Calendar)
+                .Include(tt => tt.Variants)
+                .ThenInclude(ttv => ttv.PttNotes)
                 .Where(t => t.Train == train);
 
             var timetable = timetableQuery.AsSplitQuery().SingleOrDefault(t => t.TimetableYear == year);
@@ -177,12 +181,14 @@ namespace KdyPojedeVlak.Controllers
             }
             if (timetable == null) return null;
 
-            var passagesInVariants = timetable.Variants.Select(
-                variant => variant.Points
-                    .OrderBy(p => p.Order)
-                    .Select(point => point)
-                    .ToList()
-            ).ToList();
+            var passagesInVariants = timetable.Variants
+                .OrderBy(variant => variant.ImportedFrom.CreationDate)
+                .Select(
+                    variant => variant.Points
+                        .OrderBy(p => p.Order)
+                        .Select(point => point)
+                        .ToList()
+                ).ToList();
             var pointsInVariants = passagesInVariants.Select(variant => variant.Select(passage => passage.Point).ToList()).ToList();
             var pointList = ListMerger.MergeLists(pointsInVariants);
             var pointIndices = pointList
@@ -190,8 +196,8 @@ namespace KdyPojedeVlak.Controllers
                 .GroupBy(rp => rp.point)
                 .ToDictionary(g => g.Key, g => g.Select(rp => rp.index).ToList());
 
-            var columns = new List<List<Passage>>(timetable.Variants.Count);
-            foreach(var pointsInVariant in passagesInVariants)
+            var columns = new List<List<Passage>>(passagesInVariants.Count);
+            foreach (var pointsInVariant in passagesInVariants)
             {
                 var column = new Passage?[pointList.Count];
                 var usedPointIndices = new Dictionary<RoutingPoint, int>(pointList.Count);
@@ -224,8 +230,8 @@ namespace KdyPojedeVlak.Controllers
             var variantRoutingPoints = new List<List<Passage>>(pointList.Count);
             for (var i = 0; i < pointList.Count; ++i)
             {
-                var variants = new List<Passage>(timetable.Variants.Count);
-                for (var j = 0; j < timetable.Variants.Count; ++j)
+                var variants = new List<Passage>(passagesInVariants.Count);
+                for (var j = 0; j < passagesInVariants.Count; ++j)
                 {
                     variants.Add(columns[j][i]);
                 }
@@ -233,8 +239,14 @@ namespace KdyPojedeVlak.Controllers
                 variantRoutingPoints.Add(variants);
             }
 
-            var pointCount = variantRoutingPoints.Count;
-            var majorPointFlags = variantRoutingPoints.Select((point, idx) => idx == 0 || idx == pointCount - 1 || point.Any(variant => variant != null && variant.IsMajorPoint)).ToList();
+            var isFirstPoint = true;
+            var majorPointFlags = new List<bool>(variantRoutingPoints.Count);
+            foreach (var point in variantRoutingPoints)
+            {
+                majorPointFlags.Add(isFirstPoint || point.Any(variant => variant is { IsMajorPoint: true }));
+                if (isFirstPoint && point.Any(variant => variant != null && (variant.ArrivalTime != null || variant.DepartureTime != null))) isFirstPoint = false;
+            }
+            majorPointFlags[^1] = true;
 
             var companies = timetable.Variants
                 .Select(v => v.TrainVariantId.Substring(0, 4))

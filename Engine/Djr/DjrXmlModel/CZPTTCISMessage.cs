@@ -9,6 +9,7 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
     {
         public Identifiers Identifiers { get; set; }
         public DateTime CZPTTCreation { get; set; }
+        public CZPTTHeader CZPTTHeader { get; set; }
         public CZPTTInformation CZPTTInformation { get; set; }
 
         [XmlElement]
@@ -28,6 +29,15 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
         public string Core { get; set; }
         public string Variant { get; set; }
         public int TimetableYear { get; set; }
+    }
+
+    public class CZPTTHeader
+    {
+        [XmlElement]
+        public List<CZForeignLocation> CZForeignOriginLocation { get; set; }
+
+        [XmlElement]
+        public List<CZForeignLocation> CZForeignDestinationLocation { get; set; }
     }
 
     public class CZPTTInformation
@@ -50,16 +60,20 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
         public DateTime? EndDateTime { get; set; }
     }
 
-    public class CZPTTLocation
+    public abstract class LocationBasicInfo
+    {
+        public string CountryCodeISO { get; set; }
+        public string LocationPrimaryCode { get; set; }
+        public string PrimaryLocationName { get; set; }
+    }
+
+    public class CZPTTLocation : LocationBasicInfo
     {
         [XmlAttribute]
         public string JourneyLocationTypeCode { get; set; }
 
-        public string CountryCodeISO { get; set; }
-        public string LocationPrimaryCode { get; set; }
         public LocationSubsidiaryIdentification LocationSubsidiaryIdentification { get; set; }
         public TimingAtLocation TimingAtLocation { get; set; }
-        public string PrimaryLocationName { get; set; }
         public string ResponsibleRU { get; set; }
         public string ResponsibleIM { get; set; }
         public string TrainType { get; set; }
@@ -72,6 +86,10 @@ namespace KdyPojedeVlak.Engine.Djr.DjrXmlModel
 
         [XmlElement]
         public List<NetworkSpecificParameter> NetworkSpecificParameter { get; set; }
+    }
+
+    public class CZForeignLocation : LocationBasicInfo
+    {
     }
 
     public class LocationSubsidiaryIdentification
