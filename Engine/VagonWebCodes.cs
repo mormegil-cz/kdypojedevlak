@@ -4,14 +4,14 @@ namespace KdyPojedeVlak.Engine
 {
     public static class VagonWebCodes
     {
-        public static readonly Dictionary<string, string> CompanyCodes = new Dictionary<string, string>
+        public static readonly Dictionary<string, string> CompanyCodes = new()
         {
             {"1154", "CD"},
             // { "3175", "SZD" },
             {"3189", "ARR"},
             {"3207", "MTR"},
             // { "3218", "JHMD" },
-            // { "3230", "DLB" },
+            { "3230", "DLB" },
             {"3244", "LE"},
             {"3246", "RJ"},
             // { "3266", "RETROLOK" },
