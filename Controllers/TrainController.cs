@@ -169,9 +169,13 @@ namespace KdyPojedeVlak.Controllers
                 .ThenInclude(ttv => ttv.Points)
                 .ThenInclude(p => p.Point)
                 .Include(tt => tt.Variants)
+                .ThenInclude(ttv => ttv.Points)
+                .ThenInclude(p => p.NetworkSpecificParameters)
+                .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.Calendar)
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.PttNotes)
+                .Include(tt => tt.Variants)
                 .Where(t => t.Train == train);
 
             var timetable = timetableQuery.AsSplitQuery().SingleOrDefault(t => t.TimetableYear == year);

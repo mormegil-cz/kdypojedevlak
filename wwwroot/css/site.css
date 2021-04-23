@@ -187,3 +187,12 @@ a.silent-link {
 .note-icons {
     font-family: 'Segoe UI Symbol', 'Arial Unicode MS', 'Cambria', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+.network-specific-icon-CZAlternativeTransport {
+    color: darkorange;
+}
+
+.network-specific-value-CZPassengerServiceNumber {
+    border: 1px solid grey;
+    padding: 0 2px;
+}

@@ -1,12 +1,29 @@
-﻿@using KdyPojedeVlak.Helpers
-@using KdyPojedeVlak.Models
-@using KdyPojedeVlak.Engine.Djr
+﻿@using KdyPojedeVlak.Models
 @using KdyPojedeVlak.Engine.DbStorage
+@using KdyPojedeVlak.Engine.Djr
+@using KdyPojedeVlak.Helpers
 @model KdyPojedeVlak.Models.TrainPlan
 @{
     ViewData["Title"] = "Vlak " + DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] + " " + Model.Train.TrainNumber + " " + Model.Train.Name;
     var pointCount = Model.Points.Count;
-    var isFirstStop = true;
+
+    void ShowPassageNetworkSpecificParamIcon(List<NetworkSpecificParameterForPassage> parameters, NetworkSpecificParameterPassage parameter, String icon, String description)
+    {
+        var value = parameters.FirstOrDefault(p => p.Type == parameter);
+        if (value?.Value == "1")
+        {
+            <span class="network-specific-icon network-specific-icon-@parameter" title="@description">@icon</span>
+        }
+    }
+
+    void ShowPassageNetworkSpecificParamValue(List<NetworkSpecificParameterForPassage> parameters, NetworkSpecificParameterPassage parameter)
+    {
+        var value = parameters.FirstOrDefault(p => p.Type == parameter);
+        if (!String.IsNullOrEmpty(value?.Value))
+        {
+            <span class="network-specific-value network-specific-value-@parameter">@value.Value</span>
+        }
+    }
 }
 
 <h2 title="@DisplayConsts.TrafficTypeNames[Model.Train.TrafficType]">
@@ -132,10 +149,13 @@
                         }
                     </td>
                     <td class="operation-icons">
+                        @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZAlternativeTransport, "🚌\uFE0E", "ND – náhradní doprava"); }
                         @foreach (var operation in pointVariant.TrainOperations)
                         {
                             <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
                         }
+                        @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPublicService, "🚌\uFE0E", "ND – náhradní doprava"); }
+                        @{ ShowPassageNetworkSpecificParamValue(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPassengerServiceNumber); }
                     </td>
                 }
             }

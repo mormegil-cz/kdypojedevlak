@@ -433,6 +433,8 @@ namespace KdyPojedeVlak.Engine.DbStorage
             if (value.Days == 0) return timeSpan;
             return new TimeSpan(0, value.Hours, value.Minutes, value.Seconds, value.Milliseconds);
         }
+
+        public virtual List<NetworkSpecificParameterForPassage> NetworkSpecificParameters { get; set; }
     }
 
     public class NeighboringPoints
@@ -495,6 +497,23 @@ namespace KdyPojedeVlak.Engine.DbStorage
         public bool IsTariff { get; set; }
     }
 
+    public class NetworkSpecificParameterForPassage
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public int PassageId { get; set; }
+
+        [ForeignKey("PassageId")]
+        public Passage Passage { get; set; }
+
+        [Required]
+        public NetworkSpecificParameterPassage Type { get; set; }
+
+        [Required]
+        public string Value { get; set; }
+    }
+    
     internal static class DbModelUtils
     {
         public static Dictionary<string, string> LoadDataJson(string json) => JsonConvert.DeserializeObject<Dictionary<string, string>>(json ?? "{}");

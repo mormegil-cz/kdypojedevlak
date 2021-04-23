@@ -202,13 +202,7 @@ namespace KdyPojedeVlak.Engine.Djr
             }
             var operationalTrainNumber = operationalTrainNumbers.FirstOrDefault();
 
-            var networkSpecificParameters = new Dictionary<string, List<string>>();
-            foreach (var param in message.NetworkSpecificParameter)
-            {
-                if (!networkSpecificParameters.TryGetValue(param.Name, out var currList)) currList = new List<string>(1);
-                currList.Add(param.Value);
-                networkSpecificParameters[param.Name] = currList;
-            }
+            var networkSpecificParameters = ReadNetworkSpecificParameters(message.NetworkSpecificParameter);
             networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out var trainNames);
             var trainName = trainNames == null ? null : String.Join('/', trainNames);
 
@@ -393,7 +387,7 @@ namespace KdyPojedeVlak.Engine.Djr
                                     locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
                                         ?.LocationSubsidiaryTypeCode ?? "0"]).ToString()
                         },
-                    }
+                    },
                 };
                 trainTimetableVariant.Points.Add(passage);
                 dbModelContext.Add(passage);
@@ -403,6 +397,21 @@ namespace KdyPojedeVlak.Engine.Djr
                 if (!passages.TryGetValue(locationRawID, out var passageListPerID)) passageListPerID = new List<Passage>(2);
                 passageListPerID.Add(passage);
                 passages[locationRawID] = passageListPerID;
+
+                var networkSpecificParametersForPassage = ReadNetworkSpecificParameters(locationFull?.NetworkSpecificParameter);
+                if (networkSpecificParametersForPassage != null)
+                {
+                    foreach (var param in networkSpecificParametersForPassage)
+                    {
+                        dbModelContext.Add(
+                            new NetworkSpecificParameterForPassage
+                            {
+                                Passage = passage,
+                                Type = Enum.Parse<NetworkSpecificParameterPassage>(param.Key),
+                                Value = String.Join(';', param.Value)
+                            });
+                    }
+                }
             }
 
             if (prevPoint != null)
@@ -433,6 +442,10 @@ namespace KdyPojedeVlak.Engine.Djr
 
             return operationalTrainNumber;
         }
+
+        private static Dictionary<string, List<string>>? ReadNetworkSpecificParameters(List<NetworkSpecificParameter>? parameters)
+            => parameters?.GroupBy(param => param.Name)
+                .ToDictionary(g => g.Key, g => g.Select(p => p.Value).ToList());
 
         private static CalendarDefinition FindOrCreateCalendar(DbModelContext dbModelContext, CalendarDefinition trainCalendar)
         {
@@ -833,8 +846,9 @@ namespace KdyPojedeVlak.Engine.Djr
     public enum NetworkSpecificParameterPassage
     {
         Unknown,
+        CZPassengerServiceNumber,
         CZPublicService,
-        CZAlternativeTransport
+        CZAlternativeTransport,
     }
 
     public enum HeaderDisplay
