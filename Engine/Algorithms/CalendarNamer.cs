@@ -353,31 +353,75 @@ namespace KdyPojedeVlak.Engine.Algorithms
 
         private static StringBuilder AppendListOfDays(StringBuilder result, SortedSet<DateTime> dates)
         {
-            int lastMonth = -1;
+            DateTime currStart = DateTime.MinValue;
+            DateTime prevDate = DateTime.MinValue;
+            var first = true;
+
             // TODO: Day ranges
             foreach (var date in dates)
             {
-                if (date.Month != lastMonth && lastMonth > 0)
+                if (prevDate == date.AddDays(-1))
                 {
-                    result.Append('\u00A0');
-                    result.Append(monthToRoman[lastMonth]);
-                    result.Append('.');
+                    // continuing the previous run
+                    prevDate = date;
                 }
-
-                if (lastMonth > 0) result.Append(", ");
-                result.Append(date.Day);
-                result.Append(".");
-                lastMonth = date.Month;
+                else
+                {
+                    AppendDateRange(result, currStart, prevDate, first);
+                    first = currStart <= DateTime.MinValue;
+                    currStart = date;
+                    prevDate = date;
+                }
             }
 
-            if (lastMonth > 0)
+            AppendDateRange(result, currStart, prevDate, first);
+
+            return result;
+        }
+
+        private static void AppendDateRange(StringBuilder result, DateTime start, DateTime end, bool first)
+        {
+            if (start <= DateTime.MinValue) return;
+
+            if (!first)
+            {
+                result.Append(", ");
+            }
+            
+            result.Append(start.Day);
+            result.Append('.');
+            if (start.Month != end.Month)
             {
                 result.Append('\u00A0');
-                result.Append(monthToRoman[lastMonth]);
+                result.Append(monthToRoman[start.Month]);
                 result.Append('.');
             }
 
-            return result;
+            if (end != start)
+            {
+                if ((end - start).TotalDays > 2)
+                {
+                    if (start.Month == end.Month)
+                    {
+                        result.Append('–');
+                    }
+                    else
+                    {
+                        result.Append("\u00A0– ");
+                    }
+                }
+                else
+                {
+                    result.Append(", ");
+                }
+
+                result.Append(end.Day);
+                result.Append('.');
+            }
+            
+            result.Append('\u00A0');
+            result.Append(monthToRoman[end.Month]);
+            result.Append('.');
         }
     }
 }
