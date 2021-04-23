@@ -185,26 +185,23 @@ namespace KdyPojedeVlak.Controllers
             ).ToList();
             var pointsInVariants = passagesInVariants.Select(variant => variant.Select(passage => passage.Point).ToList()).ToList();
             var pointList = ListMerger.MergeLists(pointsInVariants);
-            var pointIndices = new Dictionary<RoutingPoint, int>(pointList.Count);
-            for (var i = 0; i < pointList.Count; ++i)
-            {
-                if (pointIndices.ContainsKey(pointList[i]))
-                {
-                    DebugLog.LogProblem("Duplicate point in list: {0}", pointList[i].Name);
-                }
-
-                pointIndices[pointList[i]] = i;
-            }
-            // pointList.Select((point, index) => (point, index)).ToDictionary(tuple => tuple.point, tuple => tuple.index);
+            var pointIndices = pointList
+                .Select(((point, index) => new { point, index }))
+                .GroupBy(rp => rp.point)
+                .ToDictionary(g => g.Key, g => g.Select(rp => rp.index).ToList());
 
             var columns = new List<List<Passage>>(timetable.Variants.Count);
             foreach(var pointsInVariant in passagesInVariants)
             {
                 var column = new Passage?[pointList.Count];
+                var usedPointIndices = new Dictionary<RoutingPoint, int>(pointList.Count);
                 var lastIndex = -1;
                 foreach (var point in pointsInVariant)
                 {
-                    var pointIndex = pointIndices[point.Point];
+                    var pointIndexList = pointIndices[point.Point];
+                    usedPointIndices.TryGetValue(point.Point, out var currentPointIndex);
+                    var pointIndex = pointIndexList[currentPointIndex];
+                    usedPointIndices[point.Point] = currentPointIndex + 1;
                     if (column[pointIndex] != null)
                     {
                         DebugLog.LogProblem("Point #{0} ({1}) is duplicated after {2}", pointIndex, point.Point.Name, lastIndex);

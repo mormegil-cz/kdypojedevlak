@@ -92,9 +92,25 @@
                 }
                 else
                 {
-                    <td class="time-col">@pointVariant.ArrivalTime</td>
                     <td class="time-col">
-                        <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.DepartureTime</span>
+                        @if (pointVariant.ArrivalTime != null && pointVariant.DepartureTime == null && pointVariant.SubsidiaryLocationDescription != null)
+                        {
+                            <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.ArrivalTime</span>
+                        }
+                        else
+                        {
+                            @pointVariant.ArrivalTime
+                        }
+                    </td>
+                    <td class="time-col">
+                        @if (pointVariant.ArrivalTime == null && pointVariant.DepartureTime == null && pointVariant.SubsidiaryLocationDescription != null)
+                        {
+                            <span title="@pointVariant.SubsidiaryLocationDescription">…</span>
+                        }
+                        else
+                        {
+                            <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.DepartureTime</span>
+                        }
                     </td>
                     <td class="operation-icons">
                         @if (pointVariant.TrainOperations.Count > 0)
