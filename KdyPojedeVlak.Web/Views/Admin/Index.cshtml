@@ -1,0 +1,20 @@
+@{
+    ViewBag.Title = "Správa";
+    Layout = "_Layout";
+
+    void AdminAction(string buttonText, string actionId)
+    {
+        using (Html.BeginForm("ExecuteAction", "Admin", null, FormMethod.Post, true, new { @class = "form-inline" }))
+        {
+            @Html.Hidden("action", actionId)
+            <button type = "submit" class="list-group-item">@buttonText</button>
+        }
+    }
+}
+
+<h3>Správa</h3>
+
+<div class="list-group">
+    @{ AdminAction("Přepočítat jména kalendářů", "RenameAllCalendars"); }
+    @{ AdminAction("Přepočítat rozsahy roků", "RecomputeYearLimits"); }
+</div>

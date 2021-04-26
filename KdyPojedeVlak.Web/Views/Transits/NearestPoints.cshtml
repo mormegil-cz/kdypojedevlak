@@ -1,0 +1,12 @@
+@using KdyPojedeVlak.Web.Engine.SR70
+@model List<PointCodebookEntry>
+@{
+    ViewData["Title"] = "Nejbližší body";
+}
+<h2>Nejbližší body</h2>
+<ul>
+    @foreach (var point in Model)
+    {
+        <li>@Html.ActionLink(point.LongName, "Nearest", new { id = point.FullIdentifier })</li>
+    }
+</ul>

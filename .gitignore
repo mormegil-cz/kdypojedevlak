@@ -1,12 +1,3 @@
-# Data
-App_Data/cisjrdata
-App_Data/data-*
-App_Data/temp-*
-App_Data/.*
-
-# Production config
-appsettings.Production.json
-
 .idea/
 
 ## Ignore Visual Studio temporary files, build results, and

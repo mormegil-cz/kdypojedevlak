@@ -1,0 +1,165 @@
+﻿@using KdyPojedeVlak.Web.Models
+@using KdyPojedeVlak.Web.Engine.DbStorage
+@using KdyPojedeVlak.Web.Engine.Djr
+@using KdyPojedeVlak.Web.Helpers
+@model KdyPojedeVlak.Web.Models.TrainPlan
+@{
+    ViewData["Title"] = "Vlak " + DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] + " " + Model.Train.TrainNumber + " " + Model.Train.Name;
+    var pointCount = Model.Points.Count;
+
+    void ShowPassageNetworkSpecificParamIcon(List<NetworkSpecificParameterForPassage> parameters, NetworkSpecificParameterPassage parameter, String icon, String description)
+    {
+        var value = parameters.FirstOrDefault(p => p.Type == parameter);
+        if (value?.Value == "1")
+        {
+            <span class="network-specific-icon network-specific-icon-@parameter" title="@description">@icon</span>
+        }
+    }
+
+    void ShowPassageNetworkSpecificParamValue(List<NetworkSpecificParameterForPassage> parameters, NetworkSpecificParameterPassage parameter)
+    {
+        var value = parameters.FirstOrDefault(p => p.Type == parameter);
+        if (!String.IsNullOrEmpty(value?.Value))
+        {
+            <span class="network-specific-value network-specific-value-@parameter">@value.Value</span>
+        }
+    }
+}
+
+<h2 title="@DisplayConsts.TrafficTypeNames[Model.Train.TrafficType]">
+    Vlak @DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] @Model.Train.TrainNumber @Model.Train.Name @(Model.CompanyCodebookEntries == null ? "" : StringHelpers.Quote(@String.Join(", ", Model.CompanyCodebookEntries.Select(c => c.ShortName)), "()"))
+</h2>
+<div class="row">
+    <div class="col-md-10">
+    </div>
+    <div class="col-md-2">
+        <div class=btn-toolbar>
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Map", new { id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year })" class="btn btn-default">
+                    <span class="glyphicon glyphicon-globe" aria-label="Mapa"></span>
+                </a>
+            </div>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Nástroje <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="https://www.zelpage.cz/razeni/@(Model.Train.TimetableYear.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku (ŽelPage)</a>
+                    </li>
+                    @if (Model.VagonWebCompanyID != null)
+                    {
+                        <li>
+                            <a href="https://www.vagonweb.cz/razeni/vlak.php?zeme=@Model.VagonWebCompanyID&cislo=@Model.Train.TrainNumber&rok=@Model.Train.TimetableYear.Year">Řazení vlaku (vagonWEB)</a>
+                        </li>
+                    }
+                    <li>
+                        <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku (ČD)</a>
+                    </li>
+                    <li>
+                        <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
+                    </li>
+                    @if (Model.CompanyCodebookEntries != null && Model.CompanyCodebookEntries.Count > 0)
+                    {
+                        <li role="separator" class="divider"></li>
+                        foreach (var company in Model.CompanyCodebookEntries)
+                        {
+                            <li>
+                                <a href="@company.Web" title="@company.ShortName">@company.LongName</a>
+                            </li>
+                        }
+                    }
+                    <li role="separator" class="divider"></li>
+                    <li>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=https://kdypojedevlak.cz@(Url.Action("Details", new { id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year }))">Sdílet na Facebook</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Bod</th>
+        @foreach (var variant in Model.Train.Variants.OrderBy(v => v.ImportedFrom.CreationDate))
+        {
+            var pttNotes = variant.PttNotes;
+            <th scope="col" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()" colspan="3">
+                <div class="calendar-def">@variant.Calendar.Description</div>
+                @if (pttNotes.Count > 0)
+                {
+                    <div class="note-icons">
+                        @foreach (var note in pttNotes.OfType<CentralPttNoteForVariant>())
+                        {
+                            <span class="note-icon-@note.Type" title="@DisplayConsts.CentralPttNoteDescriptions[note.Type]">@DisplayConsts.CentralPttNoteIcons[note.Type]</span>
+                        }
+                        @foreach (var note in pttNotes.OfType<NonCentralPttNoteForVariant>())
+                        {
+                            <span class="note-noncentral-icon" title="@note.Text">🛈</span>
+                        }
+                    </div>
+                }
+            </th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @for (var i = 0; i < pointCount; ++i)
+    {
+        var point = Model.Points[i];
+        var rowType = (i == 0 ? "-first" : "") + (i == pointCount - 1 ? "-last" : "");
+        <tr class="@(Model.MajorPointFlags[i] ? "majorpoint" : "minorpoint")">
+            <td class="point-type-col@(rowType)">
+                <span class="point-type-icon point-type-icon-@point.Type@rowType"></span>
+            </td>
+            <td>
+                @Html.ActionLink(point.Name, "Nearest", "Transits", new { id = point.Code }, new { @class = "silent-link", title = point.ShortName })
+            </td>
+            @foreach (var pointVariant in Model.VariantRoutingPoints[i])
+            {
+                if (pointVariant == null)
+                {
+                    <td></td>
+                    <td class="passthrough-col@(rowType)"></td>
+                    <td></td>
+                }
+                else
+                {
+                    <td class="time-col">
+                        @if (pointVariant.ArrivalTime != null && pointVariant.DepartureTime == null && pointVariant.SubsidiaryLocationDescription != null)
+                        {
+                            <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.ArrivalTime</span>
+                        }
+                        else
+                        {
+                            @pointVariant.ArrivalTime
+                        }
+                    </td>
+                    <td class="time-col">
+                        @if (pointVariant.ArrivalTime == null && pointVariant.DepartureTime == null && pointVariant.SubsidiaryLocationDescription != null)
+                        {
+                            <span title="@pointVariant.SubsidiaryLocationDescription">…</span>
+                        }
+                        else
+                        {
+                            <span title="@pointVariant.SubsidiaryLocationDescription">@pointVariant.DepartureTime</span>
+                        }
+                    </td>
+                    <td class="operation-icons">
+                        @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZAlternativeTransport, "🚌\uFE0E", "ND – náhradní doprava"); }
+                        @foreach (var operation in pointVariant.TrainOperations)
+                        {
+                            <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
+                        }
+                        @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPublicService, "🚌\uFE0E", "ND – náhradní doprava"); }
+                        @{ ShowPassageNetworkSpecificParamValue(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPassengerServiceNumber); }
+                    </td>
+                }
+            }
+        </tr>
+    }
+    </tbody>
+</table>

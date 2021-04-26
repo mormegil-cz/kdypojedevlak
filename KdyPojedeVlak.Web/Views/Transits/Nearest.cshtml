@@ -1,0 +1,129 @@
+﻿@using System.Globalization
+@using KdyPojedeVlak.Web.Models
+@model KdyPojedeVlak.Web.Models.NearestTransits
+@{
+    ViewData["Title"] = String.Format("Nejbližší vlaky v „{0}“", Model.Point.Name);
+    var now = Model.StartDate.TimeOfDay;
+    var hasTools = false;
+}
+<h3>Nejbližší průjezdy vlaku místem „@Model.Point.Name“</h3>
+<div class="row">
+    <div class="col-md-11">
+    </div>
+    <div class="col-md-1">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Nástroje <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                @if (Model.Point.Latitude != null)
+                {
+                    hasTools = true;
+                    var lat = Model.Point.Latitude.GetValueOrDefault().ToString("F5", CultureInfo.InvariantCulture);
+                    var lon = Model.Point.Longitude.GetValueOrDefault().ToString("F5", CultureInfo.InvariantCulture);
+                    <li>
+                        <a href="https://www.openstreetmap.org/?mlat=@lat&mlon=@lon#map=15/@lat/@lon">Poloha tohoto místa</a>
+                    </li>
+                }
+                @if (Model.Point.WikidataItem != null)
+                {
+                    hasTools = true;
+                    <li>
+                        <a href="https://www.wikidata.org/wiki/@(Model.Point.WikidataItem)">Místo na Wikidatech</a>
+                    </li>
+                }
+                @if (Model.Point.CountryCodeFromId == "CZ")
+                {
+                    hasTools = true;
+                    <li>
+                        <a href="https://www.cd.cz/stanice/54@(Model.Point.ShortCzechIdentifier)">Detail stanice ČD</a>
+                    </li>
+                    <li>
+                        <a href="http://provoz.szdc.cz/tabule/StationDetail.aspx?lang=cs&id=54@(Model.Point.ShortCzechIdentifier)&t=1">Tabule příjezdů</a>
+                    </li>
+                    <li>
+                        <a href="http://provoz.szdc.cz/tabule/StationDetail.aspx?lang=cs&id=54@(Model.Point.ShortCzechIdentifier)&t=2">Tabule odjezdů</a>
+                    </li>
+                }
+                @if (hasTools)
+                {
+                    <li role="separator" class="divider"></li>
+                }
+                <li>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Nearest", new { id = Model.Point.Code }))">Sdílet na Facebook</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<form class="form-inline">
+    <div class="form-group">
+        <label for="at">Datum/čas:</label>
+        <input type="datetime" class="form-control" id="at" name="at" placeholder="@Model.StartDate.ToString("s")"/>
+    </div>
+    <button type="submit" class="btn btn-default">Aktualizovat</button>
+</form>
+
+<ul>
+    @foreach (var train in Model.Transits)
+    {
+        @* TODO: Do not show tomorrow trains as past *@
+        <li class="@(train.AnyScheduledTime < now ? "past" : "future")">
+            @train.AnyScheduledTime
+            @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.TrainTimetableVariant.Timetable.TrainCategory] + " " + train.TrainTimetableVariant.Timetable.TrainNumber + " " + train.TrainTimetableVariant.Timetable.Name,
+                "Details", "Train",
+                new
+                {
+                    id = train.TrainTimetableVariant.Timetable.TrainNumber,
+                    year = Model.CurrentTimetableYear == train.Year ? null : train.Year.Year.ToString(CultureInfo.InvariantCulture)
+                })
+            @{
+                var descriptionPieces = new List<string>();
+                if (!String.IsNullOrEmpty(train.SubsidiaryLocationDescription))
+                {
+                    descriptionPieces.Add(train.SubsidiaryLocationDescription);
+                }
+                if (train.Order > 0)
+                {
+                    if (train.Order < train.TrainTimetableVariant.Points.Count - 1)
+                    {
+                        descriptionPieces.Add($"{train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order - 1).Point.Name} → {train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order + 1).Point.Name}");
+                    }
+                    else
+                    {
+                        descriptionPieces.Add($"z {train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order - 1).Point.Name}");
+                    }
+                }
+                else
+                {
+                    descriptionPieces.Add($"směr {train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order + 1).Point.Name}");
+                }
+                <text>(@String.Join("; ", descriptionPieces))</text>
+            }
+        </li>
+    }
+</ul>
+
+<h4>Sousední místa</h4>
+<ul>
+    @foreach (var neighbor in Model.NeighboringPoints)
+    {
+        <li>
+            @Html.ActionLink(neighbor.Name, "Nearest", new { id = neighbor.Code }, null)
+        </li>
+    }
+</ul>
+
+@if (Model.NearestPoints != null)
+{
+    <h4>Další okolní místa</h4>
+    <ul>
+        @foreach (var neighbor in Model.NearestPoints)
+        {
+            <li>
+                @Html.ActionLink(neighbor.Name, "Nearest", new { id = neighbor.Code }, null)
+            </li>
+        }
+    </ul>
+}
