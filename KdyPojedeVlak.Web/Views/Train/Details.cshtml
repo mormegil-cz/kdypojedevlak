@@ -15,15 +15,6 @@
             <span class="network-specific-icon network-specific-icon-@parameter" title="@description">@icon</span>
         }
     }
-
-    void ShowPassageNetworkSpecificParamValue(List<NetworkSpecificParameterForPassage> parameters, NetworkSpecificParameterPassage parameter)
-    {
-        var value = parameters.FirstOrDefault(p => p.Type == parameter);
-        if (!String.IsNullOrEmpty(value?.Value))
-        {
-            <span class="network-specific-value network-specific-value-@parameter">@value.Value</span>
-        }
-    }
 }
 
 <h2 title="@DisplayConsts.TrafficTypeNames[Model.Train.TrafficType]">
@@ -53,12 +44,15 @@
                             <a href="https://www.vagonweb.cz/razeni/vlak.php?zeme=@Model.VagonWebCompanyID&cislo=@Model.Train.TrainNumber&rok=@Model.Train.TimetableYear.Year">Řazení vlaku (vagonWEB)</a>
                         </li>
                     }
-                    <li>
-                        <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku (ČD)</a>
-                    </li>
-                    <li>
-                        <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
-                    </li>
+                    @if (Model.VagonWebCompanyID == "CD")
+                    {
+                        <li>
+                            <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku (ČD)</a>
+                        </li>
+                        <li>
+                            <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
+                        </li>
+                    }
                     @if (Model.CompanyCodebookEntries != null && Model.CompanyCodebookEntries.Count > 0)
                     {
                         <li role="separator" class="divider"></li>
@@ -87,8 +81,23 @@
         @foreach (var variant in Model.Train.Variants.OrderBy(v => v.ImportedFrom.CreationDate))
         {
             var pttNotes = variant.PttNotes;
-            <th scope="col" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()" colspan="3">
-                <div class="calendar-def">@variant.Calendar.Description</div>
+            var passengerServiceNumbers = variant.Points
+                .SelectMany(p => p.NetworkSpecificParameters.Where(nsp => nsp.Type == NetworkSpecificParameterPassage.CZPassengerServiceNumber))
+                .Select(nsp => nsp.Value)
+                .Distinct()
+                .OrderBy(s => s)
+                .ToList();
+            <th scope="col" colspan="3">
+                @if (passengerServiceNumbers.Count > 0)
+                {
+                    <div class="passenger-service-numbers">
+                        @foreach (var number in passengerServiceNumbers)
+                        {
+                            <span class="passenger-service-number">@number</span>
+                        }
+                    </div>
+                }
+                <div class="calendar-def" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()">@variant.Calendar.Description</div>
                 @if (pttNotes.Count > 0)
                 {
                     <div class="note-icons">
@@ -150,7 +159,6 @@
                     </td>
                     <td class="operation-icons">
                         @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZAlternativeTransport, "🚌\uFE0E", "ND – náhradní doprava"); }
-                        @{ ShowPassageNetworkSpecificParamValue(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPassengerServiceNumber); }
                         @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPublicService, "🚌\uFE0E", "ND – náhradní doprava"); }
                         @foreach (var operation in pointVariant.TrainOperations)
                         {
