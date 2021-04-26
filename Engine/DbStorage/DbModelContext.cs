@@ -513,7 +513,7 @@ namespace KdyPojedeVlak.Engine.DbStorage
         [Required]
         public string Value { get; set; }
     }
-    
+
     internal static class DbModelUtils
     {
         public static Dictionary<string, string> LoadDataJson(string json) => JsonConvert.DeserializeObject<Dictionary<string, string>>(json ?? "{}");

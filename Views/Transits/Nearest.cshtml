@@ -50,7 +50,7 @@
                     <li role="separator" class="divider"></li>
                 }
                 <li>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Nearest", new {id = Model.Point.Code}))">Sdílet na Facebook</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=http://kdypojedevlak.cz@(Url.Action("Nearest", new { id = Model.Point.Code }))">Sdílet na Facebook</a>
                 </li>
             </ul>
         </div>
@@ -110,7 +110,7 @@
     @foreach (var neighbor in Model.NeighboringPoints)
     {
         <li>
-            @Html.ActionLink(neighbor.Name, "Nearest", new {id = neighbor.Code}, null)
+            @Html.ActionLink(neighbor.Name, "Nearest", new { id = neighbor.Code }, null)
         </li>
     }
 </ul>
@@ -122,7 +122,7 @@
         @foreach (var neighbor in Model.NearestPoints)
         {
             <li>
-                @Html.ActionLink(neighbor.Name, "Nearest", new {id = neighbor.Code}, null)
+                @Html.ActionLink(neighbor.Name, "Nearest", new { id = neighbor.Code }, null)
             </li>
         }
     </ul>

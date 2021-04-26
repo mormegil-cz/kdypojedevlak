@@ -16,8 +16,8 @@ namespace KdyPojedeVlak.Helpers
         }
 
         public static bool HasMessage(ITempDataDictionary tempData) => tempData.ContainsKey(MessageClassKey);
-        public static string GetMessageClass(ITempDataDictionary tempData) => (string)tempData[MessageClassKey];
-        public static string GetMessageStr(ITempDataDictionary tempData) => (string)tempData[MessageStrKey];
+        public static string GetMessageClass(ITempDataDictionary tempData) => (string) tempData[MessageClassKey];
+        public static string GetMessageStr(ITempDataDictionary tempData) => (string) tempData[MessageStrKey];
 
         public static void DropMessage(ITempDataDictionary tempData)
         {

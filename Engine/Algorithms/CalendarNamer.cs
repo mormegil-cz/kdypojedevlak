@@ -387,7 +387,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
             {
                 result.Append(", ");
             }
-            
+
             result.Append(start.Day);
             result.Append('.');
             if (start.Month != end.Month)
@@ -418,7 +418,7 @@ namespace KdyPojedeVlak.Engine.Algorithms
                 result.Append(end.Day);
                 result.Append('.');
             }
-            
+
             result.Append('\u00A0');
             result.Append(monthToRoman[end.Month]);
             result.Append('.');

@@ -10,13 +10,13 @@
 }
 
 <div>
-@using (Html.BeginForm(FormMethod.Get))
-{
-    <label for="search">Zadejte místo:</label>
-    @Html.TextBox("search", null, new { id = "search" })
-    <input type="submit" value="Hledat" />
-    <span id="locateMe"></span>
-}
+    @using (Html.BeginForm(FormMethod.Get))
+    {
+        <label for="search">Zadejte místo:</label>
+        @Html.TextBox("search", null, new { id = "search" })
+        <input type="submit" value="Hledat"/>
+        <span id="locateMe"></span>
+    }
 </div>
 <div id="geoLocateResults"></div>
 
@@ -24,16 +24,16 @@
 {
     <h3>Nalezené výsledky</h3>
     <ul>
-    @foreach (var result in Model)
-    {
-        <li>@Html.ActionLink(result.Value, "Nearest", new { id = result.Key })</li>
-    }
+        @foreach (var result in Model)
+        {
+            <li>@Html.ActionLink(result.Value, "Nearest", new { id = result.Key })</li>
+        }
     </ul>
 }
 
 @section scripts
 {
     <script>
-    $(function(){window['kdyPojedeVlak'].initGeoLocationButton('#locateMe', '@Html.Raw(Url.Action("GeoLocateMe", new { lat = "$lat", lon = "$lon", embed = "1"}))', '#geoLocateResults')});
+    $(function(){window['kdyPojedeVlak'].initGeoLocationButton('#locateMe', '@Html.Raw(Url.Action("GeoLocateMe", new { lat = "$lat", lon = "$lon", embed = "1" }))', '#geoLocateResults')});
     </script>
 }

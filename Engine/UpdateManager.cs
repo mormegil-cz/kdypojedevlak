@@ -18,6 +18,7 @@ namespace KdyPojedeVlak.Engine
         private static UpdateManager? instance;
 
         private readonly string basePath;
+
 //        private readonly int initialDelay;
 //        private readonly int wakeupInterval;
         private readonly IServiceScopeFactory serviceScopeFactory;
@@ -41,7 +42,7 @@ namespace KdyPojedeVlak.Engine
         {
             this.basePath = basePath;
             this.serviceScopeFactory = serviceScopeFactory;
-            thread = new Thread(Run) {IsBackground = true};
+            thread = new Thread(Run) { IsBackground = true };
         }
 
         private void DoStart()

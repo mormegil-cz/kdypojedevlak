@@ -12,7 +12,7 @@
         var fromName = timetableVariant.Points.FirstOrDefault()?.Point?.Name;
         var toName = timetableVariant.Points.LastOrDefault()?.Point?.Name;
         <li>
-            <a href="@Url.Action("Details", new {id = timetable.TrainNumber, year = timetable.YearId})">@DisplayConsts.TrafficTypeNames[timetable.TrafficType] @DisplayConsts.TrainCategoryNames[timetable.TrainCategory] @timetable.TrainNumber @timetable.Name (@fromName – @toName)</a>
+            <a href="@Url.Action("Details", new { id = timetable.TrainNumber, year = timetable.YearId })">@DisplayConsts.TrafficTypeNames[timetable.TrafficType] @DisplayConsts.TrainCategoryNames[timetable.TrainCategory] @timetable.TrainNumber @timetable.Name (@fromName – @toName)</a>
         </li>
     }
 </ul>

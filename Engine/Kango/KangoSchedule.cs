@@ -84,7 +84,7 @@ namespace KdyPojedeVlak.Engine.Kango
 
     public class KangoSchedule
     {
-        private static readonly string[] trainTypesByQuality = {"SC", "IC", "EN", "EC", "Ex", "R", "Sp", "Os"};
+        private static readonly string[] trainTypesByQuality = { "SC", "IC", "EN", "EC", "Ex", "R", "Sp", "Os" };
         private readonly string path;
         private readonly Dictionary<string, RoutingPoint> points = new Dictionary<string, RoutingPoint>();
         private readonly Dictionary<string, Train> trains = new Dictionary<string, Train>();
@@ -105,7 +105,7 @@ namespace KdyPojedeVlak.Engine.Kango
             if (points.Count > 0) throw new InvalidOperationException("Already loaded");
 
             LoadKangoData(path, "DB")
-                .Select(b => new {ID = BuildPointId(b, 0), Name = b[3]})
+                .Select(b => new { ID = BuildPointId(b, 0), Name = b[3] })
                 .IntoDictionary(points, b => b.ID, b => new RoutingPoint
                 {
                     ID = b.ID,
@@ -133,7 +133,7 @@ namespace KdyPojedeVlak.Engine.Kango
             }
 
             var calendars = LoadKangoData(path, "KVL")
-                .Select((row, idx) => new {Row = row, Index = idx / 2})
+                .Select((row, idx) => new { Row = row, Index = idx / 2 })
                 .GroupBy(row => row.Index)
                 .ToDictionary(g => g.Last().Row[0], g => new TrainCalendar
                 {
@@ -146,7 +146,7 @@ namespace KdyPojedeVlak.Engine.Kango
 
             BitmapBaseDate = calendars.Values.Min(c => c.ValidFrom);
 
-            calendars.Add("0", new TrainCalendar {ID = "0", Description = "jede pp", CalendarBitmap = new BitArray(553, false)});
+            calendars.Add("0", new TrainCalendar { ID = "0", Description = "jede pp", CalendarBitmap = new BitArray(553, false) });
             calendars.Add("1",
                 new TrainCalendar
                 {

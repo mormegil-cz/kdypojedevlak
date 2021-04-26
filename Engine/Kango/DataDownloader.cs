@@ -39,7 +39,7 @@ namespace KdyPojedeVlak.Engine.Kango
 
         public async Task<string> GetLatestVersionAvailable()
         {
-            var files  = await ftp.ListFilesAsync();
+            var files = await ftp.ListFilesAsync();
             var newest = files
                 .Select(file => new { File = file, Match = reFilename.Match(file.Name) })
                 .Where(f => f.Match.Success)
