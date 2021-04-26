@@ -353,8 +353,9 @@ namespace KdyPojedeVlak.Web.Engine.Algorithms
 
         private static StringBuilder AppendListOfDays(StringBuilder result, SortedSet<DateTime> dates)
         {
-            DateTime currStart = DateTime.MinValue;
-            DateTime prevDate = DateTime.MinValue;
+            var currStart = DateTime.MinValue;
+            var prevDate = DateTime.MinValue;
+            var currMonth = -1;
             var first = true;
 
             // TODO: Day ranges
@@ -367,27 +368,40 @@ namespace KdyPojedeVlak.Web.Engine.Algorithms
                 }
                 else
                 {
-                    AppendDateRange(result, currStart, prevDate, first);
+                    AppendDateRange(result, currStart, prevDate, currMonth, first);
+
+                    currMonth = currStart <= DateTime.MinValue ? -1 : prevDate.Month;
                     first = currStart <= DateTime.MinValue;
                     currStart = date;
                     prevDate = date;
                 }
             }
 
-            AppendDateRange(result, currStart, prevDate, first);
+            AppendDateRange(result, currStart, prevDate, currMonth, first);
+
+            result.Append('\u00A0');
+            result.Append(monthToRoman[prevDate.Month]);
+            result.Append('.');
 
             return result;
         }
 
-        private static void AppendDateRange(StringBuilder result, DateTime start, DateTime end, bool first)
+        private static void AppendDateRange(StringBuilder result, DateTime start, DateTime end, int currMonth, bool first)
         {
             if (start <= DateTime.MinValue) return;
 
             if (!first)
             {
+                if (currMonth > 0 && start.Month != currMonth)
+                {
+                    result.Append('\u00A0');
+                    result.Append(monthToRoman[currMonth]);
+                    result.Append('.');
+                }
+
                 result.Append(", ");
             }
-
+            
             result.Append(start.Day);
             result.Append('.');
             if (start.Month != end.Month)
@@ -399,7 +413,7 @@ namespace KdyPojedeVlak.Web.Engine.Algorithms
 
             if (end != start)
             {
-                if ((end - start).TotalDays > 2)
+                if ((end - start).TotalDays >= 2)
                 {
                     if (start.Month == end.Month)
                     {
@@ -418,10 +432,6 @@ namespace KdyPojedeVlak.Web.Engine.Algorithms
                 result.Append(end.Day);
                 result.Append('.');
             }
-
-            result.Append('\u00A0');
-            result.Append(monthToRoman[end.Month]);
-            result.Append('.');
         }
     }
 }

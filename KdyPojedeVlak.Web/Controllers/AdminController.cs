@@ -37,7 +37,7 @@ namespace KdyPojedeVlak.Controllers
         {
             if (String.IsNullOrEmpty(password))
             {
-                return View();
+                return IsLoggedIn ? RedirectToAction("Index") : View();
             }
             else
             {
