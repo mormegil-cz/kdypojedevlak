@@ -37,19 +37,19 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
         {
             modelBuilder.Entity<ImportedFile>()
                 .HasIndex(o => o.FileName).IsUnique();
+            modelBuilder.Entity<ImportedFile>()
+                .HasIndex(o => o.CreationDate);
 
             modelBuilder.Entity<Train>()
                 .HasIndex(o => o.Number).IsUnique();
 
             modelBuilder.Entity<TrainTimetable>()
                 .HasIndex(o => new { o.TrainId, o.YearId }).IsUnique();
-
             modelBuilder.Entity<TrainTimetable>()
                 .HasIndex(o => o.Name); // TODO: Fulltext
 
             modelBuilder.Entity<RoutingPoint>()
                 .HasIndex(o => o.Code).IsUnique();
-
             modelBuilder.Entity<RoutingPoint>()
                 .HasIndex(o => new { o.Latitude, o.Longitude }); // TODO: Geographic coordinates (R-Tree)
             modelBuilder.Entity<RoutingPoint>()

@@ -61,13 +61,15 @@ namespace KdyPojedeVlak.Web.Controllers
 
         public IActionResult Newest()
         {
+            const int limit = 10;
             var newestTrains = dbModelContext
                 .Set<TrainTimetableVariant>()
+                .Where(ttv => dbModelContext.ImportedFiles.OrderByDescending(f => f.CreationDate).Take(limit).Contains(ttv.ImportedFrom))
                 .OrderByDescending(ttv => ttv.ImportedFrom.CreationDate)
                 .Where(ttv => ttv.Timetable.Train != null && ttv.Timetable.Train.Number != null)
                 .Include(ttv => ttv.Points).ThenInclude(rp => rp.Point)
                 .Include(ttv => ttv.Timetable).ThenInclude(tt => tt.Train)
-                .Take(10)
+                .Take(limit)
                 .ToList();
             return View(newestTrains);
         }
