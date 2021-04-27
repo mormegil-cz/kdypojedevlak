@@ -34,12 +34,31 @@
                     <li>
                         <a href="https://www.zelpage.cz/razeni/@(Model.Train.TimetableYear.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku (ŽelPage)</a>
                     </li>
-                    <li>
-                        <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku (ČD)</a>
-                    </li>
-                    <li>
-                        <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
-                    </li>
+                    @if (Model.VagonWebCompanyID != null)
+                    {
+                        <li>
+                            <a href="https://www.vagonweb.cz/razeni/vlak.php?zeme=@Model.VagonWebCompanyID&cislo=@Model.Train.TrainNumber&rok=@Model.Train.TimetableYear.Year">Řazení vlaku (vagonWEB)</a>
+                        </li>
+                    }
+                    @if (Model.VagonWebCompanyID == "CD")
+                    {
+                        <li>
+                            <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku (ČD)</a>
+                        </li>
+                        <li>
+                            <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
+                        </li>
+                    }
+                    @if (Model.CompanyCodebookEntries != null && Model.CompanyCodebookEntries.Count > 0)
+                    {
+                        <li role="separator" class="divider"></li>
+                        foreach (var company in Model.CompanyCodebookEntries)
+                        {
+                            <li>
+                                <a href="@company.Web" title="@company.ShortName">@company.LongName</a>
+                            </li>
+                        }
+                    }
                     <li role="separator" class="divider"></li>
                     <li>
                         <a href="https://www.facebook.com/sharer/sharer.php?u=https://kdypojedevlak.cz@(Url.Action("Map", new { id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year }))">Sdílet na Facebook</a>

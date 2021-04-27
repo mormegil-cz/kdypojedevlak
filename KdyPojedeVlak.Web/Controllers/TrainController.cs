@@ -146,7 +146,22 @@ namespace KdyPojedeVlak.Web.Controllers
                 new JProperty("points", new JArray(points))
             };
 
-            return View(new TrainMapData(timetable, dataJson.ToString(Formatting.None)));
+            var companies = timetable.Variants
+                .Select(v => v.TrainVariantId.Substring(0, 4))
+                .GroupBy(code => code)
+                .OrderByDescending(g => g.Count())
+                .AsEnumerable()
+                .Select(g => Program.CompanyCodebook.Find(g.Key))
+                .Where(c => c != null)
+                .ToList();
+
+            string? vagonWebCompanyId = null;
+            if (companies.Count > 0)
+            {
+                VagonWebCodes.CompanyCodes.TryGetValue(companies.First().ID, out vagonWebCompanyId);
+            }
+
+            return View(new TrainMapData(timetable, dataJson.ToString(Formatting.None), companies, vagonWebCompanyId));
         }
 
         private TrainPlan? BuildTrainPlan(string? id, int? yearNumber)
