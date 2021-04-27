@@ -113,7 +113,7 @@ namespace KdyPojedeVlak.Web.Controllers
                 .ThenInclude(ttv => ttv.Calendar)
                 .Where(t => t.Train == train);
 
-            var timetable = timetableQuery.SingleOrDefault(t => t.TimetableYear == dbYear);
+            var timetable = timetableQuery.AsSplitQuery().SingleOrDefault(t => t.TimetableYear == dbYear);
             if (timetable == null && year == null)
             {
                 timetable = timetableQuery.OrderByDescending(t => t.TimetableYear.Year).FirstOrDefault();
