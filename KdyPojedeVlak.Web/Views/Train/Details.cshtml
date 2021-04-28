@@ -21,13 +21,29 @@
     Vlak @DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] @Model.Train.TrainNumber @Model.Train.Name @(Model.CompanyCodebookEntries == null ? "" : StringHelpers.Quote(@String.Join(", ", Model.CompanyCodebookEntries.Select(c => c.ShortName)), "()"))
 </h2>
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-9">
     </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
         <div class=btn-toolbar>
+            @if (Model.IsFiltered)
+            {
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action("Details", new { id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year, everything = true })" class="btn btn-default active">
+                        <span class="glyphicon glyphicon-filter" aria-label="I staré" title="I staré"></span>
+                    </a>
+                </div>
+            }
+            else if (Model.CanFilter)
+            {
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action("Details", new { id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year })" class="btn btn-default">
+                        <span class="glyphicon glyphicon-filter" aria-label="Jen aktuální" title="Jen aktuální"></span>
+                    </a>
+                </div>
+            }
             <div class="btn-group" role="group">
                 <a href="@Url.Action("Map", new { id = Model.Train.TrainNumber, year = Model.Train.TimetableYear.Year })" class="btn btn-default">
-                    <span class="glyphicon glyphicon-globe" aria-label="Mapa"></span>
+                    <span class="glyphicon glyphicon-globe" aria-label="Mapa" title="Mapa"></span>
                 </a>
             </div>
             <div class="btn-group" role="group">
@@ -78,7 +94,7 @@
     <tr>
         <th></th>
         <th>Bod</th>
-        @foreach (var variant in Model.Train.Variants.OrderBy(v => v.ImportedFrom.CreationDate))
+        @foreach (var variant in Model.TrainVariants.OrderBy(v => v.ImportedFrom.CreationDate))
         {
             var pttNotes = variant.PttNotes;
             var passengerServiceNumbers = variant.Points

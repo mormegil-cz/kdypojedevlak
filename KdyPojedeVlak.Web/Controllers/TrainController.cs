@@ -74,9 +74,9 @@ namespace KdyPojedeVlak.Web.Controllers
             return View(newestTrains);
         }
 
-        public IActionResult Details(string? id, int? year)
+        public IActionResult Details(string? id, int? year, bool? everything)
         {
-            var plan = BuildTrainPlan(id, year);
+            var plan = BuildTrainPlan(id, year, everything ?? false);
             if (plan == null)
             {
                 return RedirectToAction("Index", new { search = id });
@@ -164,7 +164,7 @@ namespace KdyPojedeVlak.Web.Controllers
             return View(new TrainMapData(timetable, dataJson.ToString(Formatting.None), companies, vagonWebCompanyId));
         }
 
-        private TrainPlan? BuildTrainPlan(string? id, int? yearNumber)
+        private TrainPlan? BuildTrainPlan(string? id, int? yearNumber, bool everything)
         {
             id = id?.Trim();
             if (String.IsNullOrEmpty(id)) return null;
@@ -202,7 +202,25 @@ namespace KdyPojedeVlak.Web.Controllers
             }
             if (timetable == null) return null;
 
-            var passagesInVariants = timetable.Variants
+            var timetableVariants = timetable.Variants;
+            var filteredVariants = timetableVariants
+                .Where(v => v.Calendar.EndDate >= DateTime.Now)
+                .ToList();
+
+            bool isFiltered, canFilter;
+            if (everything)
+            {
+                isFiltered = false;
+                canFilter = timetableVariants.Count() > filteredVariants.Count();
+            }
+            else
+            {
+                isFiltered = timetableVariants.Count() > filteredVariants.Count();
+                canFilter = false;
+                timetableVariants = filteredVariants;
+            }
+
+            var passagesInVariants = timetableVariants
                 .OrderBy(variant => variant.ImportedFrom.CreationDate)
                 .Select(
                     variant => variant.Points
@@ -269,7 +287,7 @@ namespace KdyPojedeVlak.Web.Controllers
             }
             majorPointFlags[^1] = true;
 
-            var companies = timetable.Variants
+            var companies = timetableVariants
                 .Select(v => v.TrainVariantId.Substring(0, 4))
                 .GroupBy(code => code)
                 .OrderByDescending(g => g.Count())
@@ -284,7 +302,7 @@ namespace KdyPojedeVlak.Web.Controllers
                 VagonWebCodes.CompanyCodes.TryGetValue(companies.First().ID, out vagonWebCompanyId);
             }
 
-            return new TrainPlan(timetable, pointList, variantRoutingPoints, majorPointFlags, companies, vagonWebCompanyId);
+            return new TrainPlan(timetable, timetableVariants, pointList, variantRoutingPoints, majorPointFlags, companies, vagonWebCompanyId, isFiltered, canFilter);
         }
 
         private TimetableYear? GetYear(int? yearNumber)
