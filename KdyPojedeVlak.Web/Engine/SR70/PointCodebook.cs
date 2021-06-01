@@ -132,7 +132,7 @@ namespace KdyPojedeVlak.Web.Engine.SR70
             }
 
             var problematicPoints = new HashSet<String>();
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2020-12-22.tsv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2021-06-01.tsv", '\t', Encoding.UTF8)
                 .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
             )
             {
@@ -162,7 +162,7 @@ namespace KdyPojedeVlak.Web.Engine.SR70
             }
 
             /*
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"osm-overpass-stations-2020-12-22.csv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"osm-overpass-stations-2021-06-01.csv", '\t', Encoding.UTF8)
                 .Select(r => (Latitude: r[0], Longitude: r[1], ID: r[2], Name: r[3]))
             )
             {
