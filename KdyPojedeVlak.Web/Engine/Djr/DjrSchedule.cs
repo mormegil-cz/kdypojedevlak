@@ -504,14 +504,14 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             return pttNoteCalendars;
         }
 
-        private static CentralPttNoteForVariant ParseCentralPttNoteDefinition(string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition> calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
+        private static CentralPttNoteForVariant ParseCentralPttNoteDefinition(string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition>? calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
         {
             var pieces = definition.Split('|');
 
             var fromCode = pieces[1];
-            var fromOccurrence = Int32.Parse(pieces[2]);
+            var fromOccurrence = String.IsNullOrEmpty(pieces[2]) ? 0 : Int32.Parse(pieces[2]);
             var toCode = pieces[3];
-            var toOccurrence = Int32.Parse(pieces[4]);
+            var toOccurrence = String.IsNullOrEmpty(pieces[4]) ? 0 : Int32.Parse(pieces[4]);
 
             if (!passages.TryGetValue(fromCode, out var fromList)) fromList = passages["_FIRST"];
             if (!passages.TryGetValue(toCode, out var toList)) toList = passages["_LAST"];
@@ -526,18 +526,18 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 From = from,
                 To = to,
                 OnArrival = pieces[5] == "1",
-                Calendar = calendarDefinitions[pieces[6]]
+                Calendar = calendarDefinitions == null ? trainTimetableVariant.Calendar : calendarDefinitions[pieces[6]]
             };
         }
 
-        private static NonCentralPttNoteForVariant ParseNonCentralPttNoteDefinition(string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition> calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
+        private static NonCentralPttNoteForVariant ParseNonCentralPttNoteDefinition(string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition>? calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
         {
             var pieces = definition.Split('|');
 
             var fromCode = pieces[0];
-            var fromOccurrence = Int32.Parse(pieces[1]);
+            var fromOccurrence = String.IsNullOrEmpty(pieces[1]) ? 0 : Int32.Parse(pieces[1]);
             var toCode = pieces[2];
-            var toOccurrence = Int32.Parse(pieces[3]);
+            var toOccurrence = String.IsNullOrEmpty(pieces[3]) ? 0 : Int32.Parse(pieces[3]);
 
             if (!passages.TryGetValue(fromCode, out var fromList)) fromList = passages["_FIRST"];
             if (!passages.TryGetValue(toCode, out var toList)) toList = passages["_LAST"];
@@ -555,7 +555,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 ShowInFooter = defShowInFooter[pieces[6]],
                 IsTariff = pieces[7] == "1",
                 OnArrival = pieces[8] == "1",
-                Calendar = calendarDefinitions[pieces[9]],
+                Calendar = calendarDefinitions == null ? trainTimetableVariant.Calendar : calendarDefinitions[pieces[9]],
             };
         }
 
