@@ -46,8 +46,8 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         {
             foreach (var year in dbModelContext.TimetableYears)
             {
-                var minDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Min(c => (DateTime?) c.StartDate);
-                var maxDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Max(c => (DateTime?) c.EndDate);
+                var minDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Min(c => (DateTime?)c.StartDate);
+                var maxDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Max(c => (DateTime?)c.EndDate);
 
                 if (minDate != null && year.MinDate > minDate)
                 {
@@ -155,7 +155,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         private static CZPTTCISMessage LoadXmlFile(Stream stream)
         {
             var ser = new XmlSerializer(typeof(CZPTTCISMessage));
-            return (CZPTTCISMessage) ser.Deserialize(stream);
+            return (CZPTTCISMessage)ser.Deserialize(stream);
         }
 
         private static string ImportToDatabase(CZPTTCISMessage message, ImportedFile importedFile, DbModelContext dbModelContext)
@@ -278,19 +278,21 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             var locationIndex = 0;
             RoutingPoint? prevPoint = null;
             var passages = new Dictionary<string, List<Passage>>(message.CZPTTInformation.CZPTTLocation.Count);
-            foreach (var location in LinqExtensions.ConcatExisting<LocationBasicInfo>(message.CZPTTHeader?.CZForeignOriginLocation, message.CZPTTInformation.CZPTTLocation, message.CZPTTHeader?.CZForeignDestinationLocation))
+            foreach (var locationDirect in LinqExtensions.ConcatExisting<LocationBasicInfo>(message.CZPTTHeader?.CZForeignOriginLocation, message.CZPTTInformation.CZPTTLocation, message.CZPTTHeader?.CZForeignDestinationLocation))
             {
-                var locationRawID = location.CountryCodeISO + location.LocationPrimaryCode;
-                var locationID = location.CountryCodeISO + ":" + location.LocationPrimaryCode;
+                var locationData = locationDirect.Location ?? locationDirect;
+                if (String.IsNullOrWhiteSpace(locationData.CountryCodeISO) || String.IsNullOrWhiteSpace(locationData.LocationPrimaryCode)) throw new FormatException("Missing location identifiers");
+                var locationRawID = locationData.CountryCodeISO + locationData.LocationPrimaryCode;
+                var locationID = locationData.CountryCodeISO + ":" + locationData.LocationPrimaryCode;
                 var dbPoint = dbModelContext.RoutingPoints.SingleOrDefault(rp => rp.Code == locationID);
                 if (dbPoint == null)
                 {
                     var codebookEntry = Program.PointCodebook.Find(locationID) ?? new PointCodebookEntry
                     {
                         ID = locationID,
-                        LongName = location.PrimaryLocationName ?? $"#{location.LocationPrimaryCode}",
-                        ShortName = location.PrimaryLocationName,
-                        Type = location.CountryCodeISO == "CZ" ? PointType.Unknown : PointType.Point
+                        LongName = locationData.PrimaryLocationName ?? $"#{locationData.LocationPrimaryCode}",
+                        ShortName = locationData.PrimaryLocationName,
+                        Type = locationData.CountryCodeISO == "CZ" ? PointType.Unknown : PointType.Point
                     };
 
                     dbPoint = new RoutingPoint
@@ -309,7 +311,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     DebugLog.LogDebugMsg("Created point '{0}'", codebookEntry.LongName);
                 }
 
-                var locationFull = location as CZPTTLocation;
+                var locationFull = locationDirect as CZPTTLocation;
                 var timingPerType = locationFull?.TimingAtLocation?.Timing?.ToDictionary(t => t.TimingQualifierCode);
                 Timing? arrivalTiming = null;
                 Timing? departureTiming = null;

@@ -60,11 +60,17 @@ namespace KdyPojedeVlak.Web.Engine.Djr.DjrXmlModel
         public DateTime? EndDateTime { get; set; }
     }
 
-    public abstract class LocationBasicInfo
+    public class LocationData
     {
         public string CountryCodeISO { get; set; }
         public string LocationPrimaryCode { get; set; }
         public string PrimaryLocationName { get; set; }
+        public LocationSubsidiaryIdentification LocationSubsidiaryIdentification { get; set; }
+    }
+
+    public abstract class LocationBasicInfo : LocationData
+    {
+        public LocationData Location { get; set; }
     }
 
     public class CZPTTLocation : LocationBasicInfo
@@ -72,7 +78,6 @@ namespace KdyPojedeVlak.Web.Engine.Djr.DjrXmlModel
         [XmlAttribute]
         public string JourneyLocationTypeCode { get; set; }
 
-        public LocationSubsidiaryIdentification LocationSubsidiaryIdentification { get; set; }
         public TimingAtLocation TimingAtLocation { get; set; }
         public string ResponsibleRU { get; set; }
         public string ResponsibleIM { get; set; }
