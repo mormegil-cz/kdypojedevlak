@@ -82,6 +82,11 @@ namespace KdyPojedeVlak.Controllers
                     InfoMessage.RegisterMessage(TempData, MessageClass.Success, "Rozsahy všech roků přepočítány");
                     return RedirectToAction("Index");
 
+                case "ReloadPointCoordinates":
+                    DjrSchedule.ReloadPointCoordinates(dbModelContext);
+                    InfoMessage.RegisterMessage(TempData, MessageClass.Success, "Souřadnice všech bodů načteny z číselníku");
+                    return RedirectToAction("Index");
+
                 default:
                     InfoMessage.RegisterMessage(TempData, MessageClass.Danger, "Cože?");
                     return RedirectToAction("Index");

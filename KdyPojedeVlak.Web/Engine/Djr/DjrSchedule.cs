@@ -72,6 +72,45 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             dbModelContext.SaveChanges();
         }
 
+        public static void ReloadPointCoordinates(DbModelContext dbModelContext)
+        {
+            var pointCodebook = Program.PointCodebook;
+            foreach (var point in dbModelContext.RoutingPoints)
+            {
+                var pointCodebookEntry = pointCodebook.Find(point.Code);
+                if (pointCodebookEntry == null)
+                {
+                    DebugLog.LogDebugMsg("No codebook entry for {0}", point.Code);
+                    continue;
+                }
+
+                if (pointCodebookEntry.Latitude == null || pointCodebookEntry.Longitude == null) continue;
+                var lat = pointCodebookEntry.Latitude.GetValueOrDefault();
+                var lon = pointCodebookEntry.Longitude.GetValueOrDefault();
+
+                if (point.Latitude == null || point.Longitude == null)
+                {
+                    DebugLog.LogDebugMsg("Filling missing coordinates for {0}", point.Code);
+                    point.Latitude = lat;
+                    point.Longitude = lon;
+                }
+                else
+                {
+                    var currLat = point.Latitude.GetValueOrDefault();
+                    var currLon = point.Longitude.GetValueOrDefault();
+                    var dist = Math.Abs(lat - currLat) + Math.Abs(lon - currLon);
+                    if (dist > 0.005)
+                    {
+                        DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Fixing wrong geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", point.Code, lat, lon, currLat, currLon, dist * 40000.0f / 360.0f, pointCodebookEntry.WikidataItem));
+                    }
+
+                    point.Latitude = lat;
+                    point.Longitude = lon;
+                }
+            }
+            dbModelContext.SaveChanges();
+        }
+
         private static bool IsGzip(string filename)
         {
             using var file = File.OpenRead(filename);
