@@ -115,7 +115,7 @@ namespace KdyPojedeVlak.Web.Controllers
 
             var allPassingTrains = point.PassingTrains
                 .GroupBy(t => t.TrainTimetableVariant.Timetable.Id)
-                .Select(g => g.OrderByDescending(ttv => ttv.TrainTimetableVariant.ImportedFrom.CreationDate).First())
+                .SelectMany(g => g.Where(p => p.TrainTimetableVariant.Calendar.EndDate >= now).OrderByDescending(p => p.TrainTimetableVariant.ImportedFrom.CreationDate).Take(1))
                 .AsEnumerable()
                 .OrderBy(p => p.AnyScheduledTimeOfDay).ToList();
             var passingTrains = allPassingTrains
