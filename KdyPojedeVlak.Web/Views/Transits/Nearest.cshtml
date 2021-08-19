@@ -5,6 +5,8 @@
     ViewData["Title"] = String.Format("Nejbližší vlaky v „{0}“", Model.Point.Name);
     var now = Model.StartDate.TimeOfDay;
     var hasTools = false;
+
+    string StrFrom(string name) => (name.Length == 0 || Char.ToUpperInvariant(name[0]) == 'Z' || Char.ToUpperInvariant(name[0]) == 'S' ? "ze " : "z ") + name; 
 }
 <h3>Nejbližší průjezdy vlaku místem „@Model.Point.Name“</h3>
 <div class="row">
@@ -92,7 +94,7 @@
                     }
                     else
                     {
-                        descriptionPieces.Add($"z {train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order - 1).Point.Name}");
+                        descriptionPieces.Add(StrFrom(train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order - 1).Point.Name));
                     }
                 }
                 else
