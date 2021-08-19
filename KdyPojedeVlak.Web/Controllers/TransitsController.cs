@@ -114,7 +114,7 @@ namespace KdyPojedeVlak.Web.Controllers
             bool bestOverMinimum = false;
 
             var allPassingTrains = point.PassingTrains
-                .GroupBy(t => t.TrainTimetableVariant.TrainVariantId)
+                .GroupBy(t => t.TrainTimetableVariant.Timetable.Id)
                 .Select(g => g.OrderByDescending(ttv => ttv.TrainTimetableVariant.ImportedFrom.CreationDate).First())
                 .AsEnumerable()
                 .OrderBy(p => p.AnyScheduledTimeOfDay).ToList();

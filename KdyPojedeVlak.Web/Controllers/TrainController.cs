@@ -208,14 +208,14 @@ namespace KdyPojedeVlak.Web.Controllers
                 .ToList();
 
             bool isFiltered, canFilter;
-            if (everything)
+            if (everything || filteredVariants.Count == 0)
             {
                 isFiltered = false;
-                canFilter = timetableVariants.Count() > filteredVariants.Count();
+                canFilter = timetableVariants.Count > filteredVariants.Count && filteredVariants.Count > 0;
             }
             else
             {
-                isFiltered = timetableVariants.Count() > filteredVariants.Count();
+                isFiltered = timetableVariants.Count > filteredVariants.Count;
                 canFilter = false;
                 timetableVariants = filteredVariants;
             }
@@ -285,7 +285,7 @@ namespace KdyPojedeVlak.Web.Controllers
                 majorPointFlags.Add(isFirstPoint || point.Any(variant => variant is { IsMajorPoint: true }));
                 if (isFirstPoint && point.Any(variant => variant != null && (variant.ArrivalTime != null || variant.DepartureTime != null))) isFirstPoint = false;
             }
-            majorPointFlags[^1] = true;
+            if (majorPointFlags.Count > 0) majorPointFlags[^1] = true;
 
             var companies = timetableVariants
                 .Select(v => v.TrainVariantId.Substring(0, 4))
