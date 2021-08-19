@@ -175,7 +175,7 @@
                     </td>
                     <td class="operation-icons">
                         @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZAlternativeTransport, "🚌\uFE0E", "ND – náhradní doprava"); }
-                        @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPublicService, "🚌\uFE0E", "ND – náhradní doprava"); }
+                        @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPublicService, "🚌\uFE0E", "Veřejná služba"); }
                         @foreach (var operation in pointVariant.TrainOperations)
                         {
                             <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
