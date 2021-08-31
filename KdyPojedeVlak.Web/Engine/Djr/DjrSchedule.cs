@@ -417,15 +417,15 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     {
                         // TODO: JourneyLocationTypeCode
                         { Passage.AttribTrainOperations, String.Join(';', trainOperations) },
-                        { Passage.AttribSubsidiaryLocation, locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code },
-                        { Passage.AttribSubsidiaryLocationName, locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryName },
+                        { Passage.AttribSubsidiaryLocation, locationData.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code },
+                        { Passage.AttribSubsidiaryLocationName, locationData.LocationSubsidiaryIdentification?.LocationSubsidiaryName },
                         {
                             Passage.AttribSubsidiaryLocationType,
-                            (locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                            (locationData.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
                                 ?.LocationSubsidiaryTypeCode == null
                                 ? SubsidiaryLocationType.None
                                 : defSubsidiaryLocationType[
-                                    locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                                    locationData.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
                                         ?.LocationSubsidiaryTypeCode ?? "0"]).ToString()
                         },
                     },

@@ -94,7 +94,7 @@ namespace KdyPojedeVlak.Web.Controllers
             }
 
             var dbYear = GetYear(year);
-            if (year == null)
+            if (dbYear == null)
             {
                 DebugLog.LogProblem("No year found for {0}", year);
             }

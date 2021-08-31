@@ -114,16 +114,16 @@ namespace KdyPojedeVlak.Web.Models
             { CentralPttNote.Transfer, "◊" },
             { CentralPttNote.Refreshments, "🍸\uFE0E" },
             { CentralPttNote.Cafe, "☕\uFE0E" },
-            { CentralPttNote.BaggageReservation, "🛄⃝" },
-            { CentralPttNote.BaggageObligatoryReservation, "🛄" },
-            { CentralPttNote.BicycleReservation, "🚲⃝" },
-            { CentralPttNote.BicycleObligatoryReservation, "🚲⃞" },
+            { CentralPttNote.BaggageReservation, "🛄\uFE0E⃝" },
+            { CentralPttNote.BaggageObligatoryReservation, "🛄\uFE0E" },
+            { CentralPttNote.BicycleReservation, "🚲\uFE0E⃝" },
+            { CentralPttNote.BicycleObligatoryReservation, "🚲\uFE0E⃞" },
             { CentralPttNote.PowerSocket, "⚇\uFE0E" },
             { CentralPttNote.ReplacementBus, "🚌\uFE0E" },
             { CentralPttNote.Children, "𝗗" },
-            { CentralPttNote.DisabledPlatform, "♿⃞" },
+            { CentralPttNote.DisabledPlatform, "♿\uFE0E⃞" },
             { CentralPttNote.SelfService, "👁\uFE0E" },
-            { CentralPttNote.NoBicycles, "🚲̸" },
+            { CentralPttNote.NoBicycles, "🚲\uFE0E̸" },
             { CentralPttNote.HistoricTrain, "🚂\uFE0E" },
             { CentralPttNote.WomenSectionCD, "👩\uFE0E" },
             { CentralPttNote.SilentSectionCD, "🤫\uFE0E" },
@@ -134,7 +134,7 @@ namespace KdyPojedeVlak.Web.Models
             { CentralPttNote.DirectedBoarding, "⛝" },
         };
 
-        public static Dictionary<TrainCategory, string> TrainCategoryNames = new()
+        public static readonly Dictionary<TrainCategory, string> TrainCategoryNames = new()
         {
             { TrainCategory.Unknown, "" },
             { TrainCategory.EuroCity, "EC" },
@@ -156,7 +156,7 @@ namespace KdyPojedeVlak.Web.Models
             { TrainCategory.LeoExpresTenders, "LET" },
         };
 
-        public static Dictionary<TrafficType, string> TrafficTypeNames = new()
+        public static readonly Dictionary<TrafficType, string> TrafficTypeNames = new()
         {
             { TrafficType.Unknown, "" },
             { TrafficType.Os, "Osobní vlak" },
@@ -173,7 +173,7 @@ namespace KdyPojedeVlak.Web.Models
             { TrafficType.Pom, "Nutný pomocný vlak" },
         };
 
-        public static Dictionary<SubsidiaryLocationType, string> SubsidiaryLocationTypeNames = new()
+        public static readonly Dictionary<SubsidiaryLocationType, string> SubsidiaryLocationTypeNames = new()
         {
             { SubsidiaryLocationType.Unknown, "" },
             { SubsidiaryLocationType.None, "" },
