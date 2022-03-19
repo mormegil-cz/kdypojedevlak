@@ -21,6 +21,9 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         private static readonly Regex reDirectory = new Regex(@"^2[0-9]{3}$",
             RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
+        private static readonly Regex reSubdirectory = new Regex(@"^2[0-9]{3}-[0-9]{2}$",
+            RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
         private const int BUFF_SIZE = 10240;
 
         private FtpClient ftp;
@@ -46,17 +49,8 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 
         public async Task<Dictionary<string, long>> GetListOfFilesAvailable()
         {
-            var directories = (await ftp.ListDirectoriesAsync())
-                .Select(dir => new { Directory = dir, Match = reDirectory.Match(dir.Name) })
-                .Where(f => f.Match.Success)
-                .Select(f => f.Directory.Name)
-                .ToList();
-
-            var results = new Dictionary<string, long>();
-            foreach (var dir in directories)
+            async Task AddListOfFilesAvailableInDir(Dictionary<string, long> dictionary, string dir)
             {
-                await ftp.ChangeWorkingDirectoryAsync(dir);
-
                 var files = (await ftp.ListFilesAsync())
                     .Select(file => new { File = file, Match = reFilename.Match(file.Name) })
                     .Where(f => f.Match.Success)
@@ -65,8 +59,35 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 
                 foreach (var file in files)
                 {
-                    results.Add(dir + "/" + file.Name, file.Size);
+                    dictionary.Add(dir + "/" + file.Name, file.Size);
                 }
+            }
+
+            var directories = (await ftp.ListDirectoriesAsync())
+                .Select(dir => new { Directory = dir, Match = reDirectory.Match(dir.Name) })
+                .Where(f => f.Match.Success)
+                .Select(f => f.Directory.Name)
+                .ToList();
+            
+            var results = new Dictionary<string, long>();
+            foreach (var dir in directories)
+            {
+                await ftp.ChangeWorkingDirectoryAsync(dir);
+
+                var subdirectories = (await ftp.ListDirectoriesAsync())
+                    .Select(subdir => new { Directory = subdir, Match = reSubdirectory.Match(subdir.Name) })
+                    .Where(f => f.Match.Success)
+                    .Select(f => f.Directory.Name)
+                    .ToList();
+
+                foreach (var subdir in subdirectories)
+                {
+                    await ftp.ChangeWorkingDirectoryAsync(subdir);
+                    await AddListOfFilesAvailableInDir(results, dir + "/" + subdir);
+                    await ftp.ChangeWorkingDirectoryAsync("..");
+                }
+                
+                await AddListOfFilesAvailableInDir(results, dir);
 
                 await ftp.ChangeWorkingDirectoryAsync("..");
             }

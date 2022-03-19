@@ -80,9 +80,16 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         private static Dictionary<string, long> GetDataFilesAvailable(string basePath)
         {
             var result = new Dictionary<string, long>();
-            foreach (var subdirectory in Directory.GetDirectories(basePath))
+            foreach (var directory in Directory.GetDirectories(basePath))
             {
-                foreach (var file in Directory.GetFiles(subdirectory, dataFilePattern))
+                foreach (var subdirectory in Directory.GetDirectories(directory))
+                {
+                    foreach (var file in Directory.GetFiles(subdirectory, dataFilePattern))
+                    {
+                        result.Add(file, new FileInfo(file).Length);
+                    }
+                }
+                foreach (var file in Directory.GetFiles(directory, dataFilePattern))
                 {
                     result.Add(file, new FileInfo(file).Length);
                 }

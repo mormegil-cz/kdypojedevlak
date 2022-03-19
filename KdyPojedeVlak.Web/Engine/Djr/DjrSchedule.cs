@@ -20,8 +20,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
     {
         public static void ImportNewFiles(DbModelContext dbModelContext, Dictionary<string, long> availableDataFiles)
         {
-            // %%NOCOMMIT: remove temporary patch
-            foreach (var file in availableDataFiles.Where(df => df.Key.Contains(@"\2021\")))
+            foreach (var file in availableDataFiles.OrderBy(e => e.Key.LastIndexOf(Path.PathSeparator)).ThenBy(e => e.Key))
             {
                 ImportCompressedDataFile(file.Key, file.Value, dbModelContext);
             }
