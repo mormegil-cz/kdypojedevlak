@@ -87,6 +87,11 @@ namespace KdyPojedeVlak.Controllers
                     InfoMessage.RegisterMessage(TempData, MessageClass.Success, "Souřadnice všech bodů načteny z číselníku");
                     return RedirectToAction("Index");
 
+                case "FillMissingPointNames":
+                    var filledNames = DjrSchedule.FillMissingPointNames(dbModelContext);
+                    InfoMessage.RegisterMessage(TempData, MessageClass.Success, filledNames + " chybějících názvů bodů načteno z číselníku");
+                    return RedirectToAction("Index");
+
                 default:
                     InfoMessage.RegisterMessage(TempData, MessageClass.Danger, "Cože?");
                     return RedirectToAction("Index");

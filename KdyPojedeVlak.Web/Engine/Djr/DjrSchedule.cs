@@ -111,6 +111,34 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             dbModelContext.SaveChanges();
         }
 
+        public static int FillMissingPointNames(DbModelContext dbModelContext)
+        {
+            int count = 0;
+            var pointCodebook = Program.PointCodebook;
+            foreach (var point in dbModelContext.RoutingPoints.Where(rp => rp.Name.StartsWith("#")))
+            {
+                if (point.Name != "#" + point.ShortCzechIdentifier)
+                {
+                    DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious name for point {0}: {1}", point.Code, point.Name));
+                    continue;
+                }
+
+                var codebookEntry = pointCodebook.Find(point.Code);
+                if (codebookEntry == null)
+                {
+                    DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Unknown name for point {0}", point.Code));
+                }
+                else
+                {
+                    DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Fixing name for point {0}: {1} → {2}", point.Code, point.Name, codebookEntry.LongName));
+                    point.Name = codebookEntry.LongName;
+                    ++count;
+                }
+            }
+            dbModelContext.SaveChanges();
+            return count;
+        }
+
         private static bool IsGzip(string filename)
         {
             using var file = File.OpenRead(filename);
@@ -417,15 +445,15 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     {
                         // TODO: JourneyLocationTypeCode
                         { Passage.AttribTrainOperations, String.Join(';', trainOperations) },
-                        { Passage.AttribSubsidiaryLocation, locationData.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code },
-                        { Passage.AttribSubsidiaryLocationName, locationData.LocationSubsidiaryIdentification?.LocationSubsidiaryName },
+                        { Passage.AttribSubsidiaryLocation, locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code },
+                        { Passage.AttribSubsidiaryLocationName, locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryName },
                         {
                             Passage.AttribSubsidiaryLocationType,
-                            (locationData.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                            (locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
                                 ?.LocationSubsidiaryTypeCode == null
                                 ? SubsidiaryLocationType.None
                                 : defSubsidiaryLocationType[
-                                    locationData.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                                    locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
                                         ?.LocationSubsidiaryTypeCode ?? "0"]).ToString()
                         },
                     },

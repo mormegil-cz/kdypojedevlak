@@ -33,7 +33,7 @@ namespace KdyPojedeVlak.Web.Engine.SR70
             codebook = new Dictionary<string, PointCodebookEntry>();
 
 
-            CodebookHelpers.LoadCsvData(path, @"SR70-2021-08-30.csv", ';', Encoding.GetEncoding(1250))
+            CodebookHelpers.LoadCsvData(path, @"SR70-2021-12-31.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r))
                 .IntoDictionary(codebook, r => r.ID, r => new PointCodebookEntry
                 {
@@ -47,24 +47,6 @@ namespace KdyPojedeVlak.Web.Engine.SR70
 
             // add historical data for missing points
             /*
-            foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2021-06-13.csv", ';', Encoding.GetEncoding(1250))
-                .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
-            {
-                if (codebook.ContainsKey(point.ID)) continue;
-
-                codebook.Add(point.ID, new PointCodebookEntry
-                {
-                    ID = point.Row[0],
-                    LongName = point.Row[1],
-                    ShortName = point.Row[3],
-                    Type = ParsePointType(point.Row[10]),
-                    Longitude = ParseGeoCoordinate(point.Row[28]),
-                    Latitude = ParseGeoCoordinate(point.Row[29]),
-                });
-
-                DebugLog.LogDebugMsg("Additional point in 2021-06 codebook: {0}", point.ID);
-            }
-
             foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2020-12-08.csv", ';', Encoding.GetEncoding(1250))
                 .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
             {
@@ -168,7 +150,7 @@ namespace KdyPojedeVlak.Web.Engine.SR70
             }
 
             var problematicPoints = new HashSet<String>();
-            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2021-08-31.tsv", '\t', Encoding.UTF8)
+            foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2022-03-19.tsv", '\t', Encoding.UTF8)
                 .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
             )
             {
@@ -235,7 +217,7 @@ namespace KdyPojedeVlak.Web.Engine.SR70
             var pointsWithWikidata = new Dictionary<PointType, Tuple<int, int>>(codebook.Count);
             foreach (var entry in codebook.Values.Where(value => value.Latitude != null))
             {
-                if (String.IsNullOrEmpty(entry.WikidataItem) && (entry.Type == PointType.Stop || entry.Type == PointType.Station || entry.Type == PointType.Siding))
+                if (String.IsNullOrEmpty(entry.WikidataItem) && (entry.Type == PointType.Stop || entry.Type == PointType.Station))
                 {
                     Console.WriteLine($"'{entry.LongName}' ({entry.ID}) {entry.Type} missing");
                 }
