@@ -3,9 +3,20 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Xml.Serialization;
 
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
 namespace KdyPojedeVlak.Web.Engine.Djr.DjrXmlModel
 {
-    public class CZPTTCISMessage
+    public abstract class CZPTTCISMessageBase
+    {
+        [XmlIgnore]
+        public abstract DateTime CreationTimestamp { get; }
+    }
+
+    public class CZPTTCISMessage : CZPTTCISMessageBase
     {
         public Identifiers Identifiers { get; set; }
         public DateTime CZPTTCreation { get; set; }
@@ -14,6 +25,25 @@ namespace KdyPojedeVlak.Web.Engine.Djr.DjrXmlModel
 
         [XmlElement]
         public List<NetworkSpecificParameter> NetworkSpecificParameter { get; set; }
+
+        [XmlIgnore]
+        public override DateTime CreationTimestamp => CZPTTCreation;
+    }
+
+    public class CZCanceledPTTMessage : CZPTTCISMessageBase
+    {
+        [XmlElement]
+        public List<PlannedTransportIdentifiers> PlannedTransportIdentifiers { get; set; }
+
+        public DateTime CZPTTCancelation { get; set; }
+
+        // TODO: CZDeactivatedSection
+        // public PathSection CZDeactivatedSection { get; set; }
+        
+        public PlannedCalendar PlannedCalendar { get; set; }
+
+        [XmlIgnore]
+        public override DateTime CreationTimestamp => CZPTTCancelation;
     }
 
     public class Identifiers
@@ -138,7 +168,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr.DjrXmlModel
             return other.ToTimeSpan.Equals(ToTimeSpan);
         }
 
-        public TimeSpan AsTimeSpan() => DateTimeOffset.ParseExact(Time, "HH:mm:ss.fffffffzzz", CultureInfo.InvariantCulture).TimeOfDay;
+        public TimeSpan AsTimeSpan() => DateTimeOffset.ParseExact(Time, @"HH:mm:ss.fffffffzzz", CultureInfo.InvariantCulture).TimeOfDay;
     }
 
     public class TrainActivity

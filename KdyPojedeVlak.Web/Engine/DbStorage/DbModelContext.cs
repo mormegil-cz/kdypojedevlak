@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using KdyPojedeVlak.Web.Engine.Djr;
 using KdyPojedeVlak.Web.Engine.SR70;
 using KdyPojedeVlak.Web.Models;
@@ -24,9 +25,11 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
         public DbSet<TimetableYear> TimetableYears { get; set; }
         public DbSet<Train> Trains { get; set; }
         public DbSet<TrainTimetable> TrainTimetables { get; set; }
+        public DbSet<TrainTimetableVariant> TrainTimetableVariants { get; set; }
         public DbSet<RoutingPoint> RoutingPoints { get; set; }
         public DbSet<CalendarDefinition> CalendarDefinitions { get; set; }
         public DbSet<NeighboringPoints> NeighboringPointTuples { get; set; }
+        public DbSet<TrainCancellation> TrainCancellations { get; set; }
 
         public DbModelContext(DbContextOptions<DbModelContext> options)
             : base(options)
@@ -47,6 +50,9 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
                 .HasIndex(o => new { o.TrainId, o.YearId }).IsUnique();
             modelBuilder.Entity<TrainTimetable>()
                 .HasIndex(o => o.Name); // TODO: Fulltext
+
+            modelBuilder.Entity<TrainTimetableVariant>()
+                .HasIndex(o => new { o.YearId, o.TrainVariantId, o.PathVariantId }).IsUnique();
 
             modelBuilder.Entity<RoutingPoint>()
                 .HasIndex(o => o.Code).IsUnique();
@@ -73,6 +79,9 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
                 .HasValue<NonCentralPttNoteForVariant>(2);
             modelBuilder.Entity<PttNoteForVariant>()
                 .HasIndex(o => o.TrainId);
+
+            modelBuilder.Entity<TrainCancellation>()
+                .HasIndex(o => o.TimetableVariantId);
         }
 
         public HashSet<RoutingPoint> GetNeighboringPoints(RoutingPoint point)
@@ -120,7 +129,7 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
 
     public class CalendarDefinition
     {
-        private static readonly Guid calendarNamespaceGuid = new Guid("4eb0c41b-32a1-4acb-bd5f-8a6dbe847162");
+        private static readonly Guid calendarNamespaceGuid = new("4eb0c41b-32a1-4acb-bd5f-8a6dbe847162");
 
         private bool[] bitmap;
 
@@ -316,6 +325,14 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
         [Required]
         public TrainTimetable Timetable { get; set; }
 
+        // note that this is denormalized: TimetableId implies YearId, but it would be difficult to normalize it
+        // and we need YearId to enforce unique index on Year+PathVariantId+TrainVariantId
+        [Required]
+        public int YearId { get; set; }
+
+        [ForeignKey("YearId")]
+        public TimetableYear TimetableYear { get; set; }
+        
         [Required]
         [MaxLength(32)]
         public string PathVariantId { get; set; }
@@ -332,6 +349,8 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
         public virtual List<Passage> Points { get; set; }
 
         public virtual List<PttNoteForVariant> PttNotes { get; set; }
+
+        public virtual List<TrainCancellation> Cancellations { get; set; }
     }
 
     public class Passage
@@ -512,6 +531,30 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
 
         [Required]
         public string Value { get; set; }
+    }
+
+    public class TrainCancellation
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [MaxLength(32)]
+        public string PathVariantId { get; set; }
+
+        [Required]
+        [MaxLength(32)]
+        public string TrainVariantId { get; set; }
+
+        public int? TimetableVariantId { get; set; }
+        
+        [ForeignKey("TimetableVariantId")]
+        public TrainTimetableVariant TrainTimetableVariant { get; set; }
+
+        [Required]
+        public CalendarDefinition Calendar { get; set; }
+
+        [Required]
+        public ImportedFile ImportedFrom { get; set; }
     }
 
     internal static class DbModelUtils

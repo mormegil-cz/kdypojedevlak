@@ -1,12 +1,12 @@
 ﻿#nullable enable
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Xml;
 using System.Xml.Serialization;
 using KdyPojedeVlak.Web.Engine.Algorithms;
 using KdyPojedeVlak.Web.Engine.DbStorage;
@@ -20,10 +20,15 @@ namespace KdyPojedeVlak.Web.Engine.Djr
     {
         public static void ImportNewFiles(DbModelContext dbModelContext, Dictionary<string, long> availableDataFiles)
         {
-            foreach (var file in availableDataFiles.OrderBy(e => e.Key.LastIndexOf(Path.PathSeparator)).ThenBy(e => e.Key))
+            foreach (var file in availableDataFiles
+                             // TODO: FIXME!
+                         .Where(e => !e.Key.Contains("\\2019\\") && !e.Key.Contains("\\2020\\"))
+                         .OrderBy(e => e.Key.LastIndexOf(Path.PathSeparator)).ThenBy(e => e.Key))
             {
                 ImportCompressedDataFile(file.Key, file.Value, dbModelContext);
             }
+            DebugLog.LogDebugMsg("Filling missing cancellation links...");
+            LinkCancellations(dbModelContext);
             DebugLog.LogDebugMsg("Import done");
         }
 
@@ -186,13 +191,13 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 
             using (var transaction = dbModelContext.Database.BeginTransaction())
             {
-                CZPTTCISMessage message;
+                CZPTTCISMessageBase messageBase;
                 using (var stream = fileReader())
                 {
-                    message = LoadXmlFile(stream);
+                    messageBase = LoadXmlFile(stream);
                 }
 
-                var creationDate = message.CZPTTCreation;
+                var creationDate = messageBase.CreationTimestamp;
                 var importedFile = new ImportedFile
                 {
                     FileName = fileName,
@@ -202,13 +207,23 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 };
                 dbModelContext.ImportedFiles.Add(importedFile);
 
-                var trainNumber = ImportToDatabase(message, importedFile, dbModelContext);
+                switch (messageBase)
+                {
+                    case CZPTTCISMessage message:
+                        var trainNumber = ImportTrainToDatabase(message, importedFile, dbModelContext);
+                        ScheduleVersionInfo.ReportFileImported(creationDate, trainNumber);
+                        break;
+
+                    case CZCanceledPTTMessage cancelMessage:
+                        ImportCancellationToDatabase(cancelMessage, importedFile, dbModelContext);
+                        break;
+
+                    default:
+                        throw new FormatException($"Unexpected message type {messageBase.GetType()}");
+                }
 
                 dbModelContext.SaveChanges();
-
                 transaction.Commit();
-
-                ScheduleVersionInfo.ReportFileImported(creationDate, trainNumber);
             }
 
             DebugLog.LogDebugMsg("File {0} imported successfully", fileName);
@@ -218,13 +233,24 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 
         private static Stream ReadZipEntry(ZipArchiveEntry entry) => entry.Open();
 
-        private static CZPTTCISMessage LoadXmlFile(Stream stream)
+        private static CZPTTCISMessageBase LoadXmlFile(Stream stream)
         {
-            var ser = new XmlSerializer(typeof(CZPTTCISMessage));
-            return (CZPTTCISMessage)ser.Deserialize(stream);
+            using var xmlReader = XmlReader.Create(stream);
+
+            xmlReader.MoveToContent();
+            if (xmlReader.NodeType != XmlNodeType.Element || !String.IsNullOrEmpty(xmlReader.NamespaceURI)) throw new FormatException($"Unexpected XML file content: {xmlReader.NodeType} {xmlReader.NamespaceURI} {xmlReader.LocalName}");
+
+            var ser = xmlReader.LocalName switch
+            {
+                "CZPTTCISMessage" => new XmlSerializer(typeof(CZPTTCISMessage)),
+                "CZCanceledPTTMessage" => new XmlSerializer(typeof(CZCanceledPTTMessage)),
+                _ => throw new FormatException($"Unsupported XML element: ${xmlReader.LocalName}")
+            };
+
+            return (CZPTTCISMessageBase)ser.Deserialize(xmlReader)!;
         }
 
-        private static string ImportToDatabase(CZPTTCISMessage message, ImportedFile importedFile, DbModelContext dbModelContext)
+        private static string ImportTrainToDatabase(CZPTTCISMessage message, ImportedFile importedFile, DbModelContext dbModelContext)
         {
             var identifiersPerType = message.Identifiers.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
             var trainId = identifiersPerType["TR"];
@@ -239,26 +265,10 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 
             var plannedCalendar = message.CZPTTInformation.PlannedCalendar;
             var calendarMinDate = plannedCalendar.ValidityPeriod.StartDateTime;
-            var calendarMaxDate = plannedCalendar.ValidityPeriod.EndDateTime ?? calendarMinDate.AddDays(message.CZPTTInformation.PlannedCalendar.BitmapDays.Length - 1);
+            var calendarMaxDate = plannedCalendar.ValidityPeriod.EndDateTime ?? calendarMinDate.AddDays(plannedCalendar.BitmapDays.Length - 1);
 
             var timetableYear = trainId.TimetableYear;
-            var dbTimetableYear = dbModelContext.TimetableYears.SingleOrDefault(y => y.Year == timetableYear);
-            if (dbTimetableYear == null)
-            {
-                dbTimetableYear = new TimetableYear
-                {
-                    Year = timetableYear,
-                    MinDate = calendarMinDate,
-                    MaxDate = calendarMaxDate
-                };
-                dbModelContext.TimetableYears.Add(dbTimetableYear);
-                DebugLog.LogDebugMsg("Created year {0}", timetableYear);
-            }
-            else
-            {
-                if (dbTimetableYear.MinDate > calendarMinDate) dbTimetableYear.MinDate = calendarMinDate;
-                if (dbTimetableYear.MaxDate < calendarMaxDate) dbTimetableYear.MaxDate = calendarMaxDate;
-            }
+            var dbTimetableYear = FindOrCreateTimetableYear(dbModelContext, timetableYear, calendarMinDate, calendarMaxDate);
 
             // TODO: Clarify TrainNumbers
             var operationalTrainNumbers = message.CZPTTInformation.CZPTTLocation.Select(loc => loc.OperationalTrainNumber).Where(n => n != null).ToHashSet();
@@ -287,7 +297,6 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             var dbCalendar = FindOrCreateCalendar(dbModelContext, new CalendarDefinition
             {
                 // TODO: trainCalendar.BaseDate??
-                Description = CalendarNamer.DetectName(calendarBitmap, calendarMinDate, calendarMaxDate),
                 StartDate = calendarMinDate,
                 EndDate = calendarMaxDate,
                 TimetableYear = dbTimetableYear,
@@ -511,6 +520,82 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             return operationalTrainNumber;
         }
 
+        private static void ImportCancellationToDatabase(CZCanceledPTTMessage message, ImportedFile importedFile, DbModelContext dbModelContext)
+        {
+            var identifiersPerType = message.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
+            var trainId = identifiersPerType["TR"];
+            var pathId = identifiersPerType["PA"];
+            var trainIdentifier = trainId.Company + "/" + trainId.Core + "/" + trainId.Variant;
+            var pathIdentifier = pathId.Company + "/" + pathId.Core + "/" + pathId.Variant;
+
+            var plannedCalendar = message.PlannedCalendar;
+            var calendarMinDate = plannedCalendar.ValidityPeriod.StartDateTime;
+            var calendarMaxDate = plannedCalendar.ValidityPeriod.EndDateTime ?? calendarMinDate.AddDays(plannedCalendar.BitmapDays.Length - 1);
+            var calendarBitmap = plannedCalendar.BitmapDays.Select(c => c == '1').ToArray();
+            var dbCalendar = FindOrCreateCalendar(dbModelContext, new CalendarDefinition
+            {
+                // TODO: trainCalendar.BaseDate??
+                StartDate = calendarMinDate,
+                EndDate = calendarMaxDate,
+                TimetableYear = FindOrCreateTimetableYear(dbModelContext, trainId.TimetableYear, calendarMinDate, calendarMaxDate),
+                Bitmap = calendarBitmap
+            });
+
+            var cancellation = new TrainCancellation
+            {
+                ImportedFrom = importedFile,
+                PathVariantId = pathIdentifier,
+                TrainVariantId = trainIdentifier,
+                Calendar = dbCalendar
+            };
+
+            dbModelContext.Add(cancellation);
+        }
+
+        private static void LinkCancellations(DbModelContext dbModelContext)
+        {
+            var count = 0;
+            foreach (var cancellation in dbModelContext.TrainCancellations.Where(c => c.TrainTimetableVariant == null))
+            {
+                var trainTimetableVariant = dbModelContext.TrainTimetableVariants.SingleOrDefault(ttv => ttv.TimetableYear == cancellation.Calendar.TimetableYear
+                                                                                                         && ttv.TrainVariantId == cancellation.TrainVariantId
+                                                                                                         && ttv.PathVariantId == cancellation.PathVariantId);
+                if (trainTimetableVariant == null)
+                {
+                    DebugLog.LogProblem("No variant found for cancellation of {0}/{1}", cancellation.TrainVariantId, cancellation.PathVariantId);
+                }
+                else
+                {
+                    cancellation.TrainTimetableVariant = trainTimetableVariant;
+                    ++count;
+                }
+            }
+            dbModelContext.SaveChanges();
+            if (count > 0) DebugLog.LogDebugMsg("Linked {0} cancellations", count);
+        }
+
+        private static TimetableYear FindOrCreateTimetableYear(DbModelContext dbModelContext, int timetableYear, DateTime calendarMinDate, DateTime calendarMaxDate)
+        {
+            var dbTimetableYear = dbModelContext.TimetableYears.SingleOrDefault(y => y.Year == timetableYear);
+            if (dbTimetableYear == null)
+            {
+                dbTimetableYear = new TimetableYear
+                {
+                    Year = timetableYear,
+                    MinDate = calendarMinDate,
+                    MaxDate = calendarMaxDate
+                };
+                dbModelContext.TimetableYears.Add(dbTimetableYear);
+                DebugLog.LogDebugMsg("Created year {0}", timetableYear);
+            }
+            else
+            {
+                if (dbTimetableYear.MinDate > calendarMinDate) dbTimetableYear.MinDate = calendarMinDate;
+                if (dbTimetableYear.MaxDate < calendarMaxDate) dbTimetableYear.MaxDate = calendarMaxDate;
+            }
+            return dbTimetableYear;
+        }
+
         private static Dictionary<string, List<string>>? ReadNetworkSpecificParameters(List<NetworkSpecificParameter>? parameters)
             => parameters?.GroupBy(param => param.Name)
                 .ToDictionary(g => g.Key, g => g.Select(p => p.Value).ToList());
@@ -520,6 +605,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             var dbCalendar = dbModelContext.CalendarDefinitions.SingleOrDefault(c => c.Guid == trainCalendar.Guid);
             if (dbCalendar != null) return dbCalendar;
 
+            trainCalendar.Description = CalendarNamer.DetectName(trainCalendar.Bitmap, trainCalendar.StartDate, trainCalendar.EndDate);
             dbModelContext.CalendarDefinitions.Add(trainCalendar);
             dbModelContext.SaveChanges();
             DebugLog.LogDebugMsg("Created calendar {0}", trainCalendar.Guid);
@@ -564,8 +650,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     TimetableYear = dbTimetableYear,
                     StartDate = startDate,
                     EndDate = endDate,
-                    Bitmap = bitmap,
-                    Description = CalendarNamer.DetectName(bitmap, startDate, endDate)
+                    Bitmap = bitmap
                 });
                 pttNoteCalendars.Add(id, calendar);
             }

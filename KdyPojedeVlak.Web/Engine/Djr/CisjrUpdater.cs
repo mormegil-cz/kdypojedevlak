@@ -31,8 +31,11 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     var downloadTime = DateTime.UtcNow;
                     var availableFilesForDownload = await downloader.GetListOfFilesAvailable();
 
+                    var total = availableFilesForDownload.Count;
+                    var count = 0;
                     foreach (var file in availableFilesForDownload)
                     {
+                        ++count;
                         var fileName = file.Key.Replace('/', Path.DirectorySeparatorChar);
                         var filePath = Path.Combine(basePath, fileName);
                         if (dataFilesAvailable.TryGetValue(filePath, out var currentSize) && currentSize == file.Value) continue;
@@ -44,7 +47,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                             fileInfo.Delete();
                         }
 
-                        DebugLog.LogDebugMsg("Downloading {0}", file.Key);
+                        DebugLog.LogDebugMsg("#{0}/{1}: Downloading {2}", count, total, file.Key);
                         var dirName = Path.GetDirectoryName(filePath);
                         if (!Directory.Exists(dirName))
                         {
