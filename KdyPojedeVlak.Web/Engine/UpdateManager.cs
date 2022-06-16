@@ -85,7 +85,6 @@ namespace KdyPojedeVlak.Web.Engine
                     using var serviceScope = serviceScopeFactory.CreateScope();
                     using var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
 
-                    context.ChangeTracker.AutoDetectChangesEnabled = false;
                     DjrSchedule.ImportNewFiles(context, availableDataFiles);
 
                     context.SaveChanges();

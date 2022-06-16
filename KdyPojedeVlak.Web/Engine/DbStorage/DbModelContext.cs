@@ -135,7 +135,10 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
 
         public int Id { get; set; }
 
+        public int TimetableYearYear { get; set; }
+
         [Required]
+        [ForeignKey("TimetableYearYear")]
         public TimetableYear TimetableYear { get; set; }
 
         [Required]
@@ -203,6 +206,8 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
         }
 
         private static Guid BuildGuidFromHash(string data) => new(GuidEx.NewGuid(data, calendarNamespaceGuid).ToByteArray());
+
+        public string DescriptionWithParens => StartDate > DateTime.Today ? "(" + Description + ")" : Description;
     }
 
     public class RoutingPoint
@@ -332,7 +337,7 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
 
         [ForeignKey("YearId")]
         public TimetableYear TimetableYear { get; set; }
-        
+
         [Required]
         [MaxLength(32)]
         public string PathVariantId { get; set; }
@@ -546,7 +551,7 @@ namespace KdyPojedeVlak.Web.Engine.DbStorage
         public string TrainVariantId { get; set; }
 
         public int? TimetableVariantId { get; set; }
-        
+
         [ForeignKey("TimetableVariantId")]
         public TrainTimetableVariant TrainTimetableVariant { get; set; }
 

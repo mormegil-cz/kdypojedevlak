@@ -20,13 +20,15 @@ namespace KdyPojedeVlak.Web.Engine.Djr
     {
         public static void ImportNewFiles(DbModelContext dbModelContext, Dictionary<string, long> availableDataFiles)
         {
+            dbModelContext.ChangeTracker.AutoDetectChangesEnabled = false;
             foreach (var file in availableDataFiles
-                             // TODO: FIXME!
+                         // TODO: FIXME!
                          .Where(e => !e.Key.Contains("\\2019\\") && !e.Key.Contains("\\2020\\"))
                          .OrderBy(e => e.Key.LastIndexOf(Path.PathSeparator)).ThenBy(e => e.Key))
             {
                 ImportCompressedDataFile(file.Key, file.Value, dbModelContext);
             }
+            dbModelContext.ChangeTracker.AutoDetectChangesEnabled = true;
             DebugLog.LogDebugMsg("Filling missing cancellation links...");
             LinkCancellations(dbModelContext);
             DebugLog.LogDebugMsg("Import done");
@@ -206,6 +208,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     CreationDate = creationDate
                 };
                 dbModelContext.ImportedFiles.Add(importedFile);
+                dbModelContext.SaveChanges();
 
                 switch (messageBase)
                 {
@@ -337,11 +340,14 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             if (trainTimetable.Variants.Any(ttv => ttv.PathVariantId == pathIdentifier && ttv.TrainVariantId == trainIdentifier))
             {
                 DebugLog.LogProblem("Duplicate variant: '{0}', '{1}'", pathIdentifier, trainIdentifier);
+                // TODO: Možná spíš smazat starší verzi??
+                return operationalTrainNumber;
             }
 
             var trainTimetableVariant = new TrainTimetableVariant
             {
                 Timetable = trainTimetable,
+                TimetableYear = dbTimetableYear,
                 Calendar = dbCalendar,
                 PathVariantId = pathIdentifier,
                 TrainVariantId = trainIdentifier,
@@ -555,20 +561,25 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         private static void LinkCancellations(DbModelContext dbModelContext)
         {
             var count = 0;
-            foreach (var cancellation in dbModelContext.TrainCancellations.Where(c => c.TrainTimetableVariant == null))
+            foreach (var cancellation in dbModelContext.TrainCancellations.Include(tc => tc.Calendar).Where(c => c.TrainTimetableVariant == null).ToList())
             {
-                var trainTimetableVariant = dbModelContext.TrainTimetableVariants.SingleOrDefault(ttv => ttv.TimetableYear == cancellation.Calendar.TimetableYear
-                                                                                                         && ttv.TrainVariantId == cancellation.TrainVariantId
-                                                                                                         && ttv.PathVariantId == cancellation.PathVariantId);
-                if (trainTimetableVariant == null)
+                var trainTimetableVariantId = dbModelContext.TrainTimetableVariants
+                    .Where(ttv => ttv.YearId == cancellation.Calendar.TimetableYearYear
+                                  && ttv.TrainVariantId == cancellation.TrainVariantId
+                                  && ttv.PathVariantId == cancellation.PathVariantId)
+                    .Select(ttv => (int?)ttv.Id)
+                    .SingleOrDefault();
+                if (trainTimetableVariantId == null)
                 {
                     DebugLog.LogProblem("No variant found for cancellation of {0}/{1}", cancellation.TrainVariantId, cancellation.PathVariantId);
                 }
                 else
                 {
-                    cancellation.TrainTimetableVariant = trainTimetableVariant;
+                    cancellation.TimetableVariantId = trainTimetableVariantId;
                     ++count;
                 }
+
+                dbModelContext.SaveChanges();
             }
             dbModelContext.SaveChanges();
             if (count > 0) DebugLog.LogDebugMsg("Linked {0} cancellations", count);
@@ -679,7 +690,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 From = from,
                 To = to,
                 OnArrival = pieces[5] == "1",
-                Calendar = calendarDefinitions == null ? trainTimetableVariant.Calendar : calendarDefinitions[pieces[6]]
+                Calendar = String.IsNullOrEmpty(pieces[6]) || calendarDefinitions == null ? trainTimetableVariant.Calendar : calendarDefinitions[pieces[6]]
             };
         }
 
@@ -708,7 +719,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 ShowInFooter = defShowInFooter[pieces[6]],
                 IsTariff = pieces[7] == "1",
                 OnArrival = pieces[8] == "1",
-                Calendar = calendarDefinitions == null ? trainTimetableVariant.Calendar : calendarDefinitions[pieces[9]],
+                Calendar = calendarDefinitions == null || String.IsNullOrEmpty(pieces[9]) ? trainTimetableVariant.Calendar : calendarDefinitions[pieces[9]],
             };
         }
 
@@ -799,6 +810,11 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         private static readonly Dictionary<string, CentralPttNote> defCentralPttNote =
             new()
             {
+                // used in 2022\2022-03\PA_0054_--KADR079263_01_2022.xml.zip, probably as a mistake instead of 37
+                { "7", CentralPttNote.Unknown },
+                // used in 2022\GVD2022.zip#PA_0054_KT-----2753A_00_2022.xml, no idea of the meaning
+                { "99", CentralPttNote.Unknown },
+
                 { "10", CentralPttNote.Class12 },
                 { "11", CentralPttNote.Class1 },
                 { "12", CentralPttNote.Class2 },
@@ -831,6 +847,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 { "40", CentralPttNote.WifiCD },
                 { "41", CentralPttNote.PortalCD },
                 { "42", CentralPttNote.CinemaCD },
+                { "43", CentralPttNote.ExcludedFromStateDiscount },
                 { "44", CentralPttNote.IntegratedTransportSystem },
                 { "45", CentralPttNote.DirectedBoarding }
             };
@@ -849,6 +866,8 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 { "0", FooterDisplay.None },
                 { "1", FooterDisplay.Everything },
                 { "2", FooterDisplay.EverythingExceptSection },
+                { "3", FooterDisplay.Everything },
+                { "4", FooterDisplay.EverythingExceptSection },
             };
     }
 
@@ -978,7 +997,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         WifiCD,
         PortalCD,
         CinemaCD,
-        Unknown43,
+        ExcludedFromStateDiscount,
         IntegratedTransportSystem,
         DirectedBoarding,
     }
@@ -1002,6 +1021,8 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         CZPassengerServiceNumber,
         CZPublicService,
         CZAlternativeTransport,
+        CZPassengerPublicTransportOrderingCoName,
+        CZInconsistentTime,
     }
 
     public enum HeaderDisplay

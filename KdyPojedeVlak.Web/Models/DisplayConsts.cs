@@ -91,6 +91,7 @@ namespace KdyPojedeVlak.Web.Models
             { CentralPttNote.WifiCD, "Ve vlaku je plánováno řazení vozu s bezdrátovým připojením k internetu" },
             { CentralPttNote.PortalCD, "Palubní portál" },
             { CentralPttNote.CinemaCD, "Dětské kino" },
+            { CentralPttNote.ExcludedFromStateDiscount, "Ve vlaku neplatí zvláštní jízdné pro žáky a studenty 18–26 let a pro cestující 65+" },
             { CentralPttNote.IntegratedTransportSystem, "Vlak zařazen v integrovaném dopravním systému" },
             { CentralPttNote.DirectedBoarding, "Usměrněný nástup" },
         };
@@ -130,6 +131,7 @@ namespace KdyPojedeVlak.Web.Models
             { CentralPttNote.WifiCD, "𝗐𝗂𝖿𝗂" },
             { CentralPttNote.PortalCD, "⏵⃞" },
             { CentralPttNote.CinemaCD, "𝗸𝗶𝗻𝗼" },
+            { CentralPttNote.ExcludedFromStateDiscount, "⏺" },
             { CentralPttNote.IntegratedTransportSystem, "⇔" },
             { CentralPttNote.DirectedBoarding, "⛝" },
         };

@@ -42,7 +42,7 @@ namespace KdyPojedeVlak.Web.Controllers
                 }
                 else
                 {
-                    return View((object) $"Vlak č. {id} nebyl nalezen.");
+                    return View((object)$"Vlak č. {id} nebyl nalezen.");
                 }
             }
             else
@@ -54,7 +54,7 @@ namespace KdyPojedeVlak.Web.Controllers
                 }
                 else
                 {
-                    return View((object) "Vlak nebyl nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
+                    return View((object)"Vlak nebyl nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
                 }
             }
         }
@@ -193,6 +193,9 @@ namespace KdyPojedeVlak.Web.Controllers
                 .Include(tt => tt.Variants)
                 .ThenInclude(ttv => ttv.PttNotes)
                 .Include(tt => tt.Variants)
+                .Include(tt => tt.Variants)
+                .ThenInclude(ttv => ttv.Cancellations)
+                .ThenInclude(c => c.Calendar)
                 .Where(t => t.Train == train);
 
             var timetable = timetableQuery.AsSplitQuery().SingleOrDefault(t => t.TimetableYear == year);
