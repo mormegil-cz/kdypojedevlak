@@ -83,17 +83,18 @@ namespace KdyPojedeVlak.Web.Engine
                 try
                 {
                     using var serviceScope = serviceScopeFactory.CreateScope();
-                    using var context = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+                    using var dbModelContext = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+                    dbModelContext.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                    DjrSchedule.ImportNewFiles(context, availableDataFiles);
+                    DjrSchedule.ImportNewFiles(dbModelContext, availableDataFiles);
 
-                    context.SaveChanges();
+                    dbModelContext.SaveChanges();
 
-                    context.Database.ExecuteSqlRaw("PRAGMA optimize");
+                    dbModelContext.Database.ExecuteSqlRaw("PRAGMA optimize");
                 }
                 catch (Exception ex)
                 {
-                    DebugLog.LogProblem("Error loading schedule: {0}", ex);
+                    DebugLog.LogProblem("Error importing new schedule files: {0}", ex);
                     return;
                 }
 

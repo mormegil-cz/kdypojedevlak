@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using KdyPojedeVlak.Web.Engine;
 using KdyPojedeVlak.Web.Engine.DbStorage;
 using KdyPojedeVlak.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -179,7 +180,7 @@ namespace KdyPojedeVlak.Web.Controllers
                 .Select(np => np.FullIdentifier)
                 .Where(id => !neighborCodes.Contains(id))
                 .Select(id => dbModelContext.RoutingPoints.SingleOrDefault(rp => rp.Code == id))
-                .Where(p => p != null)
+                .WhereNotNull()
                 .ToList();
         }
     }

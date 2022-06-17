@@ -132,12 +132,12 @@ namespace KdyPojedeVlak.Web.Controllers
 
             var points = new HashSet<RoutingPoint>(pointsInVariants.SelectMany(pl => pl.Where(p => p.Latitude != null))).Select(p => new JObject
             {
-                new JProperty("coords", new JArray(p!.Latitude, p!.Longitude)),
+                new JProperty("coords", new JArray(p!.Latitude!, p!.Longitude!)),
                 new JProperty("title", p.Name)
             }).Cast<object>().ToArray();
             // TODO: Line titles
             var lines = pointsInVariants.Select(ttv =>
-                new JArray(ttv.Where(p => p.Latitude != null).Select(p => new JArray(p!.Latitude, p!.Longitude)).Cast<object>().ToArray())
+                new JArray(ttv.Where(p => p.Latitude != null).Select(p => new JArray(p!.Latitude!, p!.Longitude!)).Cast<object>().ToArray())
             ).Cast<object>().ToArray();
 
             JObject dataJson = new JObject

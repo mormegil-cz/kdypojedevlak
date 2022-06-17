@@ -10,6 +10,7 @@ namespace KdyPojedeVlak.Web.Engine
         public static void IntoDictionary<TSource, TKey, TValue>(
             this IEnumerable<TSource> source, IDictionary<TKey, TValue> destination,
             Func<TSource, TKey> keySelector, Func<TSource, TValue> valueSelector)
+            where TKey : notnull
         {
             foreach (var item in source)
             {
@@ -28,6 +29,7 @@ namespace KdyPojedeVlak.Web.Engine
 
         public static IDictionary<TKey, TValue> ToDictionaryLax<TSource, TKey, TValue>(
             this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TValue> valueSelector)
+            where TKey : notnull
         {
             var destination = new Dictionary<TKey, TValue>();
             IntoDictionary(source, destination, keySelector, valueSelector);
@@ -35,13 +37,15 @@ namespace KdyPojedeVlak.Web.Engine
         }
 
         public static void RemoveAll<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, IEnumerable<TKey> keys)
+            where TKey : notnull
         {
             foreach (var key in keys) dictionary.Remove(key);
         }
 
-        public static IEnumerable<T> ConcatExisting<T>(params IEnumerable<T>?[] sequences)
-        {
-            return sequences.Where(s => s != null).SelectMany(s => s!);
-        }
+        public static IEnumerable<T> ConcatExisting<T>(params IEnumerable<T>?[] sequences) => sequences.Where(s => s != null).SelectMany(s => s!);
+
+        public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> sequence)
+            where T : notnull
+            => (IEnumerable<T>)sequence.Where(x => x != null);
     }
 }

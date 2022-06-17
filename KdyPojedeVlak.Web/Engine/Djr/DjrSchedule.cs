@@ -20,7 +20,6 @@ namespace KdyPojedeVlak.Web.Engine.Djr
     {
         public static void ImportNewFiles(DbModelContext dbModelContext, Dictionary<string, long> availableDataFiles)
         {
-            dbModelContext.ChangeTracker.AutoDetectChangesEnabled = false;
             foreach (var file in availableDataFiles
                          // TODO: FIXME!
                          .Where(e => !e.Key.Contains("\\2019\\") && !e.Key.Contains("\\2020\\"))
@@ -28,7 +27,6 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             {
                 ImportCompressedDataFile(file.Key, file.Value, dbModelContext);
             }
-            dbModelContext.ChangeTracker.AutoDetectChangesEnabled = true;
             DebugLog.LogDebugMsg("Filling missing cancellation links...");
             LinkCancellations(dbModelContext);
             DebugLog.LogDebugMsg("Import done");
@@ -253,7 +251,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             return (CZPTTCISMessageBase)ser.Deserialize(xmlReader)!;
         }
 
-        private static string ImportTrainToDatabase(CZPTTCISMessage message, ImportedFile importedFile, DbModelContext dbModelContext)
+        private static string? ImportTrainToDatabase(CZPTTCISMessage message, ImportedFile importedFile, DbModelContext dbModelContext)
         {
             var identifiersPerType = message.Identifiers.PlannedTransportIdentifiers.ToDictionary(pti => pti.ObjectType);
             var trainId = identifiersPerType["TR"];
@@ -282,7 +280,8 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             var operationalTrainNumber = operationalTrainNumbers.FirstOrDefault();
 
             var networkSpecificParameters = ReadNetworkSpecificParameters(message.NetworkSpecificParameter);
-            networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out var trainNames);
+            List<string>? trainNames = null;
+            networkSpecificParameters?.TryGetValue(NetworkSpecificParameterGlobal.CZTrainName.ToString(), out trainNames);
             var trainName = trainNames == null ? null : String.Join('/', trainNames);
 
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == operationalTrainNumber);
@@ -504,24 +503,27 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 
             dbModelContext.SaveChanges();
 
-            // 0. List<string> → List<string[]>
-            var calendarDefinitionPieces = networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZCalendarPTTNote.ToString(), out var calendarPttNoteDefinitionLines) ? calendarPttNoteDefinitionLines.Select(line => line.Split('|')).ToList() : null;
-
-            // 1. List<string> → Dictionary<string, string>
-            var calendarDefinitionStrings = calendarDefinitionPieces == null ? null : MergeNetworkSpecificCalendarDefinitions(calendarDefinitionPieces);
-
-            // 2. Dictionary<string, string> → Dictionary<string, CalendarDefinition>
-            var pttNoteCalendars = calendarDefinitionStrings == null ? null : ParseNetworkSpecificCalendarDefinitions(calendarDefinitionStrings, dbTimetableYear, dbModelContext);
-
-            if (networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZCentralPTTNote.ToString(), out var centralPttNoteDefinitions))
+            if (networkSpecificParameters != null)
             {
-                dbModelContext.AddRange(centralPttNoteDefinitions.Select(def => ParseCentralPttNoteDefinition(def, passages, pttNoteCalendars, trainTimetableVariant)));
+                // 0. List<string> → List<string[]>
+                var calendarDefinitionPieces = networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZCalendarPTTNote.ToString(), out var calendarPttNoteDefinitionLines) ? calendarPttNoteDefinitionLines.Select(line => line.Split('|')).ToList() : null;
+
+                // 1. List<string> → Dictionary<string, string>
+                var calendarDefinitionStrings = calendarDefinitionPieces == null ? null : MergeNetworkSpecificCalendarDefinitions(calendarDefinitionPieces);
+
+                // 2. Dictionary<string, string> → Dictionary<string, CalendarDefinition>
+                var pttNoteCalendars = calendarDefinitionStrings == null ? null : ParseNetworkSpecificCalendarDefinitions(calendarDefinitionStrings, dbTimetableYear, dbModelContext);
+
+                if (networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZCentralPTTNote.ToString(), out var centralPttNoteDefinitions))
+                {
+                    dbModelContext.AddRange(centralPttNoteDefinitions.Select(def => ParseCentralPttNoteDefinition(def, passages, pttNoteCalendars, trainTimetableVariant)));
+                }
+                if (networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZNonCentralPTTNote.ToString(), out var nonCentralPttNoteDefinitions))
+                {
+                    dbModelContext.AddRange(nonCentralPttNoteDefinitions.Select(def => ParseNonCentralPttNoteDefinition(def, passages, pttNoteCalendars, trainTimetableVariant)));
+                }
+                dbModelContext.SaveChanges();
             }
-            if (networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZNonCentralPTTNote.ToString(), out var nonCentralPttNoteDefinitions))
-            {
-                dbModelContext.AddRange(nonCentralPttNoteDefinitions.Select(def => ParseNonCentralPttNoteDefinition(def, passages, pttNoteCalendars, trainTimetableVariant)));
-            }
-            dbModelContext.SaveChanges();
 
             return operationalTrainNumber;
         }
@@ -576,10 +578,10 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 else
                 {
                     cancellation.TimetableVariantId = trainTimetableVariantId;
+                    dbModelContext.Update(cancellation);
+                    dbModelContext.SaveChanges();
                     ++count;
                 }
-
-                dbModelContext.SaveChanges();
             }
             dbModelContext.SaveChanges();
             if (count > 0) DebugLog.LogDebugMsg("Linked {0} cancellations", count);

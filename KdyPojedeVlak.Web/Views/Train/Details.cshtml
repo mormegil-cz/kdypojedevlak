@@ -2,6 +2,7 @@
 @using KdyPojedeVlak.Web.Engine.DbStorage
 @using KdyPojedeVlak.Web.Engine.Djr
 @using KdyPojedeVlak.Web.Helpers
+@using KdyPojedeVlak.Web.Engine
 @model KdyPojedeVlak.Web.Models.TrainPlan
 @{
     ViewData["Title"] = "Vlak " + DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] + " " + Model.Train.TrainNumber + " " + Model.Train.Name;
@@ -103,6 +104,23 @@
                 .Distinct()
                 .OrderBy(s => s)
                 .ToList();
+            var publicTransportOrderingCompanies = variant.Points
+                .Select(pointVariant =>
+                {
+                    var publicService = pointVariant.NetworkSpecificParameters.FirstOrDefault(p => p.Type == NetworkSpecificParameterPassage.CZPublicService);
+                    var publicTransportOrderingCo = pointVariant.NetworkSpecificParameters.FirstOrDefault(p => p.Type == NetworkSpecificParameterPassage.CZPassengerPublicTransportOrderingCoName);
+                    if (publicService?.Value == "1")
+                        return new { Icon = "🏛\uFE0E", Text = publicTransportOrderingCo?.Value ?? "Veřejná služba" };
+                    else if (!String.IsNullOrEmpty(publicTransportOrderingCo?.Value))
+                        return new { Icon = "🏢\uFE0E", Text = publicTransportOrderingCo.Value };
+                    else
+                        return null;
+                })
+                .WhereNotNull()
+                .Distinct()
+                .OrderBy(n => n.Icon)
+                .ThenBy(n => n.Text)
+                .ToList();
             <th scope="col" colspan="3">
                 @if (passengerServiceNumbers.Count > 0)
                 {
@@ -114,12 +132,16 @@
                     </div>
                 }
                 <div class="calendar-def" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()">@variant.Calendar.DescriptionWithParens</div>
-                @if (pttNotes.Count > 0)
+                @if (pttNotes.Count > 0 || publicTransportOrderingCompanies.Count > 0)
                 {
                     <div class="note-icons">
                         @foreach (var note in pttNotes.OfType<CentralPttNoteForVariant>())
                         {
                             <span class="note-icon-@note.Type" title="@DisplayConsts.CentralPttNoteDescriptions[note.Type]">@DisplayConsts.CentralPttNoteIcons[note.Type]</span>
+                        }
+                        @foreach (var orderingCompany in publicTransportOrderingCompanies)
+                        {
+                            <span class="note-icon" title="@orderingCompany.Text">@orderingCompany.Icon</span>
                         }
                         @foreach (var note in pttNotes.OfType<NonCentralPttNoteForVariant>())
                         {
@@ -176,18 +198,6 @@
                     <td class="operation-icons">
                         @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZInconsistentTime, "⮐\uFE0E", "Protičas"); }
                         @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZAlternativeTransport, "🚌\uFE0E", "ND – náhradní doprava"); }
-                        @{
-                            var publicService = pointVariant.NetworkSpecificParameters.FirstOrDefault(p => p.Type == NetworkSpecificParameterPassage.CZPublicService);
-                            var publicTransportOrderingCo = pointVariant.NetworkSpecificParameters.FirstOrDefault(p => p.Type == NetworkSpecificParameterPassage.CZPassengerPublicTransportOrderingCoName);
-                            if (publicService?.Value == "1")
-                            {
-                                ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPublicService, "🏛\uFE0E", publicTransportOrderingCo?.Value ?? "Veřejná služba");
-                            }
-                            else if (!String.IsNullOrEmpty(publicTransportOrderingCo?.Value))
-                            {
-                                ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZPublicService, "🏢\uFE0E", publicTransportOrderingCo.Value);
-                            }
-                        }
                         @foreach (var operation in pointVariant.TrainOperations)
                         {
                             <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
@@ -212,7 +222,7 @@
                         <ul>
                             @foreach (var cancellation in variant.Cancellations)
                             {
-                                <li>Ne@(cancellation.Calendar.Description) @cancellation.Calendar.StartDate – @cancellation.Calendar.EndDate</li>
+                                <li>Ne@(cancellation.Calendar.Description) @cancellation.Calendar.StartDate.ToShortDateString() – @cancellation.Calendar.EndDate.ToShortDateString()</li>
                             }
                         </ul>
                     }

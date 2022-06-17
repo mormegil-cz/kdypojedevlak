@@ -57,7 +57,7 @@ namespace KdyPojedeVlak.Web.Engine
             }
         }
 
-        public static void ReportFileImported(DateTime dataTimestamp, string trainId)
+        public static void ReportFileImported(DateTime dataTimestamp, string? trainId)
         {
             lock (syncObj)
             {

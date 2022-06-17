@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -23,61 +24,75 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             ScheduleVersionInfo.ReportLastDownload(lastUpdateDate);
             if (lastUpdateDate <= DateTime.UtcNow.AddHours(-MIN_UPDATE_FREQ_HRS))
             {
-                var downloader = new DataDownloader();
-
-                await downloader.Connect();
-                try
-                {
-                    var downloadTime = DateTime.UtcNow;
-                    var availableFilesForDownload = await downloader.GetListOfFilesAvailable();
-
-                    var total = availableFilesForDownload.Count;
-                    var count = 0;
-                    foreach (var file in availableFilesForDownload)
-                    {
-                        ++count;
-                        var fileName = file.Key.Replace('/', Path.DirectorySeparatorChar);
-                        var filePath = Path.Combine(basePath, fileName);
-                        if (dataFilesAvailable.TryGetValue(filePath, out var currentSize) && currentSize == file.Value) continue;
-
-                        var fileInfo = new FileInfo(filePath);
-                        if (fileInfo.Exists)
-                        {
-                            DebugLog.LogProblem("Data file {0} size mismatch: {1} expected, {2}/{3} found, deleting", file.Key, file.Value, fileInfo.Length, currentSize);
-                            fileInfo.Delete();
-                        }
-
-                        DebugLog.LogDebugMsg("#{0}/{1}: Downloading {2}", count, total, file.Key);
-                        var dirName = Path.GetDirectoryName(filePath);
-                        if (!Directory.Exists(dirName))
-                        {
-                            DebugLog.LogDebugMsg("Creating directory {0}", dirName);
-                            Directory.CreateDirectory(dirName);
-                        }
-                        var tempFile = Path.ChangeExtension(fileInfo.FullName, ".tmp");
-                        var (hash, size) = await downloader.DownloadZip(file.Key, tempFile);
-                        File.Move(tempFile, fileInfo.FullName);
-                        dataFilesAvailable[filePath] = size;
-                        DebugLog.LogDebugMsg("Downloaded {0} ({1} B: {2})", file.Key, size, hash);
-                    }
-
-                    WriteLastUpdateDate(basePath, downloadTime);
-                    ScheduleVersionInfo.ReportDownloadChecked();
-                }
-                finally
-                {
-                    try
-                    {
-                        await downloader.Disconnect();
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugLog.LogProblem("Unexpected exception in DataDownloader.Disconnect: {0}", ex);
-                    }
-                }
+                await DownloadNewFiles(basePath, dataFilesAvailable);
             }
 
             return dataFilesAvailable;
+        }
+
+        private static async Task DownloadNewFiles(string basePath, Dictionary<string, long> dataFilesAvailable)
+        {
+            var downloader = new DataDownloader();
+
+            await downloader.Connect();
+            try
+            {
+                var downloadTime = DateTime.UtcNow;
+                var availableFilesForDownload = (await downloader.GetListOfFilesAvailable())
+                    .Select(file => (
+                        Key: file.Key,
+                        Size: file.Value,
+                        Path: Path.Combine(basePath, file.Key.Replace('/', Path.DirectorySeparatorChar))
+                    ))
+                    .Where(file => !dataFilesAvailable.TryGetValue(file.Path, out var currentSize) || currentSize != file.Size)
+                    .ToList();
+
+                var total = availableFilesForDownload.Count;
+                var count = 0;
+                foreach (var file in availableFilesForDownload)
+                {
+                    ++count;
+                    if (dataFilesAvailable.ContainsKey(file.Path))
+                    {
+                        // ?!?
+                        DebugLog.LogProblem("Data file {0} appeared unexpectedly!", file.Path);
+                        continue;
+                    }
+                    var fileInfo = new FileInfo(file.Path);
+                    if (fileInfo.Exists)
+                    {
+                        DebugLog.LogProblem("Data file {0} size mismatch: {1} expected, {2} found, deleting", file.Key, file.Size, fileInfo.Length);
+                        fileInfo.Delete();
+                    }
+
+                    DebugLog.LogDebugMsg("#{0}/{1}: Downloading {2}", count, total, file.Key);
+                    var dirName = Path.GetDirectoryName(file.Path);
+                    if (dirName != null && !Directory.Exists(dirName))
+                    {
+                        DebugLog.LogDebugMsg("Creating directory {0}", dirName);
+                        Directory.CreateDirectory(dirName);
+                    }
+                    var tempFile = Path.ChangeExtension(fileInfo.FullName, ".tmp");
+                    var (hash, size) = await downloader.DownloadZip(file.Key, tempFile);
+                    File.Move(tempFile, fileInfo.FullName);
+                    dataFilesAvailable[file.Path] = size;
+                    DebugLog.LogDebugMsg("Downloaded {0} ({1} B: {2})", file.Key, size, hash);
+                }
+
+                WriteLastUpdateDate(basePath, downloadTime);
+                ScheduleVersionInfo.ReportDownloadChecked();
+            }
+            finally
+            {
+                try
+                {
+                    await downloader.Disconnect();
+                }
+                catch (Exception ex)
+                {
+                    DebugLog.LogProblem("Unexpected exception in DataDownloader.Disconnect: {0}", ex);
+                }
+            }
         }
 
         private static Dictionary<string, long> GetDataFilesAvailable(string basePath)
