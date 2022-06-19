@@ -22,7 +22,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         {
             foreach (var file in availableDataFiles
                          // TODO: FIXME!
-                         .Where(e => !e.Key.Contains("\\2019\\") && !e.Key.Contains("\\2020\\"))
+                         .Where(e => !e.Key.Contains("\\2019\\") && !e.Key.Contains("\\2020\\") && !e.Key.Contains("\\2021\\"))
                          .OrderBy(e => e.Key.LastIndexOf(Path.PathSeparator)).ThenBy(e => e.Key))
             {
                 ImportCompressedDataFile(file.Key, file.Value, dbModelContext);

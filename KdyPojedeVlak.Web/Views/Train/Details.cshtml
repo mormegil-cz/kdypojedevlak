@@ -129,19 +129,26 @@
                         {
                             <span class="passenger-service-number">@number</span>
                         }
+                        @foreach (var orderingCompany in publicTransportOrderingCompanies)
+                        {
+                            <span class="note-icon" title="@orderingCompany.Text">@orderingCompany.Icon</span>
+                        }
                     </div>
                 }
                 <div class="calendar-def" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()">@variant.Calendar.DescriptionWithParens</div>
-                @if (pttNotes.Count > 0 || publicTransportOrderingCompanies.Count > 0)
+                @if (pttNotes.Count > 0 || (passengerServiceNumbers.Count  == 0 && publicTransportOrderingCompanies.Count > 0))
                 {
                     <div class="note-icons">
                         @foreach (var note in pttNotes.OfType<CentralPttNoteForVariant>())
                         {
                             <span class="note-icon-@note.Type" title="@DisplayConsts.CentralPttNoteDescriptions[note.Type]">@DisplayConsts.CentralPttNoteIcons[note.Type]</span>
                         }
-                        @foreach (var orderingCompany in publicTransportOrderingCompanies)
+                        @if (passengerServiceNumbers.Count == 0)
                         {
-                            <span class="note-icon" title="@orderingCompany.Text">@orderingCompany.Icon</span>
+                            foreach (var orderingCompany in publicTransportOrderingCompanies)
+                            {
+                                <span class="note-icon" title="@orderingCompany.Text">@orderingCompany.Icon</span>
+                            }
                         }
                         @foreach (var note in pttNotes.OfType<NonCentralPttNoteForVariant>())
                         {
