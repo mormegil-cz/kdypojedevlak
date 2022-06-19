@@ -9,6 +9,7 @@ namespace KdyPojedeVlak.Web.Migrations
         {
             // initial database is created automatically
             return;
+            #pragma warning disable CS0162
 
             migrationBuilder.CreateTable(
                 name: "ImportedFiles",
@@ -307,6 +308,7 @@ namespace KdyPojedeVlak.Web.Migrations
                 name: "IX_TrainTimetableVariant_TimetableId",
                 table: "TrainTimetableVariant",
                 column: "TimetableId");
+#pragma warning restore CS0162
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

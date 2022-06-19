@@ -105,6 +105,12 @@ namespace KdyPojedeVlak.Web.Controllers
             var startDate = at ?? now;
             var neighbors = dbModelContext.GetNeighboringPoints(point);
             var currentTimetableYear = dbModelContext.TimetableYears.SingleOrDefault(y => y.MinDate <= now && y.MaxDate >= now);
+            if (currentTimetableYear == null)
+            {
+                // ??
+                // TODO: Error message?
+                return NotFound();
+            }
             return View(new NearestTransits(point, startDate, currentTimetableYear, GetTrainList(startDate, point), neighbors, GetNearPoints(point, neighbors)));
         }
 
