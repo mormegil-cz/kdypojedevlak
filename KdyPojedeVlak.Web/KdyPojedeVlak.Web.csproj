@@ -6,8 +6,8 @@
     <PackageId>kdypojedevlak.web</PackageId>
     <UserSecretsId>aspnet-KdyPojedeVlak-20160915124940</UserSecretsId>
     <RuntimeIdentifiers>win10-x64;win81-x64;win8-x64;win7-x64</RuntimeIdentifiers>
-    <TargetFramework>net5.0</TargetFramework>
-    <LangVersion>9</LangVersion>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>10</LangVersion>
     <RootNamespace>KdyPojedeVlak.Web</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
@@ -26,7 +26,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Supercluster.KDTree" Version="1.0.4" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
   </ItemGroup>
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
     <Exec Command="libman restore" />

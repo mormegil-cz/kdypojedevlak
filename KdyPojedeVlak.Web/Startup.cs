@@ -58,8 +58,7 @@ namespace KdyPojedeVlak.Web
             services.AddControllersWithViews();
 
             // Add framework services.
-            services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddMvc();
 
             services.AddLogging(loggingBuilder =>
             {
