@@ -4,17 +4,18 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Supercluster.KDTree;
+using KdTree;
+using KdTree.Math;
 
 namespace KdyPojedeVlak.Web.Engine.SR70
 {
     public class PointCodebook
     {
-        private static Regex regexGeoCoordinate = new Regex(@"\s*^[NE]\s*(?<deg>[0-9]+)\s*°\s*(?<min>[0-9]*)\s*'\s*(?<sec>[0-9]*\s*(,\s*([0-9]+)?)?)\s*""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
+        private static readonly Regex regexGeoCoordinate = new Regex(@"\s*^[NE]\s*(?<deg>[0-9]+)\s*°\s*(?<min>[0-9]*)\s*'\s*(?<sec>[0-9]*\s*(,\s*([0-9]+)?)?)\s*""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
 
         private readonly string path;
         private Dictionary<string, PointCodebookEntry> codebook;
-        private KDTree<float, string> tree;
+        private KdTree<float, string> tree;
 
         static PointCodebook()
         {
@@ -119,7 +120,7 @@ namespace KdyPojedeVlak.Web.Engine.SR70
             */
 
             foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2017-12-10.csv", ';', Encoding.GetEncoding(1250))
-                .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
+                         .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
             {
                 if (codebook.ContainsKey(point.ID)) continue;
 
@@ -134,7 +135,7 @@ namespace KdyPojedeVlak.Web.Engine.SR70
                 DebugLog.LogDebugMsg("Additional point in 2017 codebook: {0}", point.ID);
             }
             foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2013-12-15.csv", ';', Encoding.GetEncoding(1250))
-                .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
+                         .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
             {
                 if (codebook.ContainsKey(point.ID)) continue;
 
@@ -151,13 +152,13 @@ namespace KdyPojedeVlak.Web.Engine.SR70
 
             var problematicPoints = new HashSet<String>();
             foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2022-03-19.tsv", '\t', Encoding.UTF8)
-                .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
-            )
+                         .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
+                    )
             {
                 if (codebook.TryGetValue("CZ:" + row.ID.Substring(2), out var entry)
                     && Single.TryParse(row.Latitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var latitude)
                     && Single.TryParse(row.Longitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var longitude)
-                )
+                   )
                 {
                     entry.WikidataItem = row.ItemQ;
                     if (entry.Latitude != null && entry.Longitude != null)
@@ -233,21 +234,11 @@ namespace KdyPojedeVlak.Web.Engine.SR70
                 Console.WriteLine($"{count.Key}: {count.Value.Item1} with Wikidata, {count.Value.Item2} without ({100.0m * count.Value.Item1 / (count.Value.Item1 + count.Value.Item2):N1} %)");
             }
 
-            var pointList = codebook.Where(p => p.Value.Latitude != null).ToList();
-            var pointIDs = pointList.Select(p => p.Key).ToArray();
-            var pointCoordinates = pointList.Select(p => new[] { p.Value.Latitude.GetValueOrDefault(), p.Value.Longitude.GetValueOrDefault() }).ToArray();
-            tree = new KDTree<float, string>(2, pointCoordinates, pointIDs, L2Norm);
-        }
-
-        private static double L2Norm(float[] x, float[] y)
-        {
-            double dist = 0;
-            for (int i = 0; i < x.Length; i++)
+            tree = new KdTree<float, string>(2, new FloatMath());
+            foreach (var p in codebook.Where(p => p.Value.Latitude != null))
             {
-                dist += (x[i] - y[i]) * (x[i] - y[i]);
+                tree.Add(new[] { p.Value.Latitude.GetValueOrDefault(), p.Value.Longitude.GetValueOrDefault() }, p.Key);
             }
-
-            return dist;
         }
 
         public PointCodebookEntry Find(string id)
@@ -258,7 +249,7 @@ namespace KdyPojedeVlak.Web.Engine.SR70
 
         public List<PointCodebookEntry> FindNearest(float latitude, float longitude, int neighbors)
         {
-            return tree.NearestNeighbors(new[] { latitude, longitude }, neighbors).Select(point => Find(point.Item2)).Where(x => x != null).ToList();
+            return tree.GetNearestNeighbours(new[] { latitude, longitude }, neighbors).Select(point => Find(point.Value)).Where(x => x != null).ToList();
         }
 
         private static PointType ParsePointType(string typeStr)

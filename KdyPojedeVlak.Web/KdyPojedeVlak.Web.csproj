@@ -18,14 +18,14 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CoreFtp" Version="1.4.0" />
-    <PackageReference Include="GuidEx" Version="1.0.2" />
+    <PackageReference Include="GuidEx.Standard" Version="1.0.2" />
+    <PackageReference Include="KdTree" Version="1.4.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Supercluster.KDTree" Version="1.0.4" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
   </ItemGroup>
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
