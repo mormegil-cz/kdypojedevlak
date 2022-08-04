@@ -1,0 +1,2 @@
+Properties/PublishProfiles/*.ps* linguist-vendored 
+wwwroot/lib/* linguist-vendored
