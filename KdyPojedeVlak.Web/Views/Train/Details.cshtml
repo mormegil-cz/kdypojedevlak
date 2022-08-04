@@ -229,7 +229,8 @@
                         <ul>
                             @foreach (var cancellation in variant.Cancellations)
                             {
-                                <li>Ne@(cancellation.Calendar.Description) @cancellation.Calendar.StartDate.ToShortDateString() – @cancellation.Calendar.EndDate.ToShortDateString()</li>
+                                // TODO: FIXME: Cancellation calendar descriptions
+                                <li>Ne@(cancellation.Calendar.Description.Replace("nejede", "kromě")) @cancellation.Calendar.StartDate.ToShortDateString() – @cancellation.Calendar.EndDate.ToShortDateString()</li>
                             }
                         </ul>
                     }
