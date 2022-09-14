@@ -181,5 +181,45 @@ namespace KdyPojedeVlak.Web.Models
             { SubsidiaryLocationType.None, "" },
             { SubsidiaryLocationType.StationTrack, "kolej " }
         };
+
+        public static readonly Dictionary<string, string> PublicTransportNames = new()
+        {
+            { "10", "PID" },
+            { "11", "PID P" },
+            { "12", "PID B" },
+            { "13", "PID 0" },
+            { "20", "Stč" },
+            { "21", "PID 1" },
+            { "22", "PID 2" },
+            { "23", "PID 3" },
+            { "24", "PID 4" },
+            { "25", "PID 5" },
+            { "26", "PID 6" },
+            { "27", "PID 7" },
+            { "28", "PID 8" },
+            { "29", "PID 9" },
+            { "30", "IDS JK" },
+            { "31", "IDS TA" },
+            { "32", "IDS PK" },
+            { "33", "IDS P" },
+            { "41", "IDOK" },
+            { "42", "DÚK" },
+            { "51", "IDOL" },
+            { "52", "IREDO HK" },
+            { "53", "VYDIS PU" },
+            { "54", "VYDIS PU DD" },
+            { "55", "IREDO PU" },
+            { "56", "IREDO+JMK" },
+            { "57", "IREDO+IDOL" },
+            { "58", "IREDO+VYDIS" },
+            { "61", "VDV" },
+            { "64", "JMK" },
+            { "71", "IDSOK" },
+            { "72", "ZID" },
+            { "73", "TZK" },
+            { "80", "ODIS" },
+            { "97", "IREDO PU DD" },
+            { "98", "IREDO-" },
+        };
     }
 }

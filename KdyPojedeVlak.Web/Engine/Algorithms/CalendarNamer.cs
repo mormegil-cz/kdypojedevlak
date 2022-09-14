@@ -100,6 +100,19 @@ namespace KdyPojedeVlak.Web.Engine.Algorithms
             new DateTime(2022, 12, 24),
             new DateTime(2022, 12, 25),
             new DateTime(2022, 12, 26),
+            new DateTime(2023, 01, 01),
+            new DateTime(2023, 04, 7),
+            new DateTime(2023, 04, 10),
+            new DateTime(2023, 05, 01),
+            new DateTime(2023, 05, 08),
+            new DateTime(2023, 07, 05),
+            new DateTime(2023, 07, 06),
+            new DateTime(2023, 09, 28),
+            new DateTime(2023, 10, 28),
+            new DateTime(2023, 11, 17),
+            new DateTime(2023, 12, 24),
+            new DateTime(2023, 12, 25),
+            new DateTime(2023, 12, 26),
         };
 
         private static readonly Dictionary<DayClass, Predicate<DateTime>> classifiers = new(7)
