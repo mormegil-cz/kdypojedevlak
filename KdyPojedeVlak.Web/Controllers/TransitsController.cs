@@ -86,14 +86,15 @@ namespace KdyPojedeVlak.Web.Controllers
             var trainList = GetTrainList(startDate, passingTrainsQuery);
 
             // load additional data from DB
-            var filledTrainList = dbModelContext.Set<Passage>()
+            var filledTrainData = dbModelContext.Set<Passage>()
                 .Where(p => trainList.Contains(p))
                 .Include(pt => pt.Year)
                 .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Calendar)
                 .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.ImportedFrom)
-                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Timetable)
+                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Timetable).ThenInclude(tt => tt.Train)
                 .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Points).ThenInclude(tt => tt.Point)
-                .ToList();
+                .ToDictionary(p => p.Id);
+            var filledTrainList = trainList.Select(p => filledTrainData[p.Id]).ToList();
 
             return View(new NearestTransits(point, startDate, currentTimetableYear, filledTrainList, neighbors, GetNearPoints(point, neighbors)));
         }
