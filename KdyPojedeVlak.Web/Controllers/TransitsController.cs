@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using KdyPojedeVlak.Web.Engine;
 using KdyPojedeVlak.Web.Engine.DbStorage;
 using KdyPojedeVlak.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -64,27 +63,6 @@ namespace KdyPojedeVlak.Web.Controllers
                 return RedirectToAction("ChoosePoint");
             }
 
-            /*
-            var point = dbModelContext.RoutingPoints
-                .Include(p => p.PassingTrains)
-                .ThenInclude(pt => pt.Year)
-                .Include(p => p.PassingTrains)
-                .ThenInclude(pt => pt.TrainTimetableVariant)
-                .ThenInclude(ttv => ttv.Calendar)
-                .Include(p => p.PassingTrains)
-                .ThenInclude(pt => pt.TrainTimetableVariant)
-                .ThenInclude(ttv => ttv.ImportedFrom)
-                .Include(p => p.PassingTrains)
-                .ThenInclude(pt => pt.TrainTimetableVariant)
-                .ThenInclude(ttv => ttv.Timetable)
-                .ThenInclude(tt => tt.Train)
-                .Include(p => p.PassingTrains)
-                .ThenInclude(pt => pt.TrainTimetableVariant)
-                .ThenInclude(ttv => ttv.Points)
-                .ThenInclude(p => p.Point)
-                .SingleOrDefault(p => p.Code == id);
-            */
-
             var point = dbModelContext.RoutingPoints.SingleOrDefault(p => p.Code == id);
 
             if (point == null)
@@ -92,14 +70,6 @@ namespace KdyPojedeVlak.Web.Controllers
                 // TODO: Error message?
                 return NotFound();
             }
-
-            var pointEntry = dbModelContext.Entry(point);
-            var passingTrainsCollection = pointEntry.Collection(p => p.PassingTrains);
-            passingTrainsCollection.Query().Include(pt => pt.Year).Load();
-            passingTrainsCollection.Query().Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Calendar).Load();
-            passingTrainsCollection.Query().Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.ImportedFrom).Load();
-            passingTrainsCollection.Query().Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Timetable).ThenInclude(tt => tt.Train).Load();
-            passingTrainsCollection.Query().Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Points).ThenInclude(tt => tt.Point).Load();
 
             var now = DateTime.Now;
             var startDate = at ?? now;
@@ -111,30 +81,48 @@ namespace KdyPojedeVlak.Web.Controllers
                 // TODO: Error message?
                 return NotFound();
             }
-            return View(new NearestTransits(point, startDate, currentTimetableYear, GetTrainList(startDate, point), neighbors, GetNearPoints(point, neighbors)));
+
+            var passingTrainsQuery = dbModelContext.Entry(point).Collection(p => p.PassingTrains).Query();
+            var trainList = GetTrainList(startDate, passingTrainsQuery);
+
+            // load additional data from DB
+            var filledTrainList = dbModelContext.Set<Passage>()
+                .Where(p => trainList.Contains(p))
+                .Include(pt => pt.Year)
+                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Calendar)
+                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.ImportedFrom)
+                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Timetable)
+                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Points).ThenInclude(tt => tt.Point)
+                .ToList();
+
+            return View(new NearestTransits(point, startDate, currentTimetableYear, filledTrainList, neighbors, GetNearPoints(point, neighbors)));
         }
 
-        private List<Passage> GetTrainList(DateTime now, RoutingPoint point)
+        private static List<Passage> GetTrainList(DateTime now, IQueryable<Passage> passingTrainsCollection)
         {
             var nowTime = now.TimeOfDay;
             List<Passage>? bestList = null;
-            bool bestOverMinimum = false;
+            var bestOverMinimum = false;
 
-            var allPassingTrains = point.PassingTrains
+            var allPassingTrains = passingTrainsCollection
+                .Include(p => p.TrainTimetableVariant).ThenInclude(ttv => ttv.Calendar)
+                .Include(p => p.TrainTimetableVariant).ThenInclude(ttv => ttv.Timetable)
+                .Include(p => p.TrainTimetableVariant).ThenInclude(ttv => ttv.ImportedFrom)
+                .AsEnumerable()
                 .GroupBy(t => t.TrainTimetableVariant.Timetable.Id)
                 .SelectMany(g => g.Where(p => p.TrainTimetableVariant.Calendar.EndDate >= now).OrderByDescending(p => p.TrainTimetableVariant.ImportedFrom.CreationDate).Take(1))
                 .AsEnumerable()
-                .OrderBy(p => p.AnyScheduledTimeOfDay).ToList();
+                .OrderBy(p => p.AnyScheduledTimeOfDay)
+                .ToList();
             var passingTrains = allPassingTrains
                 .Select(t => (Day: 0, Train: t)).Concat(allPassingTrains.Select(t => (Day: 1, Train: t)))
                 .Where(p => CheckInCalendar(p.Train.TrainTimetableVariant.Calendar, now.Date, p.Day + (p.Train.AnyScheduledTime?.Days ?? 0)))
                 .ToList();
 
-            for (var i = 0; i < intervals.Length; ++i)
+            foreach (var intervalWidth in intervals)
             {
-                var intervalWidth = intervals[i];
                 var startTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(-intervalWidth));
-                var endTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(intervals[i]));
+                var endTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(intervalWidth));
 
                 var data = passingTrains
                     .Where(p => p.Train.AnyScheduledTimeOfDay != null)
@@ -171,7 +159,7 @@ namespace KdyPojedeVlak.Web.Controllers
             var bitmap = calendar.Bitmap;
             if (bitmap == null) return true;
 
-            var offset = (int) day.AddDays(-dayOffset).Subtract(calendar.StartDate).TotalDays;
+            var offset = (int)day.AddDays(-dayOffset).Subtract(calendar.StartDate).TotalDays;
             if (offset < 0 || offset >= bitmap.Length) return false;
             return bitmap[offset];
         }
@@ -182,12 +170,13 @@ namespace KdyPojedeVlak.Web.Controllers
             var neighborCodes = neighbors.Select(p => p.Code).ToHashSet();
             neighborCodes.Add(fromPoint.Code);
             var nearestPoints = Program.PointCodebook.FindNearest(fromPoint.Latitude.GetValueOrDefault(), fromPoint.Longitude.GetValueOrDefault(), 6);
-            return nearestPoints
+            var nearestPointCodes = nearestPoints
                 .Select(np => np.FullIdentifier)
                 .Where(id => !neighborCodes.Contains(id))
-                .Select(id => dbModelContext.RoutingPoints.SingleOrDefault(rp => rp.Code == id))
-                .WhereNotNull()
                 .ToList();
+            return dbModelContext.RoutingPoints.Where(
+                rp => nearestPointCodes.Contains(rp.Code)
+            ).ToList();
         }
     }
 }

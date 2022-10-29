@@ -2,7 +2,7 @@
 @using KdyPojedeVlak.Web.Models
 @model KdyPojedeVlak.Web.Models.NearestTransits
 @{
-    ViewData["Title"] = String.Format("Nejbližší vlaky v „{0}“", Model.Point.Name);
+    ViewData["Title"] = $"Nejbližší vlaky v „{Model.Point.Name}“";
     var now = Model.StartDate.TimeOfDay;
     var hasTools = false;
 
