@@ -1025,6 +1025,8 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         CZAlternativeTransport,
         CZPassengerPublicTransportOrderingCoName,
         CZInconsistentTime,
+
+        CZPassengerDwellTime,
     }
 
     public enum HeaderDisplay
