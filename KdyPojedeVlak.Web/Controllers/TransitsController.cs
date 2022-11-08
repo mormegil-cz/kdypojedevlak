@@ -85,21 +85,10 @@ namespace KdyPojedeVlak.Web.Controllers
             var passingTrainsQuery = dbModelContext.Entry(point).Collection(p => p.PassingTrains).Query();
             var trainList = GetTrainList(startDate, passingTrainsQuery);
 
-            // load additional data from DB
-            var filledTrainData = dbModelContext.Set<Passage>()
-                .Where(p => trainList.Contains(p))
-                .Include(pt => pt.Year)
-                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Calendar)
-                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.ImportedFrom)
-                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Timetable).ThenInclude(tt => tt.Train)
-                .Include(pt => pt.TrainTimetableVariant).ThenInclude(ttv => ttv.Points).ThenInclude(tt => tt.Point)
-                .ToDictionary(p => p.Id);
-            var filledTrainList = trainList.Select(p => filledTrainData[p.Id]).ToList();
-
-            return View(new NearestTransits(point, startDate, currentTimetableYear, filledTrainList, neighbors, GetNearPoints(point, neighbors)));
+            return View(new NearestTransits(point, startDate, currentTimetableYear.Year, trainList, neighbors, GetNearPoints(point, neighbors)));
         }
 
-        private static List<Passage> GetTrainList(DateTime now, IQueryable<Passage> passingTrainsCollection)
+        private static List<NearestTransits.Transit> GetTrainList(DateTime now, IQueryable<Passage> passingTrainsCollection)
         {
             var nowTime = now.TimeOfDay;
             List<Passage>? bestList = null;
@@ -112,12 +101,27 @@ namespace KdyPojedeVlak.Web.Controllers
                 .AsEnumerable()
                 .GroupBy(t => t.TrainTimetableVariant.Timetable.Id)
                 .SelectMany(g => g.Where(p => p.TrainTimetableVariant.Calendar.EndDate >= now).OrderByDescending(p => p.TrainTimetableVariant.ImportedFrom.CreationDate).Take(1))
+                .Select(p => new
+                {
+                    TimetableYear = p.TrainTimetableVariant.Calendar.TimetableYearYear,
+                    p.TrainTimetableVariant.Calendar,
+                    p.AnyScheduledTime, p.TrainTimetableVariant.Timetable.TrainCategory,
+                    p.TrainTimetableVariant.Timetable.TrainNumber,
+                    TrainName = p.TrainTimetableVariant.Timetable.Name,
+                    p.SubsidiaryLocationDescription,
+                    PreviousPointName = p.TrainTimetableVariant.Points.SingleOrDefault(p => p.Order == p.Order - 1),
+                    NextPointName = p.TrainTimetableVariant.Points.SingleOrDefault(p => p.Order == p.Order + 1)
+                })
                 .AsEnumerable()
+                .Select(p => new NearestTransits.Transit(
+                    p.TimetableYear,
+                    p.AnyScheduledTimeOfDay
+                    ))
                 .OrderBy(p => p.AnyScheduledTimeOfDay)
                 .ToList();
             var passingTrains = allPassingTrains
-                .Select(t => (Day: 0, Train: t)).Concat(allPassingTrains.Select(t => (Day: 1, Train: t)))
-                .Where(p => CheckInCalendar(p.Train.TrainTimetableVariant.Calendar, now.Date, p.Day + (p.Train.AnyScheduledTime?.Days ?? 0)))
+                .Select(t => (Day: 0, Transit: t)).Concat(allPassingTrains.Select(t => (Day: 1, Transit: t)))
+                .Where(p => CheckInCalendar(p.Transit.Calendar, now.Date, p.Day + (p.Transit.AnyScheduledTime?.Days ?? 0)))
                 .ToList();
 
             foreach (var intervalWidth in intervals)

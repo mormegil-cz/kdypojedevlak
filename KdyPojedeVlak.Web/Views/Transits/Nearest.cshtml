@@ -71,14 +71,14 @@
     @foreach (var train in Model.Transits)
     {
         @* TODO: Do not show tomorrow trains as past *@
-        <li class="@(train.AnyScheduledTime < now ? "past" : "future")">
-            @train.AnyScheduledTime
-            @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.TrainTimetableVariant.Timetable.TrainCategory] + " " + train.TrainTimetableVariant.Timetable.TrainNumber + " " + train.TrainTimetableVariant.Timetable.Name,
+        <li class="@(train.ScheduledTime < now ? "past" : "future")">
+            @train.ScheduledTime
+            @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.TrainCategory] + " " + train.TrainNumber + " " + train.TrainName,
                 "Details", "Train",
                 new
                 {
-                    id = train.TrainTimetableVariant.Timetable.TrainNumber,
-                    year = Model.CurrentTimetableYear == train.Year ? null : train.Year.Year.ToString(CultureInfo.InvariantCulture)
+                    id = train.TrainNumber,
+                    year = Model.CurrentTimetableYear == train.TimetableYear ? null : train.TimetableYear.ToString(CultureInfo.InvariantCulture)
                 })
             @{
                 var descriptionPieces = new List<string>();
@@ -86,20 +86,20 @@
                 {
                     descriptionPieces.Add(train.SubsidiaryLocationDescription);
                 }
-                if (train.Order > 0)
+                if (train.PreviousPointName != null)
                 {
-                    if (train.Order < train.TrainTimetableVariant.Points.Count - 1)
+                    if (train.NextPointName != null)
                     {
-                        descriptionPieces.Add($"{train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order - 1).Point.Name} → {train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order + 1).Point.Name}");
+                        descriptionPieces.Add($"{train.PreviousPointName} → {train.NextPointName}");
                     }
                     else
                     {
-                        descriptionPieces.Add(StrFrom(train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order - 1).Point.Name));
+                        descriptionPieces.Add(StrFrom(train.PreviousPointName));
                     }
                 }
                 else
                 {
-                    descriptionPieces.Add($"směr {train.TrainTimetableVariant.Points.Single(p => p.Order == train.Order + 1).Point.Name}");
+                    descriptionPieces.Add($"směr {train.NextPointName}");
                 }
                 <text>(@String.Join("; ", descriptionPieces))</text>
             }
