@@ -2,7 +2,7 @@ using System;
 
 namespace KdyPojedeVlak.Web.Helpers
 {
-    public class StringHelpers
+    public static class StringHelpers
     {
         public static string Quote(string str, string quotes)
         {

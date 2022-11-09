@@ -6,7 +6,6 @@ using System.Linq;
 using KdyPojedeVlak.Web.Engine.DbStorage;
 using KdyPojedeVlak.Web.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace KdyPojedeVlak.Web.Controllers
 {
@@ -95,29 +94,24 @@ namespace KdyPojedeVlak.Web.Controllers
             var bestOverMinimum = false;
 
             var allPassingTrains = passingTrainsCollection
-                .Include(p => p.TrainTimetableVariant).ThenInclude(ttv => ttv.Calendar)
-                .Include(p => p.TrainTimetableVariant).ThenInclude(ttv => ttv.Timetable)
-                .Include(p => p.TrainTimetableVariant).ThenInclude(ttv => ttv.ImportedFrom)
-                .AsEnumerable()
                 .GroupBy(t => t.TrainTimetableVariant.Timetable.Id)
-                .SelectMany(g => g.Where(p => p.TrainTimetableVariant.Calendar.EndDate >= now).OrderByDescending(p => p.TrainTimetableVariant.ImportedFrom.CreationDate).Take(1))
-                .Select(p => new
-                {
-                    TimetableYear = p.TrainTimetableVariant.Calendar.TimetableYearYear,
-                    p.TrainTimetableVariant.Calendar,
-                    p.AnyScheduledTime, p.TrainTimetableVariant.Timetable.TrainCategory,
-                    p.TrainTimetableVariant.Timetable.TrainNumber,
-                    TrainName = p.TrainTimetableVariant.Timetable.Name,
-                    p.SubsidiaryLocationDescription,
-                    PreviousPointName = p.TrainTimetableVariant.Points.SingleOrDefault(p => p.Order == p.Order - 1),
-                    NextPointName = p.TrainTimetableVariant.Points.SingleOrDefault(p => p.Order == p.Order + 1)
-                })
+                .Select(g => g.Where(p => p.TrainTimetableVariant.Calendar.EndDate >= now).Select(
+                    p => new NearestTransits.Transit(
+                        p.TrainTimetableVariant.Calendar.TimetableYearYear,
+                        p.TrainTimetableVariant.Calendar,
+                        p.ArrivalTime,
+                        p.DepartureTime,
+                        p.TrainTimetableVariant.Timetable.DataJson,
+                        p.TrainTimetableVariant.Timetable.Train.Number,
+                        p.TrainTimetableVariant.Timetable.Name,
+                        p.SubsidiaryLocationDescription,
+                        p.TrainTimetableVariant.Points.Where(np => np.Order == p.Order - 1).Select(np => np.Point.Name).SingleOrDefault(),
+                        p.TrainTimetableVariant.Points.Where(np => np.Order == p.Order + 1).Select(np => np.Point.Name).SingleOrDefault(),
+                        p.TrainTimetableVariant.ImportedFrom.CreationDate
+                    )
+                ).OrderByDescending(t => t.ImportDate).First())
                 .AsEnumerable()
-                .Select(p => new NearestTransits.Transit(
-                    p.TimetableYear,
-                    p.AnyScheduledTimeOfDay
-                    ))
-                .OrderBy(p => p.AnyScheduledTimeOfDay)
+                .OrderBy(t => t.AnyScheduledTimeOfDay)
                 .ToList();
             var passingTrains = allPassingTrains
                 .Select(t => (Day: 0, Transit: t)).Concat(allPassingTrains.Select(t => (Day: 1, Transit: t)))
@@ -130,9 +124,9 @@ namespace KdyPojedeVlak.Web.Controllers
                 var endTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(intervalWidth));
 
                 var data = passingTrains
-                    .Where(p => p.Train.AnyScheduledTimeOfDay != null)
-                    .SkipWhile(p => p.Day == 0 && p.Train.AnyScheduledTimeOfDay < startTime)
-                    .TakeWhile(p => p.Train.AnyScheduledTime?.Add(TimeSpan.FromDays(p.Day)) < endTime)
+                    .Where(p => p.Transit.AnyScheduledTimeOfDay != null)
+                    .SkipWhile(p => p.Day == 0 && p.Transit.AnyScheduledTimeOfDay < startTime)
+                    .TakeWhile(p => p.Transit.AnyScheduledTime?.Add(TimeSpan.FromDays(p.Day)) < endTime)
                     .Take(AbsoluteMaximum)
                     .ToList();
 
