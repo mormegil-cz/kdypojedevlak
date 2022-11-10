@@ -29,7 +29,7 @@ namespace KdyPojedeVlak.Web.Models
             NearestPoints = nearestPoints == null || nearestPoints.Count == 0 ? null : nearestPoints;
         }
 
-        public record Transit(int TimetableYear, CalendarDefinition Calendar, TimeSpan? ArrivalTime, TimeSpan? DepartureTime, string DataJson, string? TrainNumber, string? TrainName, string? SubsidiaryLocationDescription, string? PreviousPointName, string? NextPointName, DateTime ImportDate)
+        public record Transit(int TimetableYear, CalendarDefinition Calendar, TimeSpan? ArrivalTime, TimeSpan? DepartureTime, string DataJson, string? TrainNumber, string? TrainName, string? SubsidiaryLocationDescription, string? PreviousPointName, string? NextPointName)
         {
             public TimeSpan? AnyScheduledTime => ArrivalTime ?? DepartureTime;
 
