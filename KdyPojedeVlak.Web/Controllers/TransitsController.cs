@@ -89,10 +89,6 @@ namespace KdyPojedeVlak.Web.Controllers
 
         private static List<NearestTransits.Transit> GetTrainList(DateTime now, IQueryable<Passage> passingTrainsCollection)
         {
-            var nowTime = now.TimeOfDay;
-            List<Passage>? bestList = null;
-            var bestOverMinimum = false;
-
             var allPassingTrains = passingTrainsCollection
                 .GroupBy(t => t.TrainTimetableVariant.Timetable.Id)
                 .Select(g => g.Where(p => p.TrainTimetableVariant.Calendar.EndDate >= now).Select(
@@ -118,6 +114,9 @@ namespace KdyPojedeVlak.Web.Controllers
                 .Where(p => CheckInCalendar(p.Transit.Calendar, now.Date, p.Day + (p.Transit.AnyScheduledTime?.Days ?? 0)))
                 .ToList();
 
+            var nowTime = now.TimeOfDay;
+            List<NearestTransits.Transit>? bestList = null;
+            var bestOverMinimum = false;
             foreach (var intervalWidth in intervals)
             {
                 var startTime = now.TimeOfDay.Add(TimeSpan.FromMinutes(-intervalWidth));
@@ -133,12 +132,12 @@ namespace KdyPojedeVlak.Web.Controllers
                 if (data.Count == AbsoluteMaximum)
                 {
                     // too many results…
-                    return bestOverMinimum ? bestList! : data.Select(t => t.Train).ToList();
+                    return bestOverMinimum ? bestList! : data.Select(t => t.Transit).ToList();
                 }
 
-                var futureTrainCount = data.Count(pt => pt.Day > 0 || pt.Train.AnyScheduledTimeOfDay >= nowTime);
+                var futureTrainCount = data.Count(pt => pt.Day > 0 || pt.Transit.AnyScheduledTimeOfDay >= nowTime);
 
-                bestList = data.Select(t => t.Train).ToList();
+                bestList = data.Select(t => t.Transit).ToList();
 
                 if (bestList.Count >= GoodEnough && futureTrainCount >= GoodEnough / 3)
                 {

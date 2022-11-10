@@ -6,7 +6,7 @@
     var now = Model.StartDate.TimeOfDay;
     var hasTools = false;
 
-    string StrFrom(string name) => (name.Length == 0 || Char.ToUpperInvariant(name[0]) == 'Z' || Char.ToUpperInvariant(name[0]) == 'S' ? "ze " : "z ") + name; 
+    string StrFrom(string name) => (name.Length == 0 || Char.ToUpperInvariant(name[0]) == 'Z' || Char.ToUpperInvariant(name[0]) == 'S' ? "ze " : "z ") + name;
 }
 <h3>Nejbližší průjezdy vlaku místem „@Model.Point.Name“</h3>
 <div class="row">
@@ -70,9 +70,8 @@
 <ul>
     @foreach (var train in Model.Transits)
     {
-        @* TODO: Do not show tomorrow trains as past *@
-        <li class="@(train.ScheduledTime < now ? "past" : "future")">
-            @train.ScheduledTime
+        <li class="@(train.AnyScheduledTime < now ? "past" : "future")">
+            @train.AnyScheduledTimeOfDay
             @Html.ActionLink(DisplayConsts.TrainCategoryNames[train.TrainCategory] + " " + train.TrainNumber + " " + train.TrainName,
                 "Details", "Train",
                 new

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using KdyPojedeVlak.Web.Engine.DbStorage;
+using KdyPojedeVlak.Web.Engine.Djr;
 using KdyPojedeVlak.Web.Helpers;
 
 namespace KdyPojedeVlak.Web.Models
@@ -33,6 +34,8 @@ namespace KdyPojedeVlak.Web.Models
             public TimeSpan? AnyScheduledTime => ArrivalTime ?? DepartureTime;
 
             public TimeSpan? AnyScheduledTimeOfDay => AnyScheduledTime?.GetTimeOfDay();
+
+            public TrainCategory TrainCategory => DbModelUtils.GetAttributeEnum(DbModelUtils.LoadDataJson( DataJson), TrainTimetable.AttribTrainCategory, TrainCategory.Unknown);
         }
     }
 }
