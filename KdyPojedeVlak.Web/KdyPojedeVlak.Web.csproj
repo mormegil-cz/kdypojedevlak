@@ -6,8 +6,8 @@
     <PackageId>kdypojedevlak.web</PackageId>
     <UserSecretsId>aspnet-KdyPojedeVlak-20160915124940</UserSecretsId>
     <RuntimeIdentifiers>win10-x64;win81-x64;win8-x64;win7-x64</RuntimeIdentifiers>
-    <TargetFramework>net6.0</TargetFramework>
-    <LangVersion>10</LangVersion>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>default</LangVersion>
     <RootNamespace>KdyPojedeVlak.Web</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
@@ -20,13 +20,13 @@
     <PackageReference Include="CoreFtp" Version="1.4.0" />
     <PackageReference Include="GuidEx.Standard" Version="1.0.2" />
     <PackageReference Include="KdTree" Version="1.4.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.6">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
   </ItemGroup>
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
     <Exec Command="libman restore" />
