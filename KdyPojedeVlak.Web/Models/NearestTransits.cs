@@ -35,7 +35,7 @@ namespace KdyPojedeVlak.Web.Models
 
             public TimeSpan? AnyScheduledTimeOfDay => AnyScheduledTime?.GetTimeOfDay();
 
-            public TrainCategory TrainCategory => DbModelUtils.GetAttributeEnum(DbModelUtils.LoadDataJson( DataJson), TrainTimetable.AttribTrainCategory, TrainCategory.Unknown);
+            public TrainCategory TrainCategory => DbModelUtils.GetAttributeEnum(DbModelUtils.LoadDataJson(DataJson), TrainTimetable.AttribTrainCategory, TrainCategory.Unknown);
         }
     }
 }

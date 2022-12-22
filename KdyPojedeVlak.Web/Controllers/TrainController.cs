@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using KdyPojedeVlak.Web.Engine;
@@ -62,15 +61,25 @@ namespace KdyPojedeVlak.Web.Controllers
         public IActionResult Newest()
         {
             const int limit = 10;
+
             var newestTrains = dbModelContext
                 .Set<TrainTimetableVariant>()
                 .Where(ttv => dbModelContext.ImportedFiles.OrderByDescending(f => f.CreationDate).Take(limit).Contains(ttv.ImportedFrom))
                 .OrderByDescending(ttv => ttv.ImportedFrom.CreationDate)
-                .Where(ttv => ttv.Timetable.Train != null && ttv.Timetable.Train.Number != null)
-                .Include(ttv => ttv.Points).ThenInclude(rp => rp.Point)
-                .Include(ttv => ttv.Timetable).ThenInclude(tt => tt.Train)
+                .Select(
+                    ttv =>
+                        new BasicTrainInfo(
+                            ttv.Calendar.TimetableYearYear,
+                            ttv.Timetable.Train.Number,
+                            ttv.Timetable.Name,
+                            ttv.Timetable.DataJson,
+                            ttv.Points.OrderBy(np => np.Order).Select(np => np.Point.Name).FirstOrDefault(),
+                            ttv.Points.OrderByDescending(np => np.Order).Select(np => np.Point.Name).FirstOrDefault()
+                        )
+                )
                 .Take(limit)
                 .ToList();
+
             return View(newestTrains);
         }
 
