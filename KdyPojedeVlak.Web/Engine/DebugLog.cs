@@ -9,14 +9,52 @@ namespace KdyPojedeVlak.Web.Engine
     {
         private static bool logDisabled = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOG") == "disabled";
         private static string logFilename = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOGFILE");
-        private static TextWriter logWriter = logFilename == null ? Console.Out : new StreamWriter(logFilename, false, Encoding.UTF8);
+        private static readonly object initLock = new();
+        private static volatile TextWriter logWriter;
+
+        private static TextWriter InitLogWriter()
+        {
+            if (logDisabled || logWriter != null) return logWriter;
+
+            lock (initLock)
+            {
+                if (logWriter != null) return logWriter;
+
+                if (logFilename == null)
+                {
+                    logWriter = Console.Out;
+                    return logWriter;
+                }
+
+                try
+                {
+                    logWriter = new StreamWriter(logFilename, false, Encoding.UTF8);
+                    return logWriter;
+                }
+                catch (IOException e)
+                {
+                    Console.Error.WriteLine("Error opening log file: " + e);
+                    logWriter = null;
+                    return Console.Error;
+                }
+            }
+        }
 
         private static void WriteLogMessage(string type, string msgFormat, params object[] args)
         {
             if (logDisabled) return;
 
-            logWriter.WriteLine(type + "\t" + msgFormat, args);
-            logWriter.Flush();
+            var writer = InitLogWriter();
+
+            try
+            {
+                writer.WriteLine($"{DateTime.UtcNow:u}\t{type}\t{msgFormat}", args);
+                writer.Flush();
+            }
+            catch (IOException e)
+            {
+                Console.Error.WriteLine("Error writing to log file: " + e);
+            }
         }
 
         public static void LogProblem(string msg)
