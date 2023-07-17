@@ -73,7 +73,7 @@ namespace KdyPojedeVlak.Web.Controllers
             var now = DateTime.Now;
             var startDate = at ?? now;
             var neighbors = dbModelContext.GetNeighboringPoints(point);
-            var currentTimetableYear = dbModelContext.TimetableYears.SingleOrDefault(y => y.MinDate <= now && y.MaxDate >= now);
+            var currentTimetableYear = dbModelContext.TimetableYears.SingleOrDefault(y => y.MinDate <= startDate && y.MaxDate >= startDate);
             if (currentTimetableYear == null)
             {
                 // ??
