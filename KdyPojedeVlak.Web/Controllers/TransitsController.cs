@@ -11,7 +11,7 @@ namespace KdyPojedeVlak.Web.Controllers
 {
     public class TransitsController : Controller
     {
-        private static readonly IList<KeyValuePair<string, string>> emptyPointList = new KeyValuePair<string, string>[0];
+        private static readonly IList<KeyValuePair<string, string>> emptyPointList = Array.Empty<KeyValuePair<string, string>>();
 
         private static readonly int[] intervals = { 1, 3, 5, 10, 15, 30, 60, 120, 240, 300, 480, 720, 1440 };
         private const int GoodMinimum = 4;
@@ -62,6 +62,12 @@ namespace KdyPojedeVlak.Web.Controllers
                 return RedirectToAction("ChoosePoint");
             }
 
+            // TODO: Support UIC identifiers of other countries
+            if (id.StartsWith("54") && id.Length == 7)
+            {
+                return RedirectToAction("Nearest", new { id = "CZ:" + id[2..], at });
+            }
+
             var point = dbModelContext.RoutingPoints.SingleOrDefault(p => p.Code == id);
 
             if (point == null)
@@ -81,7 +87,7 @@ namespace KdyPojedeVlak.Web.Controllers
                 return NotFound();
             }
 
-            var passingTrainsQuery =  dbModelContext.Entry(point).Collection(p => p.PassingTrains).Query().Where(p => p.TrainTimetableVariant.TimetableYear == currentTimetableYear);
+            var passingTrainsQuery = dbModelContext.Entry(point).Collection(p => p.PassingTrains).Query().Where(p => p.TrainTimetableVariant.TimetableYear == currentTimetableYear);
             var trainList = GetTrainList(startDate, passingTrainsQuery);
 
             return View(new NearestTransits(point, startDate, currentTimetableYear.Year, trainList, neighbors, GetNearPoints(point, neighbors)));
