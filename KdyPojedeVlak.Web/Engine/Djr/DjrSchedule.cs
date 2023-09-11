@@ -679,8 +679,10 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             var toCode = pieces[3];
             var toOccurrence = String.IsNullOrEmpty(pieces[4]) ? 0 : Int32.Parse(pieces[4]);
 
-            if (!passages.TryGetValue(fromCode, out var fromList)) fromList = passages["_FIRST"];
-            if (!passages.TryGetValue(toCode, out var toList)) toList = passages["_LAST"];
+            passages.TryGetValue(fromCode, out var fromList);
+            fromList ??= passages["_FIRST"];
+            passages.TryGetValue(toCode, out var toList);
+            toList ??= passages["_LAST"];
 
             var from = fromOccurrence < 0 || fromOccurrence >= fromList.Count ? fromList[0] : fromList[fromOccurrence];
             var to = toOccurrence < 0 || toOccurrence >= toList.Count ? toList[0] : toList[toOccurrence];
@@ -705,11 +707,13 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             var toCode = pieces[2];
             var toOccurrence = String.IsNullOrEmpty(pieces[3]) ? 0 : Int32.Parse(pieces[3]);
 
-            if (!passages.TryGetValue(fromCode, out var fromList)) fromList = passages["_FIRST"];
-            if (!passages.TryGetValue(toCode, out var toList)) toList = passages["_LAST"];
+            passages.TryGetValue(fromCode, out var fromList);
+            fromList ??= passages["_FIRST"];
+            passages.TryGetValue(toCode, out var toList);
+            toList ??= passages["_LAST"];
 
-            var from = fromList[fromOccurrence];
-            var to = toList[toOccurrence];
+            var from = fromOccurrence < 0 || fromOccurrence >= fromList.Count ? fromList[0] : fromList[fromOccurrence];
+            var to = toOccurrence < 0 || toOccurrence >= toList.Count ? toList[0] : toList[toOccurrence];
 
             return new NonCentralPttNoteForVariant
             {
