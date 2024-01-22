@@ -156,6 +156,7 @@ namespace KdyPojedeVlak.Web.Models
             { TrainCategory.ArrivaExpress, "AEx" },
             { TrainCategory.NightJet, "NJ" },
             { TrainCategory.LeoExpresTenders, "LET" },
+            { TrainCategory.EuroSleeper, "ES" },
         };
 
         public static readonly Dictionary<TrafficType, string> TrafficTypeNames = new()

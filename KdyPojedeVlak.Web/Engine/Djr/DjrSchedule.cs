@@ -176,6 +176,18 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 
         private static void ImportDataFile(string fileName, long fileSize, DbModelContext dbModelContext, Func<Stream> fileReader)
         {
+            try
+            {
+                ImportDataFileImpl(fileName, fileSize, dbModelContext, fileReader);
+            }
+            catch (Exception e)
+            {
+                throw new FormatException($"Error importing {fileName}: {e.Message}", e);
+            }
+        }
+
+        private static void ImportDataFileImpl(string fileName, long fileSize, DbModelContext dbModelContext, Func<Stream> fileReader)
+        {
             var alreadyImportedFile = dbModelContext.ImportedFiles.SingleOrDefault(f => f.FileName == fileName);
             if (alreadyImportedFile != null && alreadyImportedFile.FileSize == fileSize)
             {
@@ -786,6 +798,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 { "9005", TrainCategory.ArrivaExpress },
                 { "9006", TrainCategory.NightJet },
                 { "9007", TrainCategory.LeoExpresTenders },
+                { "9010", TrainCategory.EuroSleeper },
             };
 
         private static readonly Dictionary<string, TrainOperation> defTrainOperation =
@@ -922,6 +935,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         ArrivaExpress,
         NightJet,
         LeoExpresTenders,
+        EuroSleeper,
     }
 
     public enum TrainRoutePointType
