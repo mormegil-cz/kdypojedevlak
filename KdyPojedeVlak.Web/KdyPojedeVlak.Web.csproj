@@ -30,7 +30,7 @@
   </ItemGroup>
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
     <Exec Command="libman restore" />
-    <Exec Command="dotnet bundle" />
+    <Exec Command="dotnet bundle" EnvironmentVariables="DOTNET_ROLL_FORWARD=Major" />
   </Target>
   <ItemGroup>
     <DotNetCliToolReference Include="BundlerMinifier.Core" Version="3.2.449" />
