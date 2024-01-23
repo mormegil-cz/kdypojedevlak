@@ -1,0 +1,11 @@
+User-agent: SemrushBot
+Disallow: /Train/
+Disallow: /Transits/
+
+User-agent: AhrefsBot
+Disallow: /Train/
+Disallow: /Transits/
+
+User-agent: barkrowler
+Disallow: /Train/
+Disallow: /Transits/
