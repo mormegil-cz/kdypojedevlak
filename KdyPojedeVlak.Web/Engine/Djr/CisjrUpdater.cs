@@ -11,6 +11,8 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 {
     public static class CisjrUpdater
     {
+        private static readonly object lastUpdateFileAccess = new();
+
         private const string dataFilePattern = "*.zip";
         private const string updateStatusFileName = ".update_info.json";
         private const int MIN_UPDATE_FREQ_HRS = 1;
@@ -117,25 +119,30 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 
         private static DateTime GetLastUpdateDate(string basePath)
         {
-            var updateStatusPath = Path.Combine(basePath, updateStatusFileName);
-            if (!File.Exists(updateStatusPath)) return DateTime.MinValue;
-            var updateStatusContents = File.ReadAllText(updateStatusPath);
-            var data = JsonConvert.DeserializeObject<UpdateStatusData>(updateStatusContents);
-            if (data == null) return DateTime.MinValue;
-            return data.LastUpdate;
+            lock (lastUpdateFileAccess)
+            {
+                var updateStatusPath = Path.Combine(basePath, updateStatusFileName);
+                if (!File.Exists(updateStatusPath)) return DateTime.MinValue;
+                var updateStatusContents = File.ReadAllText(updateStatusPath);
+                var data = JsonConvert.DeserializeObject<UpdateStatusData>(updateStatusContents);
+                return data?.LastUpdate ?? DateTime.MinValue;
+            }
         }
 
         private static void WriteLastUpdateDate(string basePath, DateTime date)
         {
-            var data = new UpdateStatusData { LastUpdate = date };
-            var json = JsonConvert.SerializeObject(data);
-            var updateStatusPath = Path.Combine(basePath, updateStatusFileName);
-            File.WriteAllText(updateStatusPath, json);
+            lock (lastUpdateFileAccess)
+            {
+                var data = new UpdateStatusData { LastUpdate = date };
+                var json = JsonConvert.SerializeObject(data);
+                var updateStatusPath = Path.Combine(basePath, updateStatusFileName);
+                File.WriteAllText(updateStatusPath, json);
+            }
         }
 
         private class UpdateStatusData
         {
-            public DateTime LastUpdate { get; set; }
+            public DateTime LastUpdate { get; init; }
         }
     }
 }
