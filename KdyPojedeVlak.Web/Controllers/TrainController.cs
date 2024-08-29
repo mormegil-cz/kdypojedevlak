@@ -210,7 +210,7 @@ namespace KdyPojedeVlak.Web.Controllers
             var timetable = timetableQuery.AsSplitQuery().SingleOrDefault(t => t.TimetableYear == year);
             if (timetable == null && yearNumber == null)
             {
-                timetable = timetableQuery.OrderByDescending(t => t.TimetableYear.Year).FirstOrDefault();
+                timetable = timetableQuery.AsSplitQuery().OrderByDescending(t => t.TimetableYear.Year).FirstOrDefault();
             }
             if (timetable == null) return null;
 
