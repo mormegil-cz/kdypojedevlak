@@ -29,13 +29,11 @@ namespace KdyPojedeVlak.Web.Models
             NearestPoints = nearestPoints == null || nearestPoints.Count == 0 ? null : nearestPoints;
         }
 
-        public record Transit(int TimetableYear, CalendarDefinition Calendar, TimeSpan? ArrivalTime, TimeSpan? DepartureTime, string DataJson, string? TrainNumber, string? TrainName, string? SubsidiaryLocationDescription, string? PreviousPointName, string? NextPointName)
+        public record Transit(int TimetableYear, CalendarDefinition Calendar, TimeSpan? ArrivalTime, TimeSpan? DepartureTime, TrainCategory TrainCategory, string? TrainNumber, string? TrainName, string? SubsidiaryLocationDescription, string? PreviousPointName, string? NextPointName)
         {
             public TimeSpan? AnyScheduledTime => ArrivalTime ?? DepartureTime;
 
             public TimeSpan? AnyScheduledTimeOfDay => AnyScheduledTime?.GetTimeOfDay();
-
-            public TrainCategory TrainCategory => DbModelUtils.GetAttributeEnum(DbModelUtils.LoadDataJson(DataJson), TrainTimetable.AttribTrainCategory, TrainCategory.Unknown);
         }
     }
 }

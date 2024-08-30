@@ -106,7 +106,7 @@ namespace KdyPojedeVlak.Web.Controllers
                             p.TrainTimetableVariant.Calendar,
                             p.ArrivalTime,
                             p.DepartureTime,
-                            p.TrainTimetableVariant.Timetable.DataJson,
+                            p.TrainTimetableVariant.Timetable.TrainCategory,
                             p.TrainTimetableVariant.Timetable.Train.Number,
                             p.TrainTimetableVariant.Timetable.Name,
                             p.SubsidiaryLocationDescription,

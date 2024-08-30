@@ -108,9 +108,10 @@ namespace KdyPojedeVlak.Web.Controllers
                             ttv.Calendar.TimetableYearYear,
                             ttv.Timetable.Train.Number,
                             ttv.Timetable.Name,
-                            ttv.Timetable.DataJson,
                             ttv.Points.OrderBy(np => np.Order).Select(np => np.Point.Name).FirstOrDefault(),
-                            ttv.Points.OrderByDescending(np => np.Order).Select(np => np.Point.Name).FirstOrDefault()
+                            ttv.Points.OrderByDescending(np => np.Order).Select(np => np.Point.Name).FirstOrDefault(),
+                            ttv.Timetable.TrainCategory,
+                            ttv.Timetable.TrafficType
                         )
                 )
                 .Take(limit)
