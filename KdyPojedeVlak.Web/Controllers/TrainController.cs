@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using KdyPojedeVlak.Web.Engine;
 using KdyPojedeVlak.Web.Engine.Algorithms;
 using KdyPojedeVlak.Web.Engine.DbStorage;
+using KdyPojedeVlak.Web.Helpers;
 using KdyPojedeVlak.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,35 +27,70 @@ namespace KdyPojedeVlak.Web.Controllers
             this.dbModelContext = dbModelContext;
         }
 
-        public IActionResult Index(string? search)
+        public IActionResult Index(string? search, int? year)
         {
             if (String.IsNullOrEmpty(search)) return View();
 
             var parsed = reTrainNumber.Match(search);
-            if (parsed.Success)
-            {
-                var id = parsed.Groups["id"].Value;
+            return parsed.Success
+                ? SearchByTrainNumber(parsed.Groups["id"].Value, year)
+                : SearchByTrainName(search, year);
+        }
 
-                if (dbModelContext.Trains.Any(t => t.Number == id))
+        private IActionResult SearchByTrainName(string search, int? yearOpt)
+        {
+            if (yearOpt == null)
+            {
+                var newestTrainByName = dbModelContext
+                    .TrainTimetables
+                    .Include(tt => tt.Train)
+                    .Where(tt => tt.Name == search)
+                    .OrderByDescending(tt => tt.YearId)
+                    .FirstOrDefault();
+
+                if (newestTrainByName == null)
                 {
-                    return RedirectToAction("Details", new { id });
+                    return View((object) "Vlak nebyl nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
                 }
-                else
-                {
-                    return View((object)$"Vlak č. {id} nebyl nalezen.");
-                }
+
+                return RedirectToAction("Details", new { id = newestTrainByName.TrainNumber, year = newestTrainByName.YearId });
+            }
+
+            var year = yearOpt.GetValueOrDefault();
+            var trainByName = dbModelContext
+                .TrainTimetables
+                .Include(tt => tt.Train)
+                .FirstOrDefault(tt => tt.Name == search && tt.YearId == year);
+            if (trainByName != null)
+            {
+                return RedirectToAction("Details", new { id = trainByName.TrainNumber });
             }
             else
             {
-                var trainByName = dbModelContext.TrainTimetables.Include(tt => tt.Train).FirstOrDefault(tt => tt.Name == search);
-                if (trainByName != null)
+                return View((object) $"Vlak nebyl pro JŘ {year} nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
+            }
+        }
+
+        private IActionResult SearchByTrainNumber(string id, int? yearOpt)
+        {
+            if (yearOpt == null)
+            {
+                var newestTrain = dbModelContext.TrainTimetables.Where(tt => tt.Train.Number == id).OrderByDescending(tt => tt.YearId).FirstOrDefault();
+                if (newestTrain == null)
                 {
-                    return RedirectToAction("Details", new { id = trainByName.TrainNumber });
+                    return View((object) $"Vlak č. {id} nebyl nalezen.");
                 }
-                else
-                {
-                    return View((object)"Vlak nebyl nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
-                }
+                return RedirectToAction("Details", new { id, year = newestTrain.YearId });
+            }
+
+            var year = yearOpt.GetValueOrDefault();
+            if (dbModelContext.TrainTimetables.Any(tt => tt.Train.Number == id && tt.YearId == year))
+            {
+                return RedirectToAction("Details", new { id, year });
+            }
+            else
+            {
+                return View((object) $"Vlak č. {id} nebyl pro JŘ {year} nalezen.");
             }
         }
 
@@ -86,12 +122,9 @@ namespace KdyPojedeVlak.Web.Controllers
         public IActionResult Details(string? id, int? year, bool? everything)
         {
             var plan = BuildTrainPlan(id, year, everything ?? false);
-            if (plan == null)
-            {
-                return RedirectToAction("Index", new { search = id });
-            }
-
-            return View(plan);
+            return plan == null
+                ? RedirectToAction("Index", new { search = id, year })
+                : View(plan);
         }
 
         public IActionResult Map(string? id, int? year)
@@ -111,7 +144,7 @@ namespace KdyPojedeVlak.Web.Controllers
             var train = dbModelContext.Trains.SingleOrDefault(t => t.Number == id);
             if (train == null)
             {
-                return RedirectToAction("Index", new { search = id });
+                return RedirectToAction("Index", new { search = id, year });
             }
 
             var timetableQuery = dbModelContext.TrainTimetables
@@ -123,13 +156,9 @@ namespace KdyPojedeVlak.Web.Controllers
                 .Where(t => t.Train == train);
 
             var timetable = timetableQuery.AsSplitQuery().SingleOrDefault(t => t.TimetableYear == dbYear);
-            if (timetable == null && year == null)
-            {
-                timetable = timetableQuery.OrderByDescending(t => t.TimetableYear.Year).FirstOrDefault();
-            }
             if (timetable == null)
             {
-                return RedirectToAction("Index", new { search = id });
+                return RedirectToAction("Index", new { search = id, year });
             }
 
             var pointsInVariants = timetable.Variants.Select(
@@ -208,10 +237,6 @@ namespace KdyPojedeVlak.Web.Controllers
                 .Where(t => t.Train == train);
 
             var timetable = timetableQuery.AsSplitQuery().SingleOrDefault(t => t.TimetableYear == year);
-            if (timetable == null && yearNumber == null)
-            {
-                timetable = timetableQuery.AsSplitQuery().OrderByDescending(t => t.TimetableYear.Year).FirstOrDefault();
-            }
             if (timetable == null) return null;
 
             var timetableVariants = timetable.Variants;
