@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using KdyPojedeVlak.Web.Engine;
 using KdyPojedeVlak.Web.Engine.DbStorage;
 using KdyPojedeVlak.Web.Engine.Djr;
@@ -148,7 +149,7 @@ namespace KdyPojedeVlak.Web
                 throw;
             }
 
-            if (EnableUpdates) UpdateManager.Initialize(@"App_Data\cisjrdata", serviceScopeFactory);
+            if (EnableUpdates && Configuration["DisableUpdates"] == null) UpdateManager.Initialize(Path.Combine("App_Data", "cisjrdata"), serviceScopeFactory);
         }
     }
 }

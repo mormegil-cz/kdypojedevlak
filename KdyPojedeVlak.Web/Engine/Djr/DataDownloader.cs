@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -10,25 +9,26 @@ using CoreFtp;
 
 namespace KdyPojedeVlak.Web.Engine.Djr
 {
-    public class DataDownloader
+    public partial class DataDownloader
     {
-        private const string clientName = "KdyPojedeVlak/CoreFTP";
-        private static readonly Uri serverBaseUri = new Uri(@"ftp://ftp.cisjr.cz/draha/celostatni/szdc/");
+        private const string ClientName = "KdyPojedeVlak/CoreFTP";
+        private static readonly Uri serverBaseUri = new(@"ftp://ftp.cisjr.cz/draha/celostatni/szdc/");
+        private const int BuffSize = 10240;
 
-        private static readonly Regex reFilename = new Regex(@"^([^.]+)\.(XML\.)?ZIP$",
-            RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        private static readonly Regex reFilename = RegexFilename();
+        private static readonly Regex reDirectory = RegexDirectory();
+        private static readonly Regex reSubdirectory = RegexSubdirectory();
 
-        private static readonly Regex reDirectory = new Regex(@"^2[0-9]{3}$",
-            RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        [GeneratedRegex(@"^([^.]+)\.(XML\.)?ZIP$", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant)]
+        private static partial Regex RegexFilename();
 
-        private static readonly Regex reSubdirectory = new Regex(@"^2[0-9]{3}-[0-9]{2}$",
-            RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        [GeneratedRegex(@"^2[0-9]{3}$", RegexOptions.Singleline | RegexOptions.CultureInvariant)]
+        private static partial Regex RegexDirectory();
 
-        private const int BUFF_SIZE = 10240;
+        [GeneratedRegex(@"^2[0-9]{3}-[0-9]{2}$", RegexOptions.Singleline | RegexOptions.CultureInvariant)]
+        private static partial Regex RegexSubdirectory();
 
         private FtpClient ftp;
-
-        public bool ShouldExtractZip => false;
 
         public async Task Connect()
         {
@@ -36,7 +36,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
 
             ftp = new FtpClient(new FtpClientConfiguration { Host = serverBaseUri.GetLeftPart(UriPartial.Authority) });
             await ftp.LoginAsync();
-            await ftp.SetClientName(clientName);
+            await ftp.SetClientName(ClientName);
             await ftp.ChangeWorkingDirectoryAsync(serverBaseUri.AbsolutePath);
         }
 
@@ -68,7 +68,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 .Where(f => f.Match.Success)
                 .Select(f => f.Directory.Name)
                 .ToList();
-            
+
             var results = new Dictionary<string, long>();
             foreach (var dir in directories)
             {
@@ -86,7 +86,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     await AddListOfFilesAvailableInDir(results, dir + "/" + subdir);
                     await ftp.ChangeWorkingDirectoryAsync("..");
                 }
-                
+
                 await AddListOfFilesAvailableInDir(results, dir);
 
                 await ftp.ChangeWorkingDirectoryAsync("..");
@@ -135,9 +135,9 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 using (var receiveStream = await ftp.OpenFileReadStreamAsync(fileName))
                 {
                     using (var storeStream = new FileStream(destinationFilename, FileMode.Create, FileAccess.Write,
-                        FileShare.Read))
+                               FileShare.Read))
                     {
-                        var buffer = new byte[BUFF_SIZE];
+                        var buffer = new byte[BuffSize];
                         while (true)
                         {
                             var read = await receiveStream.ReadAsync(buffer, 0, buffer.Length);
