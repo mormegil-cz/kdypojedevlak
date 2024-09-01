@@ -50,8 +50,8 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         {
             foreach (var year in dbModelContext.TimetableYears)
             {
-                var minDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Min(c => (DateTime?)c.StartDate);
-                var maxDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Max(c => (DateTime?)c.EndDate);
+                var minDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Min(c => (DateTime?) c.StartDate);
+                var maxDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Max(c => (DateTime?) c.EndDate);
 
                 if (minDate != null && year.MinDate > minDate)
                 {
@@ -260,7 +260,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 _ => throw new FormatException($"Unsupported XML element: ${xmlReader.LocalName}")
             };
 
-            return (CZPTTCISMessageBase)ser.Deserialize(xmlReader)!;
+            return (CZPTTCISMessageBase) ser.Deserialize(xmlReader)!;
         }
 
         private static string? ImportTrainToDatabase(CZPTTCISMessage message, ImportedFile importedFile, DbModelContext dbModelContext)
@@ -337,13 +337,9 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     Train = train,
                     TimetableYear = dbTimetableYear,
                     Name = trainName,
-                    Data = new Dictionary<string, string>
-                    {
-                        { TrainTimetable.AttribTrafficType, trafficTypes.FirstOrDefault().ToString() },
-                        { TrainTimetable.AttribTrainCategory, trainCategories.FirstOrDefault().ToString() },
-                        // { TrainTimetable.AttribTrainType, train.TrainType.ToString() },
-                    },
-                    Variants = new List<TrainTimetableVariant>()
+                    TrafficType = trafficTypes.FirstOrDefault(),
+                    TrainCategory = trainCategories.FirstOrDefault(),
+                    Variants = []
                 };
                 dbModelContext.TrainTimetables.Add(trainTimetable);
             }
@@ -393,10 +389,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                         Name = codebookEntry.LongName,
                         Latitude = codebookEntry.Latitude,
                         Longitude = codebookEntry.Longitude,
-                        Data = new Dictionary<string, string>
-                        {
-                            // TODO: Routing point data
-                        }
+                        // TODO: Routing point data
                     };
                     dbModelContext.RoutingPoints.Add(dbPoint);
                     dbModelContext.SaveChanges();
@@ -466,27 +459,21 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     DepartureDay = departureTiming?.Offset ?? 0,
                     DepartureTime = departureTiming?.AsTimeSpan(),
                     DwellTime = locationFull?.TimingAtLocation?.DwellTime,
-                    Data = new Dictionary<string, string?>
-                    {
-                        // TODO: JourneyLocationTypeCode
-                        { Passage.AttribTrainOperations, String.Join(';', trainOperations) },
-                        { Passage.AttribSubsidiaryLocation, locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code },
-                        { Passage.AttribSubsidiaryLocationName, locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryName },
-                        {
-                            Passage.AttribSubsidiaryLocationType,
-                            (locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
-                                ?.LocationSubsidiaryTypeCode == null
-                                ? SubsidiaryLocationType.None
-                                : defSubsidiaryLocationType[
-                                    locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
-                                        ?.LocationSubsidiaryTypeCode ?? "0"]).ToString()
-                        },
-                    },
+                    TrainOperationsStr = String.Join(';', trainOperations),
+                    SubsidiaryLocation = locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code,
+                    SubsidiaryLocationName = locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryName,
+                    SubsidiaryLocationType = locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                        ?.LocationSubsidiaryTypeCode == null
+                        ? SubsidiaryLocationType.None
+                        : defSubsidiaryLocationType[
+                            locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                                ?.LocationSubsidiaryTypeCode ?? "0"]
+                    // TODO: JourneyLocationTypeCode
                 };
                 trainTimetableVariant.Points.Add(passage);
                 dbModelContext.Add(passage);
 
-                if (passages.Count == 0) passages["_FIRST"] = new List<Passage>(1) { passage };
+                if (passages.Count == 0) passages["_FIRST"] = [passage];
 
                 if (!passages.TryGetValue(locationRawID, out var passageListPerID)) passageListPerID = new List<Passage>(2);
                 passageListPerID.Add(passage);
@@ -581,7 +568,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     .Where(ttv => ttv.YearId == cancellation.Calendar.TimetableYearYear
                                   && ttv.TrainVariantId == cancellation.TrainVariantId
                                   && ttv.PathVariantId == cancellation.PathVariantId)
-                    .Select(ttv => (int?)ttv.Id)
+                    .Select(ttv => (int?) ttv.Id)
                     .SingleOrDefault();
                 if (trainTimetableVariantId == null)
                 {
@@ -912,7 +899,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
         Lv,
         Vleč,
         Služ,
-        Pom
+        Pom,
     }
 
     public enum TrainCategory

@@ -135,7 +135,9 @@ namespace KdyPojedeVlak.Web
                     dbModelContext.Database.EnsureDeleted();
                     dbModelContext.Database.EnsureCreated();
                 }
+                DebugLog.LogDebugMsg("Migrating database");
                 dbModelContext.Database.Migrate();
+                DebugLog.LogDebugMsg("Migration completed");
 
                 ScheduleVersionInfo.Initialize(dbModelContext);
 

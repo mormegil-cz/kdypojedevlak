@@ -223,12 +223,6 @@ public class RoutingPoint
     public float? Latitude { get; set; }
     public float? Longitude { get; set; }
 
-    public string DataJson { get; set; }
-
-    [NotMapped]
-    // TODO: Decode data JSON
-    public Dictionary<string, string> Data { get; set; }
-
     // TODO: Point attributes
     [NotMapped]
     public PointType Type => Program.PointCodebook.Find(Code)?.Type ?? PointType.Unknown;
@@ -250,8 +244,8 @@ public class RoutingPoint
 }
 
 /**
-     * Label of a train, common for all timetable years
-     */
+  * Label of a train, common for all timetable years
+  */
 public class Train
 {
     public int Id { get; set; }
@@ -261,16 +255,10 @@ public class Train
 }
 
 /**
-     * Train in a single timetable year
-     */
+  * Train in a single timetable year
+  */
 public class TrainTimetable
 {
-    public static readonly string AttribTrafficType = "TrafficType";
-    public static readonly string AttribTrainCategory = "TrainCategory";
-    public static readonly string AttribTrainType = "TrainType";
-
-    private Dictionary<string, string> data;
-
     public int Id { get; set; }
 
     [Required]
@@ -288,40 +276,20 @@ public class TrainTimetable
     [MaxLength(100)]
     public string Name { get; set; }
 
-    public string DataJson { get; set; }
-
     [InverseProperty("Timetable")]
     public virtual List<TrainTimetableVariant> Variants { get; set; }
 
     [NotMapped]
-    public Dictionary<string, string> Data
-    {
-        get
-        {
-            if (data != null) return data;
-            data = LoadDataJson(DataJson);
-            return data;
-        }
-        set
-        {
-            data = value;
-            DataJson = StoreDataJson(value);
-        }
-    }
-
-    [NotMapped]
     public string TrainNumber => Train?.Number;
 
-    [NotMapped]
-    public TrainCategory TrainCategory => GetAttributeEnum(Data, AttribTrainCategory, TrainCategory.Unknown);
+    public TrainCategory TrainCategory { get; set; }
 
-    [NotMapped]
-    public TrafficType TrafficType => GetAttributeEnum(Data, AttribTrafficType, TrafficType.Unknown);
+    public TrafficType TrafficType { get; set; }
 }
 
 /**
-     * Variant of a train in the respective timetable year
-     */
+  * Variant of a train in the respective timetable year
+  */
 public class TrainTimetableVariant
 {
     public int Id { get; set; }
@@ -359,11 +327,6 @@ public class TrainTimetableVariant
 
 public class Passage
 {
-    public static readonly string AttribTrainOperations = "TrainOperations";
-    public static readonly string AttribSubsidiaryLocation = "SubsidiaryLocation";
-    public static readonly string AttribSubsidiaryLocationName = "SubsidiaryLocationName";
-    public static readonly string AttribSubsidiaryLocationType = "SubsidiaryLocationType";
-
     public int Id { get; set; }
 
     // note that this is denormalized: TrainId implies YearId, but it would be difficult to normalize it
@@ -395,26 +358,6 @@ public class Passage
     public int ArrivalDay { get; set; }
     public int DepartureDay { get; set; }
 
-    public string DataJson { get; set; }
-
-    [NotMapped]
-    public Dictionary<string, string> Data
-    {
-        get
-        {
-            if (data != null) return data;
-            data = LoadDataJson(DataJson);
-            return data;
-        }
-        set
-        {
-            data = value;
-            DataJson = StoreDataJson(value);
-        }
-    }
-
-    private Dictionary<string, string> data;
-
     [NotMapped]
     public bool IsMajorPoint => ArrivalTime != null || DwellTime != null;
 
@@ -437,17 +380,17 @@ public class Passage
         : (DisplayConsts.SubsidiaryLocationTypeNames[SubsidiaryLocationType] + " " + SubsidiaryLocation + " " +
            SubsidiaryLocationName).Trim();
 
-    [NotMapped]
-    public List<TrainOperation> TrainOperations => GetAttributeEnumList<TrainOperation>(Data, AttribTrainOperations);
+    [Column("TrainOperations")]
+    public string TrainOperationsStr { get; set; }
 
     [NotMapped]
-    public string SubsidiaryLocation => GetAttribute(Data, AttribSubsidiaryLocation, null);
+    public List<TrainOperation> TrainOperations => ParseEnumList<TrainOperation>(TrainOperationsStr);
 
-    [NotMapped]
-    public string SubsidiaryLocationName => GetAttribute(Data, AttribSubsidiaryLocationName, null);
+    public string SubsidiaryLocation { get; set; }
 
-    [NotMapped]
-    public SubsidiaryLocationType SubsidiaryLocationType => GetAttributeEnum(Data, AttribSubsidiaryLocationType, SubsidiaryLocationType.None);
+    public string SubsidiaryLocationName { get; set; }
+
+    public SubsidiaryLocationType SubsidiaryLocationType { get; set; }
 
     private TimeSpan? TimeOfDayOfTimeSpan(TimeSpan? timeSpan)
     {
@@ -563,20 +506,11 @@ public class TrainCancellation
 
 public static class DbModelUtils
 {
-    public static Dictionary<string, string> LoadDataJson(string json) => JsonConvert.DeserializeObject<Dictionary<string, string>>(json ?? "{}");
-
-    public static string StoreDataJson(Dictionary<string, string> json) => JsonConvert.SerializeObject(json);
-
-    public static string GetAttribute(Dictionary<string, string> data, string key, string defaultValue) => data.TryGetValue(key, out var result) ? result : defaultValue;
-
-    public static TEnum GetAttributeEnum<TEnum>(Dictionary<string, string> data, string key, TEnum defaultValue)
+    public static List<TEnum> ParseEnumList<TEnum>(string data)
         where TEnum : struct =>
-        Enum.TryParse<TEnum>(GetAttribute(data, key, null), out var result) ? result : defaultValue;
-
-    public static List<TEnum> GetAttributeEnumList<TEnum>(Dictionary<string, string> data, string key)
-        where TEnum : struct =>
-        GetAttribute(data, key, "")
-            .Split(';', StringSplitOptions.RemoveEmptyEntries)
-            .Select(Enum.Parse<TEnum>)
-            .ToList();
+        data == null
+            ? []
+            : data.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(Enum.Parse<TEnum>)
+                .ToList();
 }
