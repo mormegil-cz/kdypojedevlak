@@ -221,7 +221,7 @@
         <td></td>
         @foreach (var variant in Model.TrainVariants.OrderBy(v => v.ImportedFrom.CreationDate))
         {
-            <td>
+            <td colspan="3">
                 @{
                     var cancellations = variant.Cancellations;
                     if (cancellations.Count > 0)
