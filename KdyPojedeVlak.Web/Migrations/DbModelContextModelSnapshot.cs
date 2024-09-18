@@ -108,13 +108,18 @@ namespace KdyPojedeVlak.Web.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<string>("ValueDirect")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("Value");
+
+                    b.Property<int?>("ValueRef")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PassageId");
+
+                    b.HasIndex("ValueRef");
 
                     b.ToTable("NetworkSpecificParameterForPassage");
                 });
@@ -250,6 +255,24 @@ namespace KdyPojedeVlak.Web.Migrations
                     b.HasIndex("Latitude", "Longitude");
 
                     b.ToTable("RoutingPoints");
+                });
+
+            modelBuilder.Entity("KdyPojedeVlak.Web.Engine.DbStorage.Text", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Str")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Str")
+                        .IsUnique();
+
+                    b.ToTable("Texts");
                 });
 
             modelBuilder.Entity("KdyPojedeVlak.Web.Engine.DbStorage.TimetableYear", b =>
@@ -422,9 +445,10 @@ namespace KdyPojedeVlak.Web.Migrations
                     b.Property<int>("ShowInHeader")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("TextId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasIndex("TextId");
 
                     b.HasDiscriminator().HasValue(2);
                 });
@@ -467,7 +491,13 @@ namespace KdyPojedeVlak.Web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("KdyPojedeVlak.Web.Engine.DbStorage.Text", "ValueIndirect")
+                        .WithMany()
+                        .HasForeignKey("ValueRef");
+
                     b.Navigation("Passage");
+
+                    b.Navigation("ValueIndirect");
                 });
 
             modelBuilder.Entity("KdyPojedeVlak.Web.Engine.DbStorage.Passage", b =>
@@ -607,6 +637,17 @@ namespace KdyPojedeVlak.Web.Migrations
                     b.Navigation("Timetable");
 
                     b.Navigation("TimetableYear");
+                });
+
+            modelBuilder.Entity("KdyPojedeVlak.Web.Engine.DbStorage.NonCentralPttNoteForVariant", b =>
+                {
+                    b.HasOne("KdyPojedeVlak.Web.Engine.DbStorage.Text", "Text")
+                        .WithMany()
+                        .HasForeignKey("TextId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Text");
                 });
 
             modelBuilder.Entity("KdyPojedeVlak.Web.Engine.DbStorage.Passage", b =>

@@ -484,13 +484,23 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 {
                     foreach (var param in networkSpecificParametersForPassage)
                     {
-                        dbModelContext.Add(
-                            new NetworkSpecificParameterForPassage
-                            {
-                                Passage = passage,
-                                Type = Enum.Parse<NetworkSpecificParameterPassage>(param.Key),
-                                Value = String.Join(';', param.Value)
-                            });
+                        var type = Enum.Parse<NetworkSpecificParameterPassage>(param.Key);
+                        var paramValue = String.Join(';', param.Value);
+                        var dbParam = new NetworkSpecificParameterForPassage
+                        {
+                            Passage = passage,
+                            Type = type
+                        };
+
+                        if (NetworkSpecificParameterForPassage.IndirectTypes.Contains(type))
+                        {
+                            dbParam.ValueIndirect = Text.FindOrCreate(dbModelContext, paramValue);
+                        }
+                        else
+                        {
+                            dbParam.ValueDirect = paramValue;
+                        }
+                        dbModelContext.Add(dbParam);
                     }
                 }
             }
@@ -519,7 +529,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                 }
                 if (networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZNonCentralPTTNote.ToString(), out var nonCentralPttNoteDefinitions))
                 {
-                    dbModelContext.AddRange(nonCentralPttNoteDefinitions.Select(def => ParseNonCentralPttNoteDefinition(def, passages, pttNoteCalendars, trainTimetableVariant)));
+                    dbModelContext.AddRange(nonCentralPttNoteDefinitions.Select(def => ParseNonCentralPttNoteDefinition(dbModelContext, def, passages, pttNoteCalendars, trainTimetableVariant)));
                 }
                 dbModelContext.SaveChanges();
             }
@@ -697,7 +707,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             };
         }
 
-        private static NonCentralPttNoteForVariant ParseNonCentralPttNoteDefinition(string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition>? calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
+        private static NonCentralPttNoteForVariant ParseNonCentralPttNoteDefinition(DbModelContext dbModelContext, string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition>? calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
         {
             var pieces = definition.Split('|');
 
@@ -717,7 +727,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
             return new NonCentralPttNoteForVariant
             {
                 TrainTimetableVariant = trainTimetableVariant,
-                Text = pieces[4],
+                Text = Text.FindOrCreate(dbModelContext, pieces[4]),
                 From = from,
                 To = to,
                 ShowInHeader = defShowInHeader[pieces[5]],

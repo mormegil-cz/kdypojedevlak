@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,13 +13,12 @@ using KdyPojedeVlak.Web.Engine.Djr;
 using KdyPojedeVlak.Web.Engine.SR70;
 using KdyPojedeVlak.Web.Models;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace KdyPojedeVlak.Web.Engine.DbStorage;
 
 using static DbModelUtils;
 
-public class DbModelContext : DbContext
+public class DbModelContext(DbContextOptions<DbModelContext> options) : DbContext(options)
 {
     public DbSet<ImportedFile> ImportedFiles { get; set; }
     public DbSet<TimetableYear> TimetableYears { get; set; }
@@ -29,11 +29,7 @@ public class DbModelContext : DbContext
     public DbSet<CalendarDefinition> CalendarDefinitions { get; set; }
     public DbSet<NeighboringPoints> NeighboringPointTuples { get; set; }
     public DbSet<TrainCancellation> TrainCancellations { get; set; }
-
-    public DbModelContext(DbContextOptions<DbModelContext> options)
-        : base(options)
-    {
-    }
+    public DbSet<Text> Texts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -81,11 +77,14 @@ public class DbModelContext : DbContext
 
         modelBuilder.Entity<TrainCancellation>()
             .HasIndex(o => o.TimetableVariantId);
+
+        modelBuilder.Entity<Text>()
+            .HasIndex(o => o.Str).IsUnique();
     }
 
     public HashSet<RoutingPoint> GetNeighboringPoints(RoutingPoint point)
     {
-        if (point == null) throw new ArgumentNullException(nameof(point));
+        ArgumentNullException.ThrowIfNull(point);
 
         var pointId = point.Id;
         var neighbors = NeighboringPointTuples
@@ -451,7 +450,7 @@ public class CentralPttNoteForVariant : PttNoteForVariant
 public class NonCentralPttNoteForVariant : PttNoteForVariant
 {
     [Required]
-    public string Text { get; set; }
+    public Text Text { get; set; }
 
     [Required]
     public HeaderDisplay ShowInHeader { get; set; }
@@ -465,6 +464,8 @@ public class NonCentralPttNoteForVariant : PttNoteForVariant
 
 public class NetworkSpecificParameterForPassage
 {
+    public static readonly FrozenSet<NetworkSpecificParameterPassage> IndirectTypes = new[] { NetworkSpecificParameterPassage.CZPassengerPublicTransportOrderingCoName }.ToFrozenSet();
+
     public int Id { get; set; }
 
     [Required]
@@ -476,8 +477,15 @@ public class NetworkSpecificParameterForPassage
     [Required]
     public NetworkSpecificParameterPassage Type { get; set; }
 
+    [NotMapped]
     [Required]
-    public string Value { get; set; }
+    public string Value => ValueDirect ?? ValueIndirect?.Str;
+
+    [Column("Value")]
+    public string ValueDirect { get; set; }
+
+    [ForeignKey("ValueRef")]
+    public Text ValueIndirect { get; set; }
 }
 
 public class TrainCancellation
@@ -502,6 +510,24 @@ public class TrainCancellation
 
     [Required]
     public ImportedFile ImportedFrom { get; set; }
+}
+
+public class Text
+{
+    public int Id { get; set; }
+
+    [Required]
+    public string Str { get; set; }
+
+    public static Text FindOrCreate(DbModelContext context, string str)
+    {
+        var existing = context.Texts.SingleOrDefault(t => t.Str == str);
+        if (existing != null) return existing;
+
+        var newText = new Text { Str = str };
+        context.Add(newText);
+        return newText;
+    }
 }
 
 public static class DbModelUtils
