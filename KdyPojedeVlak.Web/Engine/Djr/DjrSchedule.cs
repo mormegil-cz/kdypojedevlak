@@ -459,7 +459,7 @@ namespace KdyPojedeVlak.Web.Engine.Djr
                     DepartureDay = departureTiming?.Offset ?? 0,
                     DepartureTime = departureTiming?.AsTimeSpan(),
                     DwellTime = locationFull?.TimingAtLocation?.DwellTime,
-                    TrainOperationsStr = String.Join(';', trainOperations),
+                    TrainOperations = trainOperations.Order().ToList(),
                     SubsidiaryLocation = locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode?.Code,
                     SubsidiaryLocationName = locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryName,
                     SubsidiaryLocationType = locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode

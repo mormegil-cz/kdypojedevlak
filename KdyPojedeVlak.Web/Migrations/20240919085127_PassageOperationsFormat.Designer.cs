@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KdyPojedeVlak.Web.Migrations
 {
     [DbContext(typeof(DbModelContext))]
-    [Migration("20240918101022_VacuumAfterIndirectTexts")]
-    partial class VacuumAfterIndirectTexts
+    [Migration("20240919085127_PassageOperationsFormat")]
+    partial class PassageOperationsFormat
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
