@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using KdyPojedeVlak.Web.Engine;
 using KdyPojedeVlak.Web.Engine.DbStorage;
 using KdyPojedeVlak.Web.Engine.Djr;
@@ -135,9 +136,14 @@ namespace KdyPojedeVlak.Web
                     dbModelContext.Database.EnsureDeleted();
                     dbModelContext.Database.EnsureCreated();
                 }
-                DebugLog.LogDebugMsg("Migrating database");
-                dbModelContext.Database.Migrate();
-                DebugLog.LogDebugMsg("Migration completed");
+                if (dbModelContext.Database.GetPendingMigrations().Any())
+                {
+                    DebugLog.LogDebugMsg("Migrating database");
+                    dbModelContext.Database.Migrate();
+                    DebugLog.LogDebugMsg("Vacuuming database");
+                    dbModelContext.Database.ExecuteSqlRaw("VACUUM");
+                    DebugLog.LogDebugMsg("Migration completed");
+                }
 
                 ScheduleVersionInfo.Initialize(dbModelContext);
 

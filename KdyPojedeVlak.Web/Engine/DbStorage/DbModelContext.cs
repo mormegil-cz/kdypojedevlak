@@ -383,7 +383,11 @@ public class Passage
     public string TrainOperationsStr { get; set; }
 
     [NotMapped]
-    public List<TrainOperation> TrainOperations => ParseEnumList<TrainOperation>(TrainOperationsStr);
+    public List<TrainOperation> TrainOperations
+    {
+        get => ParseEnumList<TrainOperation>(TrainOperationsStr);
+        set => TrainOperationsStr = BuildEnumList(value);
+    }
 
     public string SubsidiaryLocation { get; set; }
 
@@ -533,10 +537,17 @@ public class Text
 public static class DbModelUtils
 {
     public static List<TEnum> ParseEnumList<TEnum>(string data)
-        where TEnum : struct =>
+        where TEnum : struct, Enum =>
         data == null
             ? []
             : data.Split(';', StringSplitOptions.RemoveEmptyEntries)
                 .Select(Enum.Parse<TEnum>)
                 .ToList();
+
+    public static string BuildEnumList<TEnum>(List<TEnum> list)
+        where TEnum : Enum =>
+#pragma warning disable CA2021
+        // ReSharper disable once SuspiciousTypeConversion.Global
+        String.Join(';', list.Cast<int>());
+#pragma warning restore CA2021
 }
