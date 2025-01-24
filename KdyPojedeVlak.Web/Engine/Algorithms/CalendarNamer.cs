@@ -35,6 +35,7 @@ public static class CalendarNamer
         new(2017, 12, 24),
         new(2017, 12, 25),
         new(2017, 12, 26),
+
         new(2018, 01, 01),
         new(2018, 03, 30),
         new(2018, 04, 02),
@@ -48,6 +49,7 @@ public static class CalendarNamer
         new(2018, 12, 24),
         new(2018, 12, 25),
         new(2018, 12, 26),
+
         new(2019, 01, 01),
         new(2019, 04, 19),
         new(2019, 04, 22),
@@ -61,6 +63,7 @@ public static class CalendarNamer
         new(2019, 12, 24),
         new(2019, 12, 25),
         new(2019, 12, 26),
+
         new(2020, 01, 01),
         new(2020, 04, 10),
         new(2020, 04, 13),
@@ -74,6 +77,7 @@ public static class CalendarNamer
         new(2020, 12, 24),
         new(2020, 12, 25),
         new(2020, 12, 26),
+
         new(2021, 01, 01),
         new(2021, 04, 02),
         new(2021, 04, 05),
@@ -87,6 +91,7 @@ public static class CalendarNamer
         new(2021, 12, 24),
         new(2021, 12, 25),
         new(2021, 12, 26),
+
         new(2022, 01, 01),
         new(2022, 04, 15),
         new(2022, 04, 18),
@@ -100,8 +105,9 @@ public static class CalendarNamer
         new(2022, 12, 24),
         new(2022, 12, 25),
         new(2022, 12, 26),
+
         new(2023, 01, 01),
-        new(2023, 04, 7),
+        new(2023, 04, 07),
         new(2023, 04, 10),
         new(2023, 05, 01),
         new(2023, 05, 08),
@@ -112,10 +118,38 @@ public static class CalendarNamer
         new(2023, 11, 17),
         new(2023, 12, 24),
         new(2023, 12, 25),
-        new(2023, 12, 26)
+        new(2023, 12, 26),
+
+        new(2024, 01, 01),
+        new(2024, 03, 29),
+        new(2024, 04, 01),
+        new(2024, 05, 01),
+        new(2024, 05, 08),
+        new(2024, 07, 05),
+        new(2024, 07, 06),
+        new(2024, 09, 28),
+        new(2024, 10, 28),
+        new(2024, 11, 17),
+        new(2024, 12, 24),
+        new(2024, 12, 25),
+        new(2024, 12, 26),
+
+        new(2025, 01, 01),
+        new(2025, 04, 18),
+        new(2025, 04, 21),
+        new(2025, 05, 01),
+        new(2025, 05, 08),
+        new(2025, 07, 05),
+        new(2025, 07, 06),
+        new(2025, 09, 28),
+        new(2025, 10, 28),
+        new(2025, 11, 17),
+        new(2025, 12, 24),
+        new(2025, 12, 25),
+        new(2025, 12, 26),
     ];
 
-    private static readonly Dictionary<DayClass, Predicate<DateTime>> classifiers = new(7)
+    private static readonly Dictionary<DayClass, Predicate<DateTime>> classifiers = new(13)
     {
         { DayClass.Monday, MakeDayClassifier(DayOfWeek.Monday) },
         { DayClass.Tuesday, MakeDayClassifier(DayOfWeek.Tuesday) },
