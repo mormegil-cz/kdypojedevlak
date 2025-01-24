@@ -145,7 +145,7 @@ code	short name	full name	country	url
 2124	LTG Cargo	AB LTG Cargo	LT	litrail.lt
 2125	LDZ Cargo	LDZ Cargo Ltd	LV	http://www.ldz.lv/
 2126	Operail 	AS Operail 	EE	http://www.evrcargo/
-2131	BTEG	"Boldtumur Eruu Gol" LLC	MN	
+2131	BTEG	Boldtumur Eruu Gol LLC	MN
 2132	NOEVOG	Niederosterreichische Verkehrsorganisationsges m.b.H.	AT	  www.noevog.at
 2133	CAT	City Air Terminal Betriebsgesellschaft m.b.H	AT	www.cityairporttrain.com
 2134	Eurasian Railway Carrier 	Eurasian Railway Carrier SP zoo	PL	
@@ -218,7 +218,7 @@ code	short name	full name	country	url
 3002	Eurail GIE	Eurail Group GIE	NL	http://www.eurailgroup.org/
 3003	CER	Community of European Railways	BE	http://www.cer.be/
 3005	BTS	Baltijas Tranzita Serviss AG	LV	http://www.rto.lv/en/home/
-3006	BE	JSC "Baltijas Ekspresis"	LV	http://asbe.lv/
+3006	BE	JSC Baltijas Ekspresis	LV	http://asbe.lv/
 3007	CIT	Comité international des transports ferroviaires	CH	http://www.cit-rail.org/
 3008	StL UK	Stena Line UK Ltd	GB	http://www.stenaline.co.uk/ferry/
 3009	SERVTRANS	SERVTRANS Invest SA	RO	http://www.servtrans-invest.com/
@@ -771,7 +771,7 @@ code	short name	full name	country	url
 3568	BL24	Bahnlogistik24 GmbH	DE	http://www.bahnpersonal24.de/Bahnlogistik24/
 3569	MEDWAY	Medway - operador ferroviário et logistico de mercadorias sa sucursal en Espana	PT	
 3570	REGIO CALATORI	REGIO CALATORI S.R.L.	RO	https://regiocalatori.ro/
-3571	OAO "PK "ZhDS""	OAO Zheldorservice 	MD	
+3571	OAO PK ZhDS	OAO Zheldorservice 	MD
 3572	Ferrovie del Sud Est 	Ferrovie del Sud Est e Servizi Automobilistici s.r.l.	IT	https://www.fseonline.it/
 3573	RCL GmbH	Rail Cargo Logistics GmbH	AT	http://www.railcargologistics.com/
 3574	OFZ	OFZ, a.s.	SK	https://www.ofz.company/en/
@@ -819,7 +819,7 @@ code	short name	full name	country	url
 3616	LE s.r.o.	Leo Express s.r.o.	CZ	WWW.leoexpress.com
 3617	Adriafer	Adriafer s.r.l.	IT	http://www.adriafer.com/
 3618	Depol sp.z.o.o.	Przedsiębiorstwo Obrotu Surowcami Wtórnymi „DEPOL” Sp. z o.o.	PL	http://www.depol.com.pl/
-3619	"TBD-TP" JSC	"TBD-Tovarni Prevozi" JSC	BG	
+3619	TBD-TP JSC	TBD-Tovarni Prevozi JSC	BG
 3620	UIRR scrl	Union Internationale pour le Transport Combiné Rail-Route	BE	http://www.uirr.com/
 3621	L&W	Laeger & Wöstenhöfer GmbH & Co.KG	DE	https://lundw-privatbahn.de/
 3622	CMO	Cargo Motion s.r.o.	CZ	
@@ -1526,7 +1526,7 @@ code	short name	full name	country	url
 4332	TWG	Tankwagon Sp. z o.o.	PL	https://www.tankwagon.pl
 4333	ZACH	Zaklady Azotowe Chorzow Spolka Akcyjna	PL	
 4334	ZAPUL	Zaklady Azotowe Pulawy SA	PL	https://www.zapulawy.pl
-4335	ZTK	Zaklad Transportu Kolejowego "SIARKOPOL" Sp. z o.o.	PL	https://www.ztksiarkopol.pl
+4335	ZTK	Zaklad Transportu Kolejowego SIARKOPOL Sp. z o.o.	PL	https://www.ztksiarkopol.pl
 4336	ALROS	SC ALRO S.A. SLATINA	RO	https://www.alro.ro
 4337	GPRC	GP RAIL CARGO SA	RO	
 4338	MMVRR	SC MMV Rail Romania SA	RO	https://www.mmvrail.ro
