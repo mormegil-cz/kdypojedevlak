@@ -161,12 +161,7 @@ public class Timing : IEquatable<Timing>
 
     public TimeSpan ToTimeSpan => AsTimeSpan().Add(TimeSpan.FromDays(Offset));
 
-    public bool Equals(Timing other)
-    {
-        if (other == null) return false;
-
-        return other.ToTimeSpan.Equals(ToTimeSpan);
-    }
+    public bool Equals(Timing other) => other != null && other.ToTimeSpan.Equals(ToTimeSpan);
 
     public TimeSpan AsTimeSpan() => DateTimeOffset.ParseExact(Time, @"HH:mm:ss.fffffffzzz", CultureInfo.InvariantCulture).TimeOfDay;
 }

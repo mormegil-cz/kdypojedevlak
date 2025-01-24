@@ -128,30 +128,27 @@ public partial class DataDownloader
         {
             await ftp.ChangeWorkingDirectoryAsync(versionSegments[i]);
         }
-        var fileName = versionSegments[versionSegments.Length - 1];
-        using (var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
+        var fileName = versionSegments[^1];
+        using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        var size = 0L;
+        await using (var receiveStream = await ftp.OpenFileReadStreamAsync(fileName))
         {
-            var size = 0L;
-            using (var receiveStream = await ftp.OpenFileReadStreamAsync(fileName))
+            await using (var storeStream = new FileStream(destinationFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
             {
-                using (var storeStream = new FileStream(destinationFilename, FileMode.Create, FileAccess.Write,
-                           FileShare.Read))
+                var buffer = new byte[BuffSize];
+                while (true)
                 {
-                    var buffer = new byte[BuffSize];
-                    while (true)
-                    {
-                        var read = await receiveStream.ReadAsync(buffer, 0, buffer.Length);
-                        if (read == 0) break;
-                        var writeTask = storeStream.WriteAsync(buffer, 0, read);
-                        hasher.AppendData(buffer, 0, read);
-                        size += read;
-                        await writeTask;
-                    }
+                    var read = await receiveStream.ReadAsync(buffer, 0, buffer.Length);
+                    if (read == 0) break;
+                    var writeTask = storeStream.WriteAsync(buffer, 0, read);
+                    hasher.AppendData(buffer, 0, read);
+                    size += read;
+                    await writeTask;
                 }
             }
-            await ftp.ChangeWorkingDirectoryAsync(originalDirectory);
-            var hash = hasher.GetHashAndReset();
-            return (BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant(), size);
         }
+        await ftp.ChangeWorkingDirectoryAsync(originalDirectory);
+        var hash = hasher.GetHashAndReset();
+        return (Convert.ToHexStringLower(hash), size);
     }
 }

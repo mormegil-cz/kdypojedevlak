@@ -1,15 +1,16 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 namespace KdyPojedeVlak.Web.Engine;
 
 // TODO: Migrate to ILogger or some other logging framework
 public static class DebugLog
 {
-    private static bool logDisabled = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOG") == "disabled";
-    private static string logFilename = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOGFILE");
-    private static readonly object initLock = new();
+    private static readonly bool logDisabled = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOG") == "disabled";
+    private static readonly string logFilename = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOGFILE");
+    private static readonly Lock initLock = new();
     private static volatile TextWriter logWriter;
 
     private static TextWriter InitLogWriter()

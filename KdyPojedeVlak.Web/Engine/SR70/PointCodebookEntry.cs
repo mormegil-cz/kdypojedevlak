@@ -1,4 +1,6 @@
-﻿namespace KdyPojedeVlak.Web.Engine.SR70;
+﻿using System;
+
+namespace KdyPojedeVlak.Web.Engine.SR70;
 
 public class PointCodebookEntry
 {
@@ -10,7 +12,7 @@ public class PointCodebookEntry
     public float? Longitude { get; set; }
     public string WikidataItem { get; set; }
 
-    public string FullIdentifier => "CZ:" + ID.Substring(0, ID.Length - 1);
+    public string FullIdentifier => String.Concat("CZ:", ID.AsSpan(0, ID.Length - 1));
 }
 
 public enum PointType

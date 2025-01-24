@@ -275,7 +275,7 @@ public class PointCodebook(string path)
                      .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
                 )
         {
-            if (codebook.TryGetValue("CZ:" + row.ID.Substring(2), out var entry)
+            if (codebook.TryGetValue(String.Concat("CZ:", row.ID.AsSpan(2)), out var entry)
                 && Single.TryParse(row.Latitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var latitude)
                 && Single.TryParse(row.Longitude, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var longitude)
                )
@@ -338,14 +338,15 @@ public class PointCodebook(string path)
         var pointsWithWikidata = new Dictionary<PointType, Tuple<int, int>>(codebook.Count);
         foreach (var entry in codebook.Values.Where(value => value.Latitude != null))
         {
-            if (String.IsNullOrEmpty(entry.WikidataItem) && (entry.Type == PointType.Stop || entry.Type == PointType.Station))
+            if (String.IsNullOrEmpty(entry.WikidataItem) && entry.Type is PointType.Stop or PointType.Station)
             {
                 Console.WriteLine($"'{entry.LongName}' ({entry.ID}) {entry.Type} missing");
             }
             pointsWithWikidata.TryGetValue(entry.Type, out var currentCount);
-            if (currentCount == null) currentCount = Tuple.Create(0, 0);
-            if (String.IsNullOrEmpty(entry.WikidataItem)) currentCount = Tuple.Create(currentCount.Item1, currentCount.Item2 + 1);
-            else currentCount = Tuple.Create(currentCount.Item1 + 1, currentCount.Item2);
+            currentCount ??= Tuple.Create(0, 0);
+            currentCount = String.IsNullOrEmpty(entry.WikidataItem)
+                ? Tuple.Create(currentCount.Item1, currentCount.Item2 + 1)
+                : Tuple.Create(currentCount.Item1 + 1, currentCount.Item2);
             pointsWithWikidata[entry.Type] = currentCount;
         }
         Console.WriteLine("Wikidata statistics per point type:");
@@ -380,8 +381,14 @@ public class PointCodebook(string path)
     private static float? ParseGeoCoordinate(string posStr)
     {
         if (String.IsNullOrEmpty(posStr)) return null;
-        if (posStr == "E  °',   \"" || posStr == "N  °',   \"") return null;
-        if (posStr == "E  °00'00,   \"" || posStr == "N  °00'00,   \"") return null;
+        switch (posStr)
+        {
+            case "E  °',   \"":
+            case "N  °',   \"":
+            case "E  °00'00,   \"":
+            case "N  °00'00,   \"":
+                return null;
+        }
         var match = regexGeoCoordinate.Match(posStr);
         if (!match.Success) throw new FormatException($"Invalid geographical coordinate '{posStr}'");
         var deg = ParseFloat(match.Groups["deg"].Value);

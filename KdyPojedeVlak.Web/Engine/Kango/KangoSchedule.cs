@@ -71,34 +71,22 @@ public class RoutingPoint
         NeighboringPoints = [];
     }
 
-    public string LongName
-    {
-        get { return CodebookEntry.LongName; }
-    }
+    public string LongName => CodebookEntry.LongName;
 
-    public PointType Type
-    {
-        get { return CodebookEntry.Type; }
-    }
+    public PointType Type => CodebookEntry.Type;
 }
 
-public class KangoSchedule
+public class KangoSchedule(string path)
 {
     private static readonly string[] trainTypesByQuality = ["SC", "IC", "EN", "EC", "Ex", "R", "Sp", "Os"];
-    private readonly string path;
-    private readonly Dictionary<string, RoutingPoint> points = new Dictionary<string, RoutingPoint>();
-    private readonly Dictionary<string, Train> trains = new Dictionary<string, Train>();
-    private readonly Dictionary<string, Train> trainsByNumber = new Dictionary<string, Train>();
+    private readonly Dictionary<string, RoutingPoint> points = new();
+    private readonly Dictionary<string, Train> trains = new();
+    private readonly Dictionary<string, Train> trainsByNumber = new();
 
     public Dictionary<string, RoutingPoint> Points => points;
     public Dictionary<string, Train> Trains => trainsByNumber;
 
     public DateTime BitmapBaseDate { get; private set; }
-
-    public KangoSchedule(string path)
-    {
-        this.path = path;
-    }
 
     public void Load()
     {
@@ -267,19 +255,19 @@ public class KangoSchedule
         {
             if (String.IsNullOrEmpty(row[col2]))
             {
-                if (isRequired) throw new FormatException(String.Format("No data at {0}, {1}", col1, col2));
+                if (isRequired) throw new FormatException($"No data at {col1}, {col2}");
                 return null;
             }
             if (!Int32.TryParse(row[col2], out result))
             {
-                throw new FormatException(String.Format("Bad data at {0}: '{1}'", col2, row[col2]));
+                throw new FormatException($"Bad data at {col2}: '{row[col2]}'");
             }
         }
         else
         {
             if (!Int32.TryParse(row[col1], out result))
             {
-                throw new FormatException(String.Format("Bad data at {0}: '{1}'", col1, row[col1]));
+                throw new FormatException($"Bad data at {col1}: '{row[col1]}'");
             }
         }
         return result;
@@ -290,14 +278,14 @@ public class KangoSchedule
         int result;
         if (String.IsNullOrEmpty(row[col]))
         {
-            if (isRequired) throw new FormatException(String.Format("No data at {0}", col));
+            if (isRequired) throw new FormatException($"No data at {col}");
             return null;
         }
         else
         {
             if (!Int32.TryParse(row[col], out result))
             {
-                throw new FormatException(String.Format("Bad data at {0}: '{1}'", col, row[col]));
+                throw new FormatException($"Bad data at {col}: '{row[col]}'");
             }
         }
         return result;

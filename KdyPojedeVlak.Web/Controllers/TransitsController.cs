@@ -111,6 +111,7 @@ public class TransitsController(DbModelContext dbModelContext) : Controller
             )
             .AsEnumerable()
             .Where(t => t != null)
+            .Cast<NearestTransits.Transit>()
             .OrderBy(t => t.AnyScheduledTimeOfDay)
             .ToList();
         var passingTrains = allPassingTrains

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -11,11 +12,11 @@ namespace KdyPojedeVlak.Web.Engine.Djr;
 
 public static class CisjrUpdater
 {
-    private static readonly object lastUpdateFileAccess = new();
+    private static readonly Lock lastUpdateFileAccess = new();
 
-    private const string dataFilePattern = "*.zip";
-    private const string updateStatusFileName = ".update_info.json";
-    private const int MIN_UPDATE_FREQ_HRS = 1;
+    private const string DataFilePattern = "*.zip";
+    private const string UpdateStatusFileName = ".update_info.json";
+    private const int MinUpdateFreqHrs = 1;
 
     public static async Task<Dictionary<string, long>> DownloadMissingFiles(string basePath)
     {
@@ -24,7 +25,7 @@ public static class CisjrUpdater
         // check online if not too soon after last update
         var lastUpdateDate = GetLastUpdateDate(basePath);
         ScheduleVersionInfo.ReportLastDownload(lastUpdateDate);
-        if (lastUpdateDate <= DateTime.UtcNow.AddHours(-MIN_UPDATE_FREQ_HRS))
+        if (lastUpdateDate <= DateTime.UtcNow.AddHours(-MinUpdateFreqHrs))
         {
             await DownloadNewFiles(basePath, dataFilesAvailable);
         }
@@ -104,12 +105,12 @@ public static class CisjrUpdater
         {
             foreach (var subdirectory in Directory.GetDirectories(directory))
             {
-                foreach (var file in Directory.GetFiles(subdirectory, dataFilePattern))
+                foreach (var file in Directory.GetFiles(subdirectory, DataFilePattern))
                 {
                     result.Add(file, new FileInfo(file).Length);
                 }
             }
-            foreach (var file in Directory.GetFiles(directory, dataFilePattern))
+            foreach (var file in Directory.GetFiles(directory, DataFilePattern))
             {
                 result.Add(file, new FileInfo(file).Length);
             }
@@ -121,7 +122,7 @@ public static class CisjrUpdater
     {
         lock (lastUpdateFileAccess)
         {
-            var updateStatusPath = Path.Combine(basePath, updateStatusFileName);
+            var updateStatusPath = Path.Combine(basePath, UpdateStatusFileName);
             if (!File.Exists(updateStatusPath)) return DateTime.MinValue;
             var updateStatusContents = File.ReadAllText(updateStatusPath);
             var data = JsonConvert.DeserializeObject<UpdateStatusData>(updateStatusContents);
@@ -135,7 +136,7 @@ public static class CisjrUpdater
         {
             var data = new UpdateStatusData { LastUpdate = date };
             var json = JsonConvert.SerializeObject(data);
-            var updateStatusPath = Path.Combine(basePath, updateStatusFileName);
+            var updateStatusPath = Path.Combine(basePath, UpdateStatusFileName);
             File.WriteAllText(updateStatusPath, json);
         }
     }
