@@ -1,21 +1,20 @@
 ﻿using System.Collections.Generic;
 
-namespace KdyPojedeVlak.Web.Engine
-{
-    public static class Sets<T>
-    {
-        public static readonly HashSet<T> Empty = new(0);
-        public static readonly SortedSet<T> EmptySortedSet = new();
-    }
+namespace KdyPojedeVlak.Web.Engine;
 
-    public static class SetsExtensions
+public static class Sets<T>
+{
+    public static readonly HashSet<T> Empty = [];
+    public static readonly SortedSet<T> EmptySortedSet = [];
+}
+
+public static class SetsExtensions
+{
+    public static void AddAll<T>(this ISet<T> set, IEnumerable<T> elems)
     {
-        public static void AddAll<T>(this ISet<T> set, IEnumerable<T> elems)
+        foreach (var elem in elems)
         {
-            foreach (var elem in elems)
-            {
-                set.Add(elem);
-            }
+            set.Add(elem);
         }
     }
 }

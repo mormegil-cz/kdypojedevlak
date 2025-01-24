@@ -2,79 +2,78 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace KdyPojedeVlak.Web.Engine
+namespace KdyPojedeVlak.Web.Engine;
+
+// TODO: Migrate to ILogger or some other logging framework
+public static class DebugLog
 {
-    // TODO: Migrate to ILogger or some other logging framework
-    public static class DebugLog
+    private static bool logDisabled = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOG") == "disabled";
+    private static string logFilename = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOGFILE");
+    private static readonly object initLock = new();
+    private static volatile TextWriter logWriter;
+
+    private static TextWriter InitLogWriter()
     {
-        private static bool logDisabled = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOG") == "disabled";
-        private static string logFilename = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOGFILE");
-        private static readonly object initLock = new();
-        private static volatile TextWriter logWriter;
+        if (logDisabled || logWriter != null) return logWriter;
 
-        private static TextWriter InitLogWriter()
+        lock (initLock)
         {
-            if (logDisabled || logWriter != null) return logWriter;
+            if (logWriter != null) return logWriter;
 
-            lock (initLock)
+            if (logFilename == null)
             {
-                if (logWriter != null) return logWriter;
-
-                if (logFilename == null)
-                {
-                    logWriter = Console.Out;
-                    return logWriter;
-                }
-
-                try
-                {
-                    logWriter = new StreamWriter(logFilename, false, Encoding.UTF8);
-                    return logWriter;
-                }
-                catch (IOException e)
-                {
-                    Console.Error.WriteLine("Error opening log file: " + e);
-                    logWriter = null;
-                    return Console.Error;
-                }
+                logWriter = Console.Out;
+                return logWriter;
             }
-        }
-
-        private static void WriteLogMessage(string type, string msgFormat, params object[] args)
-        {
-            if (logDisabled) return;
-
-            var writer = InitLogWriter();
 
             try
             {
-                writer.WriteLine($"{DateTime.UtcNow:u}\t{type}\t{msgFormat}", args);
-                writer.Flush();
+                logWriter = new StreamWriter(logFilename, false, Encoding.UTF8);
+                return logWriter;
             }
             catch (IOException e)
             {
-                Console.Error.WriteLine("Error writing to log file: " + e);
+                Console.Error.WriteLine("Error opening log file: " + e);
+                logWriter = null;
+                return Console.Error;
             }
         }
+    }
 
-        public static void LogProblem(string msg)
-        {
-            WriteLogMessage("WARN", "{0}", msg);
-        }
+    private static void WriteLogMessage(string type, string msgFormat, params object[] args)
+    {
+        if (logDisabled) return;
 
-        public static void LogProblem(string msgFormat, params object[] args)
-        {
-            WriteLogMessage("WARN", msgFormat, args);
-        }
+        var writer = InitLogWriter();
 
-        public static void LogDebugMsg(string msg)
+        try
         {
-            WriteLogMessage("DEBUG", "{0}", msg);
+            writer.WriteLine($"{DateTime.UtcNow:u}\t{type}\t{msgFormat}", args);
+            writer.Flush();
         }
+        catch (IOException e)
+        {
+            Console.Error.WriteLine("Error writing to log file: " + e);
+        }
+    }
 
-        public static void LogDebugMsg(string msgFormat, params object[] args)
-        {
-            WriteLogMessage("DEBUG", msgFormat, args);
-        }
+    public static void LogProblem(string msg)
+    {
+        WriteLogMessage("WARN", "{0}", msg);
+    }
+
+    public static void LogProblem(string msgFormat, params object[] args)
+    {
+        WriteLogMessage("WARN", msgFormat, args);
+    }
+
+    public static void LogDebugMsg(string msg)
+    {
+        WriteLogMessage("DEBUG", "{0}", msg);
+    }
+
+    public static void LogDebugMsg(string msgFormat, params object[] args)
+    {
+        WriteLogMessage("DEBUG", msgFormat, args);
     }
 }

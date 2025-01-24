@@ -6,34 +6,33 @@ using KdyPojedeVlak.Web.Engine.DbStorage;
 using KdyPojedeVlak.Web.Engine.Djr;
 using KdyPojedeVlak.Web.Helpers;
 
-namespace KdyPojedeVlak.Web.Models
+namespace KdyPojedeVlak.Web.Models;
+
+public class NearestTransits
 {
-    public class NearestTransits
+    public RoutingPoint Point { get; }
+    public DateTime StartDate { get; }
+    public IEnumerable<Transit> Transits { get; }
+
+    public int CurrentTimetableYear { get; }
+
+    public HashSet<RoutingPoint> NeighboringPoints { get; }
+    public List<RoutingPoint>? NearestPoints { get; }
+
+    public NearestTransits(RoutingPoint point, DateTime startDate, int currentTimetableYear, IEnumerable<Transit> transits, HashSet<RoutingPoint> neighboringPoints, List<RoutingPoint>? nearestPoints)
     {
-        public RoutingPoint Point { get; }
-        public DateTime StartDate { get; }
-        public IEnumerable<Transit> Transits { get; }
+        Point = point;
+        StartDate = startDate;
+        CurrentTimetableYear = currentTimetableYear;
+        Transits = transits;
+        NeighboringPoints = neighboringPoints;
+        NearestPoints = nearestPoints == null || nearestPoints.Count == 0 ? null : nearestPoints;
+    }
 
-        public int CurrentTimetableYear { get; }
+    public record Transit(int TimetableYear, CalendarDefinition Calendar, TimeSpan? ArrivalTime, TimeSpan? DepartureTime, TrainCategory TrainCategory, string? TrainNumber, string? TrainName, string? SubsidiaryLocationDescription, string? PreviousPointName, string? NextPointName)
+    {
+        public TimeSpan? AnyScheduledTime => ArrivalTime ?? DepartureTime;
 
-        public HashSet<RoutingPoint> NeighboringPoints { get; }
-        public List<RoutingPoint>? NearestPoints { get; }
-
-        public NearestTransits(RoutingPoint point, DateTime startDate, int currentTimetableYear, IEnumerable<Transit> transits, HashSet<RoutingPoint> neighboringPoints, List<RoutingPoint>? nearestPoints)
-        {
-            Point = point;
-            StartDate = startDate;
-            CurrentTimetableYear = currentTimetableYear;
-            Transits = transits;
-            NeighboringPoints = neighboringPoints;
-            NearestPoints = nearestPoints == null || nearestPoints.Count == 0 ? null : nearestPoints;
-        }
-
-        public record Transit(int TimetableYear, CalendarDefinition Calendar, TimeSpan? ArrivalTime, TimeSpan? DepartureTime, TrainCategory TrainCategory, string? TrainNumber, string? TrainName, string? SubsidiaryLocationDescription, string? PreviousPointName, string? NextPointName)
-        {
-            public TimeSpan? AnyScheduledTime => ArrivalTime ?? DepartureTime;
-
-            public TimeSpan? AnyScheduledTimeOfDay => AnyScheduledTime?.GetTimeOfDay();
-        }
+        public TimeSpan? AnyScheduledTimeOfDay => AnyScheduledTime?.GetTimeOfDay();
     }
 }

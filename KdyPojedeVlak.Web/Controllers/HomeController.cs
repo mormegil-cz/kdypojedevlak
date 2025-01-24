@@ -1,26 +1,22 @@
-﻿using System.Linq;
-using KdyPojedeVlak.Web.Engine;
-using KdyPojedeVlak.Web.Engine.DbStorage;
-using KdyPojedeVlak.Web.Models;
+﻿using KdyPojedeVlak.Web.Engine;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KdyPojedeVlak.Controllers
+namespace KdyPojedeVlak.Web.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return View();
+    }
 
-        public IActionResult About()
-        {
-            return View(ScheduleVersionInfo.CurrentVersionInformation);
-        }
+    public IActionResult About()
+    {
+        return View(ScheduleVersionInfo.CurrentVersionInformation);
+    }
 
-        public IActionResult Error()
-        {
-            return View();
-        }
+    public IActionResult Error()
+    {
+        return View();
     }
 }
