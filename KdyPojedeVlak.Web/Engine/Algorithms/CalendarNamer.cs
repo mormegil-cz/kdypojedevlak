@@ -147,6 +147,20 @@ public static class CalendarNamer
         new(2025, 12, 24),
         new(2025, 12, 25),
         new(2025, 12, 26),
+
+        new(2026, 01, 01),
+        new(2026, 04, 03),
+        new(2026, 04, 06),
+        new(2026, 05, 01),
+        new(2026, 05, 08),
+        new(2026, 07, 05),
+        new(2026, 07, 06),
+        new(2026, 09, 28),
+        new(2026, 10, 28),
+        new(2026, 11, 17),
+        new(2026, 12, 24),
+        new(2026, 12, 25),
+        new(2026, 12, 26),
     ];
 
     private static readonly Dictionary<DayClass, Predicate<DateTime>> classifiers = new(13)
