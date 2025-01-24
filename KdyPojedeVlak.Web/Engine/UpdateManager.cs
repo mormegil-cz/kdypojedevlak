@@ -23,7 +23,7 @@ public class UpdateManager
 //        private readonly int wakeupInterval;
     private readonly IServiceScopeFactory serviceScopeFactory;
     private readonly Thread thread;
-    private readonly object sync = new object();
+    private readonly object sync = new();
 
     private volatile bool terminated;
 

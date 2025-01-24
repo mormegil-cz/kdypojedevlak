@@ -4,15 +4,9 @@ using System.Text;
 
 namespace KdyPojedeVlak.Web.Engine.Uic;
 
-public class CompanyCodebook
+public class CompanyCodebook(string path)
 {
     private Dictionary<string, CompanyCodebookEntry> codebook;
-    private readonly string path;
-
-    public CompanyCodebook(string path)
-    {
-        this.path = path;
-    }
 
     public void Load()
     {

@@ -9,22 +9,16 @@ using KdTree.Math;
 
 namespace KdyPojedeVlak.Web.Engine.SR70;
 
-public class PointCodebook
+public class PointCodebook(string path)
 {
     private static readonly Regex regexGeoCoordinate = new Regex(@"\s*^[NE]\s*(?<deg>[0-9]+)\s*°\s*(?<min>[0-9]*)\s*'\s*(?<sec>[0-9]*\s*(,\s*([0-9]+)?)?)\s*""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
 
-    private readonly string path;
     private Dictionary<string, PointCodebookEntry> codebook;
     private KdTree<float, string> tree;
 
     static PointCodebook()
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-    }
-
-    public PointCodebook(string path)
-    {
-        this.path = path;
     }
 
     public void Load()

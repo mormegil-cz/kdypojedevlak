@@ -4,13 +4,10 @@ using System.IO;
 using System.Linq;
 using KdyPojedeVlak.Web.Engine;
 using KdyPojedeVlak.Web.Engine.DbStorage;
-using KdyPojedeVlak.Web.Engine.Djr;
 using KdyPojedeVlak.Web.Engine.SR70;
 using KdyPojedeVlak.Web.Engine.Uic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -20,31 +17,10 @@ using Microsoft.Extensions.Logging;
 
 namespace KdyPojedeVlak.Web;
 
-public class Startup
+public class Startup(IConfiguration configuration)
 {
-    private static readonly bool RecreateDatabase = false;
-    private static readonly bool EnableUpdates = true;
-
-    public Startup(IConfiguration configuration)
-    {
-        Configuration = configuration;
-    }
-
-    public IConfiguration Configuration { get; }
-
-    /*
-    public Startup(IWebHostEnvironment env)
-    {
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(env.ContentRootPath)
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-            .AddEnvironmentVariables();
-        Configuration = builder.Build();
-    }
-
-    public IConfigurationRoot Configuration { get; }
-    */
+    private const bool RecreateDatabase = false;
+    private const bool EnableUpdates = true;
 
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
@@ -56,7 +32,6 @@ public class Startup
         //     options.MinimumSameSitePolicy = SameSiteMode.None;
         // });
 
-
         services.AddControllersWithViews();
 
         // Add framework services.
@@ -64,14 +39,14 @@ public class Startup
 
         services.AddLogging(loggingBuilder =>
         {
-            loggingBuilder.AddConfiguration(Configuration.GetSection("Logging"));
+            loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
             loggingBuilder.AddConsole();
             loggingBuilder.AddDebug();
         });
 
         services.AddDbContext<DbModelContext>(
             options => options
-                .UseSqlite(Configuration.GetConnectionString("Database"))
+                .UseSqlite(configuration.GetConnectionString("Database"))
                 .ConfigureWarnings(w => w.Log(RelationalEventId.MultipleCollectionIncludeWarning))
         );
     }
@@ -90,7 +65,6 @@ public class Startup
             app.UseHsts();
         }
 
-        app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseCookiePolicy();
 
@@ -104,7 +78,7 @@ public class Startup
 
         var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
 
-        Program.PointCodebook = new PointCodebook(@"App_Data");
+        Program.PointCodebook = new PointCodebook(configuration["PointCodebookLocation"] ?? "App_Data");
         try
         {
             Program.PointCodebook.Load();
@@ -115,7 +89,7 @@ public class Startup
             throw;
         }
 
-        Program.CompanyCodebook = new CompanyCodebook(@"App_Data");
+        Program.CompanyCodebook = new CompanyCodebook(configuration["CompanyCodebookLocation"] ?? "App_Data");
         try
         {
             Program.CompanyCodebook.Load();
@@ -157,6 +131,6 @@ public class Startup
             throw;
         }
 
-        if (EnableUpdates && Configuration["DisableUpdates"] == null) UpdateManager.Initialize(Path.Combine("App_Data", "cisjrdata"), serviceScopeFactory);
+        if (EnableUpdates && configuration["DisableUpdates"] == null) UpdateManager.Initialize(configuration["CisJrFilesLocation"] ?? Path.Combine("App_Data", "cisjrdata"), serviceScopeFactory);
     }
 }
