@@ -1,7 +1,7 @@
 code	short name	full name	country	url
 0006	StL Holland	Stena Line Holland BV	NL	http://www.stenaline.nl/ferry/
 0010	VR	VR-Yhtymä Oy	FI	http://www.vr.fi/
-0012	TRFSA	Transfesa	ES	http://www.transfesa.com/
+0012	TRFSA	Transfesa Logistics SA	ES	http://www.transfesa.com/
 0013	OSJD	OSJD	PL	http://osjd.org/
 0014	CWL	Compagnie des Wagons-Lits	FR	http://www.cwl-services.com/
 0015	RMF	Rail Manche Finance	GB	http://www.rmf.co.uk/
@@ -34,12 +34,12 @@ code	short name	full name	country	url
 0054	SZCZ	Správa železnic, statni organizace	CZ	https://www.spravazeleznic.cz/
 0055	MÁV	Magyar Államvasutak Zrt.	HU	http://www.mav.hu/
 0056	ŽSR	Železnice Slovenskej Republiky	SK	http://www.zsr.sk/
-0057	AZ-ADDY	Azərbaycan Dövlət Dəmir Yolu	AZ	http://www.railway.gov.az/
+0057	ADY	Azerbaidjan Railways CJSC	AZ	http://www.railway.gov.az/
 0058	CJSC SCR	South Caucasus Railway CJSC	AM	http://www.ukzhd.am/
 0059	KTJ	Kyrgyz Railways	KG	http://www.ktj.kg/
 0060	CIE	Córas Iompair Éireann	IE	http://www.cie.ie/
 0061	KORAIL	Korea Railroad Corporation	KR	http://www.korail.com/
-0063	BLS	BLS AG	CH	http://www.bls.ch/
+0063	BLS N	BLS Netz AG Infrastrukturmanager	CH	http://www.bls.ch/
 0064	FN	Ferrovienord S.p.A.	IT	www.ferrovienord.it
 0065	CFARYM-I	Makedonski Železnici Infrastructure-Skopje	MK	http://www.mzi.mk/
 0066	TDZ	Tajikistan Railways	TJ	
@@ -55,11 +55,11 @@ code	short name	full name	country	url
 0076	BN	Bane NOR SF	NO	https://www.banenor.no
 0077	FS EPA	Ferrovie dello Stato Italiane SpA EPA	IT	http://www.fsitaliane.it/
 0078	HŽ-Infrastruktura	HŽ Infrastruktura d.o.o.	HR	http://www.hzinfra.hr/
-0079	SŽ - Infrastuktura, d.o.o.	Slovenske železnice - Infrastuktura, d.o.o.	SI	http://www.slo-zeleznice.si/sl/infrastruktura/
-0080	DB Netz AG	DB Netz AG	DE	http://fahrweg.dbnetze.com/
+0079	SŽ - Infrastruktura, d.o.o.	Slovenske železnice - Infrastruktura, d.o.o.	SI	http://www.slo-zeleznice.si/sl/infrastruktura/
+0080	DB InfraGO	DB InfraGO Aktiengesellschaft	DE	https://www.dbinfrago.com/web
 0081	ÖBB-Holding AG	ÖBB-Holding AG	AT	http://www.oebb.at/
 0082	CFL Infrastructure	Societé Nationale des Chemins de Fer Luxembourgeois	LU	http://www.cfl.lu/
-0083	FS	Ferrovie dello Stato Italiane SpA	IT	http://www.fsitaliane.it/
+0083	RFI 	Rete Ferroviaria Italiana SpA	IT	http://www.fsitaliane.it/
 0084	ProRail	ProRail	NL	http://blog.prorail.nl/
 0085	SBB Infrastructure 	Swiss Federal Railways - Infrastructure	CH	http://www.sbb.ch/sbb-konzern.html
 0086	Banedanmark	Banedanmark (RailNet Denmark)	DK	http://www.bane.dk/
@@ -74,9 +74,11 @@ code	short name	full name	country	url
 0096	RAI	Rahahan-e Djjomhouri-e Eslami Iran	IR	http://irirw.com/
 0097	CFS	Administration Générale des Chemins de fer Syriens	SY	http://www.cfssyria.org/
 0098	CEL	Lebanon Railways	LB	
-0099	IRR	Iraqi Republic Railways Establishment	IQ	http://www.iraqrailways.com/
-1001	EgroNet	Verkehrsverbund Vogtland GmbH	DE	
-1012	TRFSR	Transfesa Rail 	ES	http://www.transfesa.com/
+0099	IRR	Iraqi Republic Railways Establishment	IQ	
+0175	PASIFIK EURASIA DTI	PASIFIK EURASIA DEMIRYOLU TREN ISLETMECILIGI A.S. 	TR	
+0275	PASIFIK EURASIA LOJISTIK	PASIFIK EURASIA LOJISTIK DIS TICARET A.S.	TR	
+1001	EgroNet	Verkehrsverbund Vogtland GmbH.	DE	
+1012	TRFSR	Transfesa Logistics  S A	ES	http://www.transfesa.com/
 1020	RZD holding	Russian Railways State Joint Company-Holding	RU	http://rzd.ru/
 1033	CR holding	Chinese Railways-Holding	CN	http://www.chineserailways.com/
 1051	PKP	Polskie Koleje Państwowe Spółka Akcyjna	PL	http://www.pkp.pl/
@@ -84,7 +86,7 @@ code	short name	full name	country	url
 1062	ŽPCG	Željeznički prevoz Crne Gore AD	ME	http://www.zcg-prevoz.me/
 1065	CFARYM-T	Makedonski Železnici Transport AD Skopje	MK	http://mztransportad.com.mk/
 1071	Renfe	Renfe Operadora	ES	http://www.renfe.com/
-1073	TRAINOSE	TRAINOSE S.A.	GR	http://www.trainose.gr/
+1073	HELLENIC TRAIN SA	HELLENIC TRAIN - Railway SA	GR	https://www.hellenictrain.gr/
 1074	ASJUA	Affärsverket Statens Järnväger		
 1076	Vy	Vygruppen AS	NO	https://www.vy.no/
 1079	SŽ, d.o.o.	Slovenske železnice, d.o.o.	SI	http://www.slo-zeleznice.si/en/sz-group/
@@ -103,6 +105,7 @@ code	short name	full name	country	url
 1154	ČD	České dráhy, a.s.	CZ	http://www.cd.cz/
 1155	MÁV-Start	MÁV-Start Vasúti Személyszállító Zrt.	HU	http://www.mav-start.hu/
 1156	ZSSK	Železničná spoločnosť Slovensko, a.s.	SK	http://www.slovakrail.sk/
+1163	BLS P	BLS AG Personenverkehr	CH	http://www.bls.ch/
 1170	ATOC Ltd	Association of Train Operating Companies Limited	GB	http://www.atoc.org/
 1171	RENFE VIAJEROS	RENFE VIAJEROS, S.A	ES	http://www.renfe.com/
 1172	SV	Srbija Voz a.d.	RS	http://www.srbvoz.rs/
@@ -113,7 +116,7 @@ code	short name	full name	country	url
 1180	DB Vertrieb GmbH	DB Vertrieb GmbH	DE	http://www.bahn.de/
 1181	ÖBB PV AG	ÖBB Personenverkehr AG	AT	http://personenverkehr.oebb.at/
 1182	CFL Voyageurs	Société Nationale des Chemins de Fer Luxembourgeois.	LU	https://www.cfl.lu/
-1183	TI	TRENITALIA	IT	
+1183	TI	Trenitalia S.p.A.	IT	
 1184	NS International	NS International BV	NL	http://www.ns.nl/
 1185	SBB-Passengers	Swiss Federal Railways-Passenger subsidiary	CH	http://www.sbb.ch/
 1186	DSB-Passenger	Danske Statsbaner-Passenger subsidiary	DK	http://www.dsb.dk/
@@ -131,15 +134,18 @@ code	short name	full name	country	url
 1351	SKMT	PKP SKM w Trójmieście Spółka z o.o.	PL	http://www.skm.pkp.pl/
 1355	MAV START Zrt	MAV START Railway Passenger Transport Co.	HU	
 1385	SBB2	Schweizerische Bundesbahnen Personenverkehr	CH	https://www.sbb.ch/
+1435	railML	railML.org e.V.	DE	
 1484	NS Reizigers	NS Reizigers BV	NL	http://www.ns.nl/
+1892	HVLEI	Havelländische Eisenbahn AG - Infrastruktur	DE	
 1923	Korfez Ulastirma	Korfez Ulastirma A.S.	TR	https://www.korfezulastirma.com.tr/
 1971	SKPL	SKPL Cargo Sp. z o.o.	PL	
 1980	OVF	Omnibusverkehr Franken GmbH		
+1988	CT	Cargo Train Sp. Z o.o.	PL	https://gkrc.pl/
 2080	DB Regio Bus	DB Regio AG Business Unit Bus 	DE	
 2124	LTG Cargo	AB LTG Cargo	LT	litrail.lt
 2125	LDZ Cargo	LDZ Cargo Ltd	LV	http://www.ldz.lv/
 2126	Operail 	AS Operail 	EE	http://www.evrcargo/
-2131	BTEG	"""Boldtumur Eruu Gol"" LLC"	MN	
+2131	BTEG	"Boldtumur Eruu Gol" LLC	MN	
 2132	NOEVOG	Niederosterreichische Verkehrsorganisationsges m.b.H.	AT	  www.noevog.at
 2133	CAT	City Air Terminal Betriebsgesellschaft m.b.H	AT	www.cityairporttrain.com
 2134	Eurasian Railway Carrier 	Eurasian Railway Carrier SP zoo	PL	
@@ -148,7 +154,7 @@ code	short name	full name	country	url
 2137	TDKPL	TDK Plus Sp. z o.o.	PL	
 2143	GYSEV CARGO	GYSEV CARGO Zrt.	HU	http://www.gysevcargo.hu/
 2144	H-KR	KOMPLEX RAILVasuti Szolgaltato Kft	HU	http://www.komplexrail.hu
-2151	PKP CARGO S.A.	PKP Cargo Spółka Akcyjna	PL	https://www.pkpcargo.com
+2151	PKP CARGO 	PKP Cargo Spółka Akcyjna in restructuring	PL	https://www.pkpcargo.com
 2152	BDZ CARGO	BULGARIAN STATE RAILWAYS CARGO	BG	http://bdzcargo.bdz.bg/
 2153	CFR Marfă	Societatea Naţională de Transport Feroviar de Marfă	RO	http://cfr.ro/
 2154	ČDC	ČD Cargo, a.s.	CZ	http://www.cdcargo.cz/
@@ -164,12 +170,12 @@ code	short name	full name	country	url
 2179	SŽ - Tovorni promet, d.o.o.	Slovenske železnice - Tovorni promet, d.o.o.	SI	http://www.slo-zeleznice.si/sl/tovorni-promet/
 2180	DBCDE	DB Cargo AG	DE	https://www.dbcargo.com/
 2181	RCA	Rail Cargo Austria AG	AT	http://www.railcargo.at/
-2182	CFL cargo	CFL cargo SA	LU	http://www.cfl.lu/CFLInternet/Espaces/03EspaceFret/
+2182	CFL cargo	CFL cargo SA	LU	https://www.cfl-mm.lu/en-gb/organisation/cfl-cargo
 2183	MIR	Mercitalia Rail	IT	http://www.fsitaliane.it/fsi/Il-Gruppo/Societ%C3%A0-del-Gruppo/Mercitalia-Rail/Mercitalia-Rail
 2184	DBCNL	DB Cargo Nederland N.V.	NL	http://nl.dbcargo.com/
 2185	SBB Cargo	SBB CFF FFS Cargo	CH	http://www.sbbcargo.com/
 2186	DBCSC	DB Cargo Scandinavia A/S	DK	http://dk.dbcargo.com/
-2187	Fret SNCF	SNCF-C32	FR	http://fret.sncf.com/
+2187	Fret SNCF	SAS Fret SNCF	FR	http://fret.sncf.com/
 2188	LNS	Lineas	BE	http://www.lineas.be
 2189	ACF	Administration des chemins de fer luxembourgeois	LU	www.railinfra.lu
 2190	Pelkolan Terminaali 	Pelkolan Terminaali Oy	FI	
@@ -185,18 +191,19 @@ code	short name	full name	country	url
 2243	Raaberbahn Cargo	Raaberbahn Cargo GmbH	AT	https://www.raaberbahn.at/organisation/raaberbahn-cargo-gmbh.html
 2248	ZUE 	ZUE SA	PL	www.grupazue.pl
 2249	Naantalin Satama	Naantalin Satama oy	FI	https://www.portofnaantali.fi/en
-2250	Tenutado 	Tenutado SK s.r.o.	SK	
+2250	TNTD	Tenutado SK, a.s. 	SK	
 2251	PKP LHS	PKP Linia Hutnicza Szerokotorowa Spółka z o.o.	PL	http://www.lhs.com.pl/
 2252	HaminaKotka Satama Oy	HaminaKotka Satama Oy / Port of HaminaKotka Ltd	FI	http://www.haminakotka.com
 2253	Oiltanking Finland Oy	Oiltanking Finland  Oy	FI	www.oiltanking.com 
 2254	Ovako Imatra	Ovako Imatra Oy Ab	FI	www.ovako.com
+2263	BLS N EVU	BLS Netz AG Eisenbahnverkehrsunternehmung	CH	http://www.bls.ch/
 2280	DBCITA	DB Cargo Italy Srl	IT	
 2282	CFL cargo Deutschland	CFL cargo Deutschland GmbH	DE	http://www.cflcargo.de/
 2285	Cargo SI (SBB)	Cargo SI		
 2287	CTI	Captrain Italia Srl	IT	http://www.captrain.it/
 2343	GYSEV Traction 	Győr-Sopron-Ebenfurti Vasút Zrt. Gépészet	HU	https://www2.gysev.hu/
 2380	DBCIT	DB Cargo Italia Srl	IT	http://it.dbcargo.com/rail-italia-it/
-2382	CFL cargo Danmark	CFL cargo Danmark ApS	DK	http://www.cflcargo.dk/
+2382	VIKING Rail 	VIKING Rail ApS	DK	http://www.vikingrail.dk/
 2385	SBBCD	SBB Cargo Deutschland GmbH	DE	
 2387	CTB	Captrain Belgium NV	BE	http://www.captrain.be/
 2480	DB Fernverkehr	DB Fernverkehr AG	DE	http://www.deutschebahn.com/
@@ -211,7 +218,7 @@ code	short name	full name	country	url
 3002	Eurail GIE	Eurail Group GIE	NL	http://www.eurailgroup.org/
 3003	CER	Community of European Railways	BE	http://www.cer.be/
 3005	BTS	Baltijas Tranzita Serviss AG	LV	http://www.rto.lv/en/home/
-3006	BE	"JSC ""Baltijas Ekspresis"""	LV	http://asbe.lv/
+3006	BE	JSC "Baltijas Ekspresis"	LV	http://asbe.lv/
 3007	CIT	Comité international des transports ferroviaires	CH	http://www.cit-rail.org/
 3008	StL UK	Stena Line UK Ltd	GB	http://www.stenaline.co.uk/ferry/
 3009	SERVTRANS	SERVTRANS Invest SA	RO	http://www.servtrans-invest.com/
@@ -236,7 +243,7 @@ code	short name	full name	country	url
 3029	Viking Line	Viking Line Abp	FI	https://www.vikingline.com/
 3030	GVG	Georg Verkehrsorganisation GmbH	DE	http://berlin-night-express.com/
 3031	J.P.F.T.	Joopar Passenger & Freight Trains co.	IR	http://www.joopar.com/
-3032	VPE	Vasúti Pályakapacitás-elosztó Kft.	HU	http://www2.vpe.hu/
+3032	KTI	KTI Magyar Kozlekedestudomanyi es Logisztikai Intezet Nonprofit Korlatolt Felelossegu Tarsasag	HU	http://www2.vpe.hu/
 3033	QR	Queensland Rail		
 3034	SLB	Salzburger Lokalbahn AG		
 3035	MBS	Montafonerbahn AG	AT	http://montafonerbahn.at/
@@ -253,7 +260,7 @@ code	short name	full name	country	url
 3048	STA Travel	STA Travel International Ltd	GB	http://www.statravel.fr/
 3049	StL Scand	Stena Line Scandinavia AB		
 3050	Vy Tag	Vy Tag AB 	SE	http://www.tagkompaniet.se/
-3051	Snälltåget	Snälltåget i Sverige	SE	https://www.snalltaget.se
+3051	Snälltåget	Snälltåget AB	SE	https://www.snalltaget.se
 3052	LCR	Low Cost Rail SA	ES	http://www.lcrail.com
 3053	Softrans	Softrans Srl	RO	http://www.softrans.ro/
 3054	Locon	Locon Logistik & Consulting AG	DE	http://locon-ag.de/
@@ -272,12 +279,12 @@ code	short name	full name	country	url
 3068	WLE	Westfälische Landes-Eisenbahn GmbH	DE	http://wle-online.de/
 3069	RVM	Regionalverkehr Münsterland GmbH	DE	http://rvm-online.de/
 3070	MWB	Mittelweserbahn GmbH	DE	http://www.mittelweserbahn.de/
-3071	EVG	Eifelbahn Verkehrsgesellschaft mbH	DE	http://www.zugtouren.de/
+3071	D-EVG	Eifelbahn Verkehrsgesellschaft mbH	DE	http://www.zugtouren.de/
 3072	VPS	Verkehrsbetriebe Peine-Salzgitter GmbH	DE	http://www.vps-bahn.de/
 3073	RHEB	Rheinhessische Eisenbahn GmbH		
 3074	AS	Aktsiaselts Spacecom	EE	http://www.spacecom.ee/
 3075	JLT	Region Jönköpings län, Jönköpings länstrafik	SE	https://jlt.se/
-3076	Transdev	Transdev GmbH 	DE	http://www.veolia-verkehr.de/
+3076	Transdev	Transdev GmbH 	DE	www.transdev.de 
 3077	WGT	Westgate Transport OÜ	EE	
 3079	CISALPINO	Cisalpino AG		
 3080	LOKORAIL	LOKORAIL, a.s.	SK	http://lokorail.sk/
@@ -299,7 +306,7 @@ code	short name	full name	country	url
 3099	Rail4Captrain	Rail4Captrain GmbH		
 3100	DBCPL	DB Cargo Polska Spółka Akcyjna	PL	http://pl.dbcargo.com/
 3101	Viamont	Viamont a.s.		
-3103	Koltar	"Grupa Azoty ""KOLTAR"" Sp. z o.o."	PL	http://koltar.grupaazoty.com/
+3103	Koltar	Grupa Azoty  KOLTAR Sp. z o.o.	PL	http://koltar.grupaazoty.com/
 3105	LOTOS Kolej	LOTOS Kolej Spółka z o.o.	PL	http://www.lotos.pl/
 3106	BARTER	BARTER S.A.	PL	
 3107	PSZ	Prvá Slovenská železnicná, a.s.	SK	http://www.sped-trans.sk/
@@ -350,7 +357,7 @@ code	short name	full name	country	url
 3153	WIENER LINIEN	WIENER LINIEN GmbH & Co KG	AT	http://www.wienerlinien.at/
 3154	UTZ	SC UNICOM TRANZIT SA	RO	http://www.unicom-group.ro/unifer/
 3155	RVF	Regio-Verkehrsverbund Freiburg GmbH	DE	http://www.rvf.de/
-3156	ZIK	Zakład Inżynierii Kolejowej Leśkiewicz, Kosmala Spółka Jawna	PL	http://www.ziksandomierz.pl/
+3156	ZIK	Zakład Inżynierii Kolejowej Sp. z o. o.	PL	http://www.ziksandomierz.pl/
 3157	LM	Lokomotion Gesellschaft für Schienentraktion mbH	DE	http://www.lokomotion-rail.de/
 3158	RTC	Rail Traction Company SpA	IT	http://www.railtraction.it/
 3159	LFP PERTHUS	Linea FiguerasPerpignan SA	ES	http://www.lfpperthus.com/
@@ -358,7 +365,7 @@ code	short name	full name	country	url
 3161	LTE CZ	LTE Logistik a Transport Czechia s.r.o.	CZ	http://www.lte.at/en/LTE/LTE-CZ.html
 3162	RCCDE	Rail Cargo Carrier Germany GmbH	DE	
 3163	PoRha	Pohjois-Suomen Rautatieharrastajat ry	FI	http://www.elisanet.fi/porhaltaja/
-3164	agilis	agilis Verkehrsgesellschaft mbH & Co. KG	DE	http://www.agilis.de/
+3164	agilis V	agilis Verkehrsgesellschaft mbH & Co. KG	DE	https://www.agilis.de/
 3165	ODEG	ODEG Ostdeutsche Eisenbahn GmbH	DE	http://www.odeg.info/
 3166	TZD CZ	TCHAS ŽD s.r.o.	CZ	
 3167	H-MTMG	MTMG Logisztikai Zrt.	HU	http://mtmgzrt.com/
@@ -401,7 +408,7 @@ code	short name	full name	country	url
 3205	EURORAIL	EURORAIL NV/SA	BE	http://www.eurorail.eu/
 3206	RITAL	Rail Italia Srl		
 3207	MTR	METRANS Rail s.r.o.	CZ	http://www.metransrail.eu/
-3208	Hector Rail	Hector Rail AB	SE	http://www.hectorrail.com/
+3208	HRAB	Hector Rail AB	SE	http://www.hectorrail.com/
 3209	MTRD	METRANS Rail (Deutschland) GmbH	DE	http://www.metransrail.eu/
 3210	VTR	S.C. Vest Trans Rail S.R.L.	RO	
 3211	TSZO S.A.	Tabor Szynowy Opole Spółka Akcyjna	PL	http://taborszynowy.com.pl/
@@ -442,13 +449,13 @@ code	short name	full name	country	url
 3246	RJ	Regiojet a.s. (CZ)	CZ	http://www.regiojet.cz/cs/
 3247	DBCBG	DB Cargo Bulgaria EOOD	BG	http://www.dbschenker.bg/
 3248	HSL PL	HSL Sp. Z.o.o.	PL	http://www.hsl.net.pl/
-3249	NBE	NBE nordbahn Eisenbahngesellschaft mbH	DE	http://www.nordbahn.info/
+3249	NBE	NBE nordbahn Eisenbahngesellschaft mbH & Co. KG	DE	www.nordbahn.de
 3250	CER Slovakia	CER Slovakia a.s.	SK	http://www.cercargo.eu/
 3251	Scandlines AB	Scandlines AB	SE	http://www.scandlines.se/
 3252	KD	Koleje Dolnośląskie S.A.	PL	http://www.kolejedolnoslaskie.eu/
 3253	KW	Koleje Wielkopolskie Sp. z o.o.	PL	http://koleje-wielkopolskie.com.pl/
 3254	HKX	Hamburg-Köln-Express GmbH	DE	http://www.hkx.de/
-3255	PSP	Petrolsped Slovakia, s.r.o.	SK	http://www.petrolsped.sk/
+3255	RLL	RailLog s.r.o.	SK	https://www.raillog.sk/
 3256	ELIPSOS	ELIPSOS INTERNACIONAL 	ES	http://www.elipsos.com/
 3257	BRYNTIN	BRYNTIN RAIL CZ s.r.o.		
 3258	metronom	metronom Eisenbahngesellschaft mbH 	DE	http://www.der-metronom.de/
@@ -471,7 +478,7 @@ code	short name	full name	country	url
 3275	HOCHBAHN	Hamburger Hochbahn AG	DE	http://www.hochbahn.de/
 3276	LNSI	Lineas (Intermodal)	BE	https://lineasintermodal.net/
 3277	CRW	CENTRAL RAILWAYS a.s.	SK	http://www.crw.sk/
-3278	CIECH	CIECH Cargo Sp z oo	PL	http://www.ciechgroup.com/
+3278	QEMETICA cargo	QEMETICA cargo Sp. z o.o. 	PL	https://qemetica.com/
 3279	RMV	Rhein-Main-Verkehrsverbund GmbH	DE	http://www.rmv.de/
 3280	SAD	SAD Trasporto Locale SpA	IT	http://www.sad.it/
 3281	RTI	Railtrans International, a.s.	SK	
@@ -498,7 +505,7 @@ code	short name	full name	country	url
 3302	RONE	Rail One S.p.A	IT	http://www.railone.it/
 3303	RCCHU	Rail Cargo Carrier Nemzetközi Árufuvarozási Korlátolt Felelősségű Társaság	HU	
 3304	LTE	LTE Logistik- und Transport-GmbH	AT	http://www.lte.at/en/LTE/LTE-AT.html
-3305	LTE HU	LTE Hungária Kft.	HU	http://www.lte.at/en/LTE/LTE-HU.html
+3305	LTE Hungaria Kft.	LTE Hungaria Vasuti Arufuvarozo es Logisztikai Kft.	HU	https://www.lte-group.eu/
 3306	VOR	Verkehrsverbund Ost-Region (VOR) GmbH	AT	http://www.vor.at/
 3307	DLA	Dolnośląskie Linie Autobusowe Sp. z o.o.	PL	http://www.dla.com.pl/
 3308	TXL	TX Logistik AG	DE	http://www.txlogistik.eu/
@@ -522,7 +529,7 @@ code	short name	full name	country	url
 3326	Rail & Sea NV	RAIL & SEA NV - Belgium	BE	
 3327	SREq	Strukton Rail Materieel BV	NL	http://www.struktonrail.com/
 3328	Xrail	Xrail S.A.	BE	
-3329	PCW	Siemens AG Prüf- und Validationcenter Wegberg Wildenrath	DE	http://www.mobility.siemens.com/
+3329	PCW	Siemens Mobility GmbH 	DE	www.siemens.com
 3330	TRC	SC TIM Rail Cargo SRL	RO	http://www.timrailcargo.ro/
 3331	Kolprem Sp. zo. o.	Przedsiębiorstwo Uslug Kolejowych Kolprem Sp. z o. o.	PL	http://www.kolprem.pl/
 3332	KŽC	KŽC Doprava s.r.o.	CZ	http://www.kzc.cz/
@@ -588,7 +595,7 @@ code	short name	full name	country	url
 3392	highQ	highQ Computerlösungen GmbH	DE	http://www.highQ.de/
 3393	SVDE	SNCF Voyages Deutschland GmbH	DE	http://de.voyages-sncf.com/de/
 3394	Captrain Polska Sp. z o.o.	Captrain Polska Spotka 2 Ograniczona Odpowiedzialnoscia	PL	http://www.captrain.pl/
-3395	WEG	Walser Eisenbahn GmbH	AT	http://www.walsereisenbahn.at/
+3395	Weco	Weco Rail GmbH	AT	http://www.walsereisenbahn.at/
 3396	DB Fernverkehr	DB Fernverkehr AG	DE	http://www.deutschebahn.com/
 3397	Eurotrans	Eurotrans Sp.z o.o.	PL	http://eurotrans.com.pl/
 3398	RRFR	RegioRail France SAS	FR	http://www.regiorail.fr/
@@ -598,7 +605,7 @@ code	short name	full name	country	url
 3402	NR HS	Network Rail High Speed	GB	
 3403	FT	Flytoget AS	NO	http://www.flytoget.no/
 3404	H-Karp	KÁRPÁT Vasút Kft.	HU	
-3405	Takargo, S.A.	Takargo - Transporte de Mercadorias, S.A.	PT	http://www.takargo.pt/
+3405	Captrain Portugal 	Captrain Portugal SA	PT	https://captrain.pt/
 3406	GPMR	Grand Port Maritime de Rouen	FR	http://www.haropaports.com/rouen/
 3407	CTR	CityRail, a.s.	CZ	
 3408	Edikt	Edikt a.s.	CZ	http://www.edikt.cz/
@@ -635,7 +642,7 @@ code	short name	full name	country	url
 3439	JSK Sp Z.o.o.	Jastrzębska Spółka Kolejowa Sp. z o.o.	PL	http://www.jsk.pl/
 3440	evb Infrastruktur	Eisenbahnen und Verkehrsbetriebe Elbe-Weser GmbH-Infrastruktur	DE	http://www.evb-elbe-weser.de/Infrastruktur.5.0.html
 3441	LO	Liberty Ostrava a.s.	CZ	https://libertyostrava.cz/
-3442	V.C.S. a.s.	Vápenka Čertovy schody a.s.	CZ	
+3442	VCS	Vápenka Čertovy schody a.s.	CZ	https://www.lhoist.com/en
 3443	PIMK Rail	PIMK Rail PLS	BG	
 3444	GPMD	Grand Port Maritime de Dunkerque	FR	http://www.dunkerque-port.fr/
 3445	DBCCZ	DB Cargo Czechia s.r.o	CZ	http://www.deutschebahn.com/
@@ -675,12 +682,12 @@ code	short name	full name	country	url
 3479	Neste	Neste Oyj	FI	
 3480	RaahePort	Raahen Satama Oy	FI	http://www.raahensatama.fi/fi/
 3481	PAS	Port Autonome de Strasbourg 	FR	http://www.strasbourg.port.fr/
-3482	FuoriMuro S.R.L.	FuoriMuro Servizi Portuali e Ferroviari S.R.L.	IT	http://www.fuorimuro.it/index.php/it/
+3482	FuoriMuro SrL	FuoriMuro Impresa Ferroviara S.r.L.	IT	http://www.fuorimuro.it/index.php/it/
 3483	LTE PL	LTE Polska Spółka z o.o. 	PL	
 3484	Port of Kokkola 	Kokkolan Satama Oy	FI	http://www.portofkokkola.fi/port/
 3485	GDG	Gunvor Deutschland GmbH	DE	http://gunvor-deutschland.de/hp1/Startseite.htm
 3486	NR Rail	NR Rail Oy	FI	http://www.nurminenlogistics.com/FrontPage/
-3487	Salzburg AG 	Salzburg AG für Energie, Verkehr und Telekommunikation	AT	https://www.salzburg-ag.at/
+3487	SLV	Salzburg Linien Verkehrsbetriebe GmbH	AT	https://www.salzburg-ag.at/
 3488	Rauman Satama	Rauman Satama Oy - Port of Rauma	FI	http://www.portofrauma.com/
 3489	VTGSK	Retrack Slovakia s.r.o.	SK	
 3490	ES	Euroterminal Sławków	PL	http://www.euterminal.pl/pl
@@ -720,7 +727,7 @@ code	short name	full name	country	url
 3524	Arriva SK	Arriva Service s.r.o.	SK	http://www.arriva.sk
 3525	FER	Ferrovie Emilia Romagna 	IT	http://www.fer.it
 3526	ABRN	Abellio Rail NRW GmbH	DE	http://www.abellio.de
-3527	EDG	Eisenbahndienstleister GmbH	CH	http://www.eisenbahndienstleister.ch
+3527	LTE CH	LTE Schweiz GmbH	CH	http://www.eisenbahndienstleister.ch
 3528	EBT	Emons Bahntransporte GmbH	DE	http://www.emons.com/
 3529	DP	Dinazanno PO SpA	IT	http://www.dpspa.it/
 3530	Aurora	Aurora Rail Oy	FI	http://www.easmar.fi
@@ -732,15 +739,15 @@ code	short name	full name	country	url
 3536	STRABAG HU	STRABAG Vasútépítő Kft	HU	http://www.strabag.hu/
 3537	CPTT	Cargo Przewozy Towarowe Transport Sp. z. o o. SK	PL	http://cptt.pl/
 3538	RLC	railCare AG	CH	http://www.railcare.ch
-3539	Rail2U	Rail2U B.V.	NL	
+3539	Lineas Netherlands	Lineas Nederland BV	NL	https://lineas.net/
 3540	INVG	Ingolstädter Verkehrsgesellschaft mbH	DE	http://www.invg.de
 3541	SP SE	SPITZKE SE	DE	https://www.spitzke.com 
 3542	SLG	SLG SPITZKE LOGISTIK GmbH Eisenbahnverkehrsunternehmen	DE	https://www.spitzke.com 
-3543	MMV-AT	MMV-Rail Asutria GmbH	AT	
+3543	PSP AT	PSP  Cargo Group Austria Ges.m.b.H 	AT	
 3544	HSL NL	HSL Netherlands B.V.	NL	http://www.hsl-logistik.de
 3545	BSAS	BSAS Eisenbahnverkehrs GmbH & Co. KG	DE	http://www.bsas-evg.de
 3546	VVW	Verkehrsverbund Warnow GmbH	DE	https://www.verkehrsverbund-warnow.de/
-3547	BBL	Stadtwerke Baden-Baden Verkehrsbetriebe	DE	http://www.stadtwerke-baden-baden.de 
+3547	BB L	Stadtwerke Baden-Baden Verkehrsbetriebe	DE	http://www.stadtwerke-baden-baden.de 
 3548	MTPL	METRANS (Polonia) sp. z o. o. 	PL	https://www.metranspolonia.pl/
 3549	ERB	KEOLIS Deutschland GmbH & Co. KG	DE	http://www.keolis.de 
 3550	Tagab	Tågåkeriet i Bergslagen AB	SE	http://www.tagakeriet.se/
@@ -764,12 +771,12 @@ code	short name	full name	country	url
 3568	BL24	Bahnlogistik24 GmbH	DE	http://www.bahnpersonal24.de/Bahnlogistik24/
 3569	MEDWAY	Medway - operador ferroviário et logistico de mercadorias sa sucursal en Espana	PT	
 3570	REGIO CALATORI	REGIO CALATORI S.R.L.	RO	https://regiocalatori.ro/
-3571	"OAO ""PK ""ZhDS"""""	OAO Zheldorservice 	MD	
+3571	OAO "PK "ZhDS""	OAO Zheldorservice 	MD	
 3572	Ferrovie del Sud Est 	Ferrovie del Sud Est e Servizi Automobilistici s.r.l.	IT	https://www.fseonline.it/
 3573	RCL GmbH	Rail Cargo Logistics GmbH	AT	http://www.railcargologistics.com/
 3574	OFZ	OFZ, a.s.	SK	https://www.ofz.company/en/
 3575	moovel	moovel Group GmbH	DE	https://www.moovel-group.com/en
-3576	Bartex sp.z.o.o	Bartex Spółka z ograniczona odpowiedzialnoscia	PL	
+3576	BRX	Bartex Spółka z ograniczona odpowiedzialnoscia	PL	www.bartex-paliwa.pl
 3577	TLC	Transport line Cargo	CZ	
 3578	SL	AB Storstockholms Lokaltrafik	SE	
 3579	Sersa	Sersa Group AG (Schweiz)	CH	http://sersa-group.com/
@@ -812,7 +819,7 @@ code	short name	full name	country	url
 3616	LE s.r.o.	Leo Express s.r.o.	CZ	WWW.leoexpress.com
 3617	Adriafer	Adriafer s.r.l.	IT	http://www.adriafer.com/
 3618	Depol sp.z.o.o.	Przedsiębiorstwo Obrotu Surowcami Wtórnymi „DEPOL” Sp. z o.o.	PL	http://www.depol.com.pl/
-3619	"""TBD-TP"" JSC"	"""TBD-Tovarni Prevozi"" JSC"	BG	
+3619	"TBD-TP" JSC	"TBD-Tovarni Prevozi" JSC	BG	
 3620	UIRR scrl	Union Internationale pour le Transport Combiné Rail-Route	BE	http://www.uirr.com/
 3621	L&W	Laeger & Wöstenhöfer GmbH & Co.KG	DE	https://lundw-privatbahn.de/
 3622	CMO	Cargo Motion s.r.o.	CZ	
@@ -821,14 +828,14 @@ code	short name	full name	country	url
 3626	GVB	GVB Exploitatie BV	NL	https://en.gvb.nl/
 3627	Lineas Deutschland	Lineas Deutschland GmbH	DE	https://lineas.net/
 3628	Lineas Italia	Lineas Italia SRL	IT	https://lineas.net/
-3629	Lineas Netherland	Lineas Nederland BV	NL	https://lineas.net/
+3629	Lineas Netherland	Lineas Nederland BV 	NL	https://lineas.net/
 3630	Hit Rail	Hit Rail BV	NL	https://www.hitrail.com/
 3631	Logserv	Logistik Service GmbH.	AT	http://www.logserv.at
 3632	SwRail	Swietelsky Rail CZ s.r.o.	CZ	http://www.swietelsky.cz
 3633	OR	Ouestrail SAS	FR	http://www.ouestrail.ch/
 3634	DTVG	Deutschlandtarifverbund GmbH	DE	https://deutschlandtarifverbund.de/
 3635	VTG CH (ex AAEC)	VTG Schweiz GmbH (ex AAEC)	CH	https://www.vtg.com
-3636	S-Rail 	S-Rail GmbH	DE	https://www.netzwerk-bahnen.de
+3636	SRA	S-Rail GmbH	DE	https://www.setg.at/
 3637	Duisburg Hafen AG	Duisburg Hafen AG	DE	https://www.duisport.de
 3638	VIA	VIAMONT Servis as 	CZ	http://www.viamontservis.cz
 3639	SEZEV REKO as	SEZEV REKO as	CZ	https://www.sezev-reko.cz/
@@ -845,8 +852,8 @@ code	short name	full name	country	url
 3651	PDCS	PEDASTA dopravni stavby, s.r.o	CZ	http://pedasta.cz/
 3652	WSBA	WAGON SERVICE travel s.r.o.	SK	www.wagonservice.sk
 3653	RCCRo	SC Rail Cargo Carrier Romania SRL	RO	http://www.railcargocarrier.com/
-3654	CTN	CAPTRAIN Netherlands B.V.	NL	https://www.captrain.de/netherlands.html
-3655	ENNA	ENNA TRANSPORT d.o.o. za prijevoz tereta	HR	http:// www.transport.enna.hr
+3654	RCC BX	Rail Cargo Carrier Benelux NV	NL	https://www.railcargo.com/de/
+3655	ENNA TRANSPORT	ENNA TRANSPORT d.o.o. za prijevoz tereta	HR	http:// www.transport.enna.hr
 3656	NIR	Northern Ireland Railways Company Limited	GB	http://www.translink.co.uk/
 3657	REKOP	REKOP s.r.o.	CZ	https://rejstrik-firem.kurzy.cz/27499499/rekop-sro/
 3658	RPKM s.r.o.	RPKM s.r.o.	CZ	http://rpkm.cz/
@@ -871,7 +878,7 @@ code	short name	full name	country	url
 3677	STAV GmbH	STAV GmbH	DE	http://www.stav-gmbh.de/
 3678	RSTL	RST Logistics Sp. z o.o	PL	www.rstlogistics.pl
 3679	RIWNL	Sim Boerema BV	NL	
-3680	BSS 2000 Kft	BSS 2000 Energetikai Szolgáltató Ipari és Kereskedelmi Kft	HU	
+3680	Belfry BSS Kft	Belfry BSS Korlatolt Felelossegu Tarsasag 	HU	www.belfrygroup.eu
 3681	KPT 	KPT rail s.r.o.	CZ	https://www.kptrail.cz/
 3682	IDS	IDS Inženýrské a dopravní stavby Olomouc a.s.	CZ	http://www.ids-olomouc.cz
 3683	FEDASOLUCIONS	FEDASOLUCIONS AD	AD	www.fedasolucions.ad
@@ -902,7 +909,7 @@ code	short name	full name	country	url
 3708	Eurailscout	Eurailscout Inspection & Analysis B.V. 	NL	http://www.eurailscout.com/
 3709	EZ Praha	Elektrizace železnic Praha a.s	CZ	www.elzel.cz
 3710	MAV FKG Kft.	MAV FKG Felepitmenykarbantarto es Gepjavito Korlatolt Felelossegu Tarsasag	HU	https://www.mavcsoport.hu/mav-fkg/bemutatkozas-mav-fkg-kft
-3711	Logitren	Logitren Ferroviaria, SA	ES	http://www.logitren.es
+3711	CSP Logitren	CSP Logitren SA	ES	http://www.logitren.es
 3712	GX Solutions	GX Solutions a.s.	SK	http://www.gxsolutions.sk/
 3713	RPB	Railport Brabant BV	NL	http://www.gvtintermodal.com/terminals/railport-brabant
 3714	KARPIEL 	KARPIEL Sp. z. o.o. 	PL	http://karpiel.info.pl/
@@ -929,7 +936,7 @@ code	short name	full name	country	url
 3736	Die Landerbahn CZ	Die Landerbahn CZ s.r.o.	CZ	
 3737	METSA	Metsa Tissue AB	SE	
 3738	RAIL STM	RAIL STM Sp zoo	PL	
-3739	TKFR	TRACKFER	FR	www.trackfer.com
+3739	TKFR	RailAdventure France 	FR	https://www.railadventure.de/
 3740	KDS2	KDS Kladenska dopravni a strojni s.r.o.	CZ	
 3741	PEARL S.A.	Piraeus Europe Asia Rail Logistics S.A.	GR	
 3742	LE-B	Lausitz Energie Bergbau AG	DE	
@@ -945,7 +952,7 @@ code	short name	full name	country	url
 3752	RJUK	Regiojet UK a.s.	CZ	
 3753	SOF	SOFISTIK SERVIS s.r.o.	CZ	
 3754	DESP	Despotija d.o.o.	RS	
-3755	OWLP	OST-WEST LOGISTIC POLAND sp.z.o.o.	PL	
+3755	OWLP	OST-WEST LOGISTIC POLAND sp.z.o.o.	PL	https://owlp.pl/
 3756	BLSR	BLSR Rail AB	SE	
 3757	RELOC	RELOC S.A.	RO	
 3758	MEV CH	MEV Schweiz AG	CH	http://www.m-e-v.ch/
@@ -993,7 +1000,7 @@ code	short name	full name	country	url
 3800	RÖHM	RÖHM GmbH	DE	
 3801	WFL	Wedler Franz Logistik GmbH & Co.KG	DE	
 3802	EUWAG	EUROWAGON sp. Z o.o.	PL	
-3803	ORF	Operail Finland Oy	FI	
+3803	NRC	North Rail Ltd	FI	
 3804	Budamar South	Budamar South s.r.o. 	SK	
 3805	VVO	Zweckverband Verkehrsverbund Oberelbe	DE	www.vvo-online.de
 3806	RR	Rabbit Rail s.r.o	CZ	 www.rabrail.cz
@@ -1020,7 +1027,7 @@ code	short name	full name	country	url
 3827	OBB IT	OBB Italia S.r.l.	IT	www.oebb.at
 3828	BAM	BAM Infra Rail bv	NL	www.bam.nl
 3829	TCA	Terminal Athus Sa	BE	https://www.tca.be/en
-3830	OR	OPEN RAIL	FR	
+3830	CBR	COMBIRAIL	FR	
 3831	PRL	Pirell s.r.o.	CZ	
 3832	EVM	EVM Rail S.r.l.	IT	https://www.evmrail.it/
 3833	KORAIL	Korea Railroad Corporation.	KR	www.korail.com
@@ -1035,7 +1042,7 @@ code	short name	full name	country	url
 3842	DCTG	DCTG GDANSK S.A.	PL	
 3843	SD	Servicerail Deutschland GmbH	DE	
 3844	IFTEC	IFTEC GmbH & Co KG	DE	www.iftec.de
-3845	START	Regionalverkehre Start Deutschland GmbH	DE	www.startgmbh.com/datenschutz.
+3845	RVSD	Regionalverkehre Start Deutschland GmbH	DE	https://www.startgmbh.com/
 3846	HISA	Hupac Intermodal SA	CH	www.hupac.com 
 3847	BHE	Bremische Hafeneisenbahn 	DE	http://www.bremische-hafeneisenbahn.de/
 3848	Go Ahead BW	https://www.tricon-terminal.de/	DE	www.go-ahead-bw.de 
@@ -1064,12 +1071,12 @@ code	short name	full name	country	url
 3871	ELS	ELS Eisenbahn Logistik und Service GmbH	DE	
 3872	OSB	Oresundsbro Konsortiet	DK	https://www.oresundsbron.com/sv/start
 3873	RTB	Rurtalbahn GmbH	DE	https://www.rath-gruppe.de/
-3874	WYNX	WYNX Pool s.r.o.	CZ	
+3874	PARI	PARI CZ servis s.r.o.	CZ	
 3875	VRAIL	VRAIL SRL	IT	
 3876	BahnLog	BahnLog Bahnlogistik & Service GmbH	DE	https://www.bahnlog.com/
 3877	NeSA	NeSA Eisenbahn-Betriebsgesellschaft Neckar-Schwarzwald-Alb MbH	DE	https://nesa-bahn.de/
 3878	TFE	Dispo-Tf Education GmbH	DE	https://dispotf.de/
-3879	PNUIK Krakow Sp. z o.o.	Przedsiebiorstwo Napraw Utrzymania Infrastruktury Kolejowej w Krakowie Sp. z o.o. 	PL	
+3879	PNUIK Krakow Sp. z o.o.	Przedsiebiorstwo Napraw i Utrzymania Infrastruktury Kolejowej w Krakowie Sp. z o.o. 	PL	
 3880	LRN	JSC LatRailNet	LV	https://www.lrn.lv/
 3881	RTL	Rail Transport Logistic d.o.o.	RS	http://www.rtl.co.rs/
 3882	LINZ SERVICE	LINZ SERVICE GmbH Fur Infrastruktur und Kommunale Dienste 	AT	http://www.hafenlinz.at 
@@ -1082,7 +1089,7 @@ code	short name	full name	country	url
 3889	LIS B.V.	Logistics Intermodal Services B.V.	NL	https://logims.com/
 3890	RSVG	Rhein-Sieg-Verkehrsgesellschaft mbH	DE	https://www.rsvg.de/
 3891	R360	Rail-360 A.Barthel	CH	https://rail360.ch/
-3892	DB Cargo AT	DB Cargo	DE	https://www.dbcargo.com/rail-de-en
+3892	DBCAT	DB Cargo Austria GmbH	AT	https://www.dbcargo.com/rail-de-en
 3893	TSSU	Tiroler Strasse-schiene-Umschlag gmbH 	AT	https://www.tssu.at/
 3894	IRFP e.K.	Institut fur Regional- und Fernverkehrsplanung  	DE	www.irfp.de
 3895	LOC	LoConnect GmbH	DE	www.loconnect.eu
@@ -1155,14 +1162,14 @@ code	short name	full name	country	url
 3962	PIMK	PIMK d.o.o. Dimitrovgrad	RS	
 3963	Koleje Slaskie	Koleje Slaskie Sp. z o.o.	PL	https://www.kolejeslaskie.com/en/
 3964	Go Ahead BY	Go Ahead Bayern GmbH	DE	https://www.go-ahead.bayern/
-3965	RENDEZ Rail	RENDEZ Rail CZ s.r.o.	CZ	
+3965	SR CZ	S-Rail CZ s.r.o.	CZ	https://www.setg.at/
 3966	FlixTrain	FlixTrain GmbH	DE	https://www.flixtrain.com/
 3967	Nurmes	Nurmeksen kaupunki	FI	
 3968	MTRN	MTR Nordic AB	SE	https://www.mtrnordic.se/
 3969	LGSE	Linde Gas Sweden AB	SE	
 3970	Spark Trade	Spark Trade Producktion AB	SE	https://sparktrade.se/en/
 3971	GRK	GRK Rail Oy	FI	https://www.grk.fi/en/
-3972	BASAB	Baneservice Skandinavia AB	SE	http://baneservice.se/
+3972	GRAB	Grenland Rail AB	SE	http://www.grenlandrail.no/
 3973	Dettmer	Dettmer Rail GmbH	DE	
 3974	VATTZ	voestalpine Turnout Technology Zetlweg GmbH	AT	https://www.voestalpine.com/group/fr/
 3975	VARS	voestalpine Railway System GmbH	AT	https://www.voestalpine.com/group/fr/
@@ -1184,7 +1191,7 @@ code	short name	full name	country	url
 3991	IGL	IGL Sp. Z.o.o.Sp.k.  	PL	
 3992	SWTT	Swedtrac Trafik AB	SE	https://traincompetencegroup.se/
 3993	MZE	MZ Eisenbahndienstleistungen GmbH	DE	
-3994	Arriva Sverige 	Arriva Sverige AB	SE	
+3994	VR Sverige AB	VR Sverige	SE	
 3995	BRS	BRS sp. z o.o.	PL	
 3996	Railpolonia 	Railpolonia sp. z o.o.	PL	
 3997	vlexx	vlexx GmbH	DE	www.vlexx.de
@@ -1205,7 +1212,7 @@ code	short name	full name	country	url
 4013	RhoBT	Rhomberg Bahntechnik GmbH	AT	https://www.bahntechnik.com
 4014	SETG	Salzburger EisenbahnTransportLogistik GmbH	AT	
 4015	SFY	Safety4you Baustellenlogistik GmbH	AT	https://www.s4you.at
-4016	SWIE	Fa. Swietelsky Bauges.m.b.H	AT	https://www.swietelsky.at
+4016	SWIE	Swietelsky AG	AT	https://www.swietelsky.at
 4017	21	Twentyone GmbH	AT	www.twentyone21.eu 
 4018	VTGA	VTG Austria Ges.m.b.H.	AT	https://www.vtg.de
 4019	WWG	Weichenwerk Wörth GmbH	AT	https://www.wwg.co.at
@@ -1254,7 +1261,7 @@ code	short name	full name	country	url
 4063	DIAMO	DIAMO, Staatsbetrieb	CZ	
 4064	DRK	Lučební závody Draslovka a.s. Kolín	CZ	
 4065	DSCHT	Duchcovska Svarovna a.s.	CZ	https://www.dscht.cz
-4066	FECZ	Felbermayr Transport und Hebetechnik spol. s.r.o.	CZ	https://www.draslovka.cz
+4066	FECZ	Felbermayr Transport- und Hebetechnik spol. s.r.o.	CZ	www.felbermayr.cc 
 4067	IDS	IDS - Inzenyrske a dopravni stavby Olomouc a.s.	CZ	https://www.ids-olomouc.cz
 4068	IFT	Interfracht s.r.o.	CZ	https://www.interfracht.cz
 4069	KEM	Kemwater ProChemie	CZ	https://www.prochemie.cz
@@ -1268,11 +1275,11 @@ code	short name	full name	country	url
 4077	RYKO	RYKO PLUS spol. s r.o.	CZ	https://www.rykoplus.cz
 4078	SKANS	Skanska a.s	CZ	https://www.skanska.com
 4079	SKOTR	ŠKODA AUTO a.s.	CZ	https://www.skoda-auto.com
-4080	SPCH	Spolek pro chemickou a hutní výrobu a.s.	CZ	https://www.spolchemie.cz.
+4080	SPCH	Spolek pro chemickou a hutní výrobu, akciová společnost. 	CZ	https://www.spolchemie.cz.
 4081	SSCR	Sladovny Soufflet CR, a.s.	CZ	https://www.spolchemie.cz
 4082	STEEL	VITKOVICE STEEL, a.s.	CZ	https://www.vitkovicesteel.com
 4083	TBSM	TREIBACHER SCHLEIFMITTEL Ltd	CZ	https://www.treibacher.com
-4084	VKSWU	VKS Vagon Komerc Speed spol. s r.o.	CZ	https://www.vks.cz
+4084	VKSWU	V.K.S. VAGON KOMERC SPEED, spol. s r.o.	CZ	https://www.vks.cz
 4085	ZXBCZ	ZX-BENET CZ s.r.o.	CZ	https://www.zxbenet.cz
 4086	ACH	AlzChem Trostberg GmbH, Standort Hart	DE	https://www.alzchem.com/
 4087	AERS	AERS Rail Services GmbH	DE	https://www.aers-rail-services.de
@@ -1314,8 +1321,8 @@ code	short name	full name	country	url
 4123	DZLMV	DHL FoodServices GmbH	DE	https://www.dhl.com
 4124	EEB	Emsländische Eisenbahn GmbH	DE	https://www.eeb-online.de
 4125	EGOO	e.g.o.o.	DE	https://www.e-g-o-o.de
-4126	EIB	Erfurter Bahn GmbH	DE	
-4127	EIVEL	Eichholz EIVEL GmbH	DE	https://www.evb-elbe-weser.de
+4126	EB	Erfurter Bahn GmbH	DE	https://www.erfurter-bahn.de/
+4127	SRO	STRABAG Rail Operations GmbH	DE	https://www.strabag-rail.com/
 4128	ELBA	ELBA Logistik GmbH	DE	https://www.elba-logistik.de
 4129	ENVI	ENVILOC GmbH	DE	https://www.enviloc.eu
 4130	ERAIL	Eurailpool GmbH	DE	https://www.eurailpool.com
@@ -1334,14 +1341,14 @@ code	short name	full name	country	url
 4144	HFM	HFM Managementgesellschaft mbH	DE	https://www.hfm-frankfurt.de
 4145	HFW	H.F. Wiebe GmbH + Co.KG	DE	https://www.wiebe.de
 4146	HGB	Hessische Güterbahn GmbH	DE	https://www.hessische-gueterbahn.de
-4147	HHPI	Heavy Haul Power	DE	https://www.hhpi.org
+4147	HHPI	Heavy Haul Power International	DE	https://www.hhpi.de
 4148	HMED	Heinrichsmeyer Eisenbahndienstleistungen UB	DE	https://www.heinrichsmeyer.com
 4149	HRS	Hamburger Rail Service GmbH & Co.KG	DE	
 4150	HTB	Hörseltalbahn GmbH	DE	https://www.hoerseltalbahn.de
 4151	HUHL	Hermann UHL e.K.	DE	https://www.uhl.de
 4152	HWV	Hamburger Waggonvermietung GmbH	DE	
 4153	HZL	HzL Hohenzollerische Landesbahn AG	DE	https://www.hzl-online.de
-4154	IGBIG	IGB Industriebahn-Gesellschaft mbH	DE	
+4154	IGB	IGB Industriebahn-Gesellschaft mbH	DE	
 4155	ILM	Ilmebahn GmbH	DE	https://www.ilmebahn.de
 4156	ITB	ITB Industrietransportgesellschaft mbH Brandenburg	DE	https://www.villmann-gruppe.de/itb.htm
 4157	ITLC	ITL Cargo GmbH	DE	https://www.itlcargo.de
@@ -1357,7 +1364,7 @@ code	short name	full name	country	url
 4167	KSW	KSW Kreisbahn Siegen-Wittgenstein GmbH	DE	https://www.siegener-kreisbahn.de
 4168	LANGE	Lange & Co. GmbH	DE	https://www.langegas.com
 4169	LBHN	L. Brüggemann KG	DE	https://www.brueggemann.com
-4170	LDS	LDS GmbH	DE	https://www.ldsgmbh.de
+4170	SBL	Schweerbau Logistik GmbH	DE	https://www.schweerbau-logistik.de/
 4171	LOG	Vossloh Logistics GmbH	DE	https://www.vossloh.com
 4172	LTH	LTH Railservice GmbH	DE	https://www.lth-gruppe.de
 4173	LWC	LWC Lappwaldbahn Cargo GmbH	DE	
@@ -1368,7 +1375,7 @@ code	short name	full name	country	url
 4178	MOS	Mosolf Automotive Railway GmbH (MAR)	DE	https://www.mosolf.com
 4179	MVG	Märkische Eisenbahngesellschaft mbH	DE	https://www.mvg-online.de
 4180	NCS	DAHER PROJECTS GmbH	DE	
-4181	NEG	neg Niebüll GmbH	DE	https://www.neg-niebuell.de
+4181	NEG	Norddeutsche Eisenbahn Niebüll GmbH	DE	https://www.neg-niebuell.de
 4182	NGE	Nordliner Gesellschaft für Eisenbahnverkehr mbH	DE	
 4183	NIAG	Niederrheinische Verkehrsbetriebe Aktiengesellschaft NIAG	DE	https://www.niag-online.de
 4184	NRS	Nordic Rail Service GmbH	DE	https://www.nordic-rail-service.de
@@ -1392,7 +1399,7 @@ code	short name	full name	country	url
 4202	SKLUS	SKL Umschlageservice	DE	https://www.skl-umschlagservice.de
 4203	SOEG	Sächsisch-Oberlausitzer Eisenbahngesellschaft mbH	DE	https://www.soeg-zittau.de
 4204	STARK	Starkenberger Güterlogistik GmbH	DE	
-4206	SWEG	SWEG Südwestdeutsche Verkehrs-Aktiengesellschaft	DE	https://www.sweg.de
+4206	SWEG	SWEG Südwestdeutsche Landesverkehrs-GmbH	DE	https://www.sweg.de
 4207	SWT	Eisenbahnverkehrsunternehmen Stahlwerk Thüringen	DE	https://www.stahlwerk-thueringen.de
 4208	TRG	TRIANGULA Logistik GmbH	DE	https://www.triangula.de
 4209	TTGGE	Tyczka Gase GmbH	DE	https://www.tyczka.de
@@ -1400,14 +1407,14 @@ code	short name	full name	country	url
 4211	UEF	UEF Eisenbahn-Verkehrsgesellschaft mbH	DE	https://www.uef-dampf.de
 4212	VGH	Verkehrsbetriebe Grafschaft Hoya GmbH	DE	https://www.verden.de/wirtschaft/verden-walsroder-eisenbahn/
 4214	VRCG	Vossloh Rail Center GmbH	DE	https://www.vossloh-rail-services.com
-4215	VRCK	Voestalpine Rail Center Königsborn GmbH	DE	https://www.voestalpine.de
+4215	VRCK	Voestalpine Track Solutions Königsborn GmbH	DE	https://www.voestalpine.com/track-solutions-konigsborn
 4216	VTG	VTG Rail Europe GmbH	DE	https://www.vtg.de
 4217	VTGD	VTG Aktiengesellschaft	DE	https://www.vtg.de
 4218	VWE	VERDEN-WALSRODER EISENBAHN GmbH	DE	
 4219	WFG	Wittfeld GmbH	DE	https://www.wittfeld.eiffage-infra.de
 4220	WHE	Wanne-Herner Eisenbahn und Hafen GmbH	DE	https://www.whe.de
 4221	WIDE	RPM Wiebe & Swietelsky GmbH & Co. KG	DE	https://www.wiebe.de
-4222	WSG	waggonservice WSG mbH	DE	https://www.waggonservice.com
+4222	JMRM	JOSEF MEYER Rail Maintenance GmbH	DE	https://jmrm.de/
 4223	WVZ	waggon24 GmbH	DE	https://www.waggon24.com
 4224	WWL	Willke Logistik GmbH	DE	https://www.willke.com
 4225	ZAS	Zweckverband Abfallverwertung Südostbayern (ZAS)	DE	https://www.zas-burgkirchen.de
@@ -1433,7 +1440,7 @@ code	short name	full name	country	url
 4245	FIA	Ferrivia	FR	https://www.ferrivia.fr
 4246	FRT	Ferrotract	FR	https://www.ferrotract.fr
 4247	GATXF	GATX Rail France SAS	FR	https://www.gatx.eu
-4248	GEFCO FR	GEFCO France SAS	FR	https://www.gefco.net
+4248	CEVA FR	Ceva Logistics Ground & Rail France	FR	www.cevalogistics.com 
 4249	GEFCO SK	GEFCO Rail Slovakia s.r.o	FR	https://www.sk.gefco.net
 4250	GMTP	Greenmodal Transport	FR	https://www.greenmodal.eu
 4251	HOLFR	HOLCIM	FR	https://www.lafargeholcim.com
@@ -1474,7 +1481,7 @@ code	short name	full name	country	url
 4286	MASPED	Masped Rt.	HU	https://www.masped.hu
 4287	MMV	MMV Magyar Maganvasut Zrt.	HU	https://www.mmv.hu
 4288	MOL	MOL Hungarian Oil and Gas Company	HU	https://www.mol.hu
-4289	PULT	PULTRANS Kft.	HU	https://www.pultrans.hu
+4289	PULTRANS  KFT	PULTRANS VASUTI SZALLITMANYOZASI KFT.	HU	https://www.pultrans.hu
 4290	ZPORT	ZAHONY-PORT Dienstleistende-Logistik und Ladungs-abfertigungs AG	HU	https://www.zahony-port.hu
 4291	AMBR	AMBROGIO TRASPORTI SpA	IT	https://www.ambrogio.it
 4292	CEMAT	Mercitalia Intermodal S.p.A.	IT	https://www.mercitaliaintermodal.it
@@ -1487,7 +1494,7 @@ code	short name	full name	country	url
 4299	NOI	Nuovo Operatore Intermodale s.r.l.	IT	
 4300	OTS	OTS OMNIA TRASPORTI SPECIALI SRL	IT	
 4301	RONE	CFI LOGISTICS SERVICES	IT	https://www.grp-group.com
-4302	SI	Sistemi Territoriali S.p.A	IT	https://www.sistemiterritorialispa.it
+4302	ST	Sistemi Territoriali S.p.A	IT	https://www.sistemiterritorialispa.it
 4303	TRAS	TRASFEIMER Spa	IT	
 4304	LORRY	LORRY-RAIL	LU	https://www.lorry-rail.com
 4305	DVVO	Ministry of Defence Movement & Transport Organization	NL	https://www.english.defensie.nl
@@ -1510,16 +1517,16 @@ code	short name	full name	country	url
 4322	INKOM	P.W. Inter-Komtrans	PL	https://www.interkomtrans.pl
 4323	JSWL	JSW Logistics Sp. z o.o.	PL	https://www.jsw-logistics.pl
 4325	KZCSS	Kopalnie i Zaklady Chemiczne Siarki SIARKOPOL S.A.w Grzybowie	PL	https://www.siarkopol.grupaazoty.com
-4326	LAUDE	Laude Smart Intermodal S.A.	PL	https://www.kronospan.pl
+4326	LAUDE	Laude Smart Intermodal S.A.	PL	www.laude.pl
 4327	MKT	Majkoltrans Sp. z o.o.	PL	https://www.majkoltrans.pl
 4328	MPL	Moris Sp. z.o.o.	PL	https://www.moris.com.pl
 4329	ORLEN	Polski Koncern Naftowy Orlen Spolka Akcyjna	PL	https://www.orlen.pl
 4330	PCCR	PCC Rokita SA	PL	https://www.pccrail.pl
-4331	PFELB	Felbermayr Immo	PL	https://www.felbermayr.cc
+4331	FEPL	Felbermayr Polska Sp z.o.o.	PL	https://www.felbermayr.cc
 4332	TWG	Tankwagon Sp. z o.o.	PL	https://www.tankwagon.pl
 4333	ZACH	Zaklady Azotowe Chorzow Spolka Akcyjna	PL	
 4334	ZAPUL	Zaklady Azotowe Pulawy SA	PL	https://www.zapulawy.pl
-4335	ZTK	"Zaklad Transportu Kolejowego ""SIARKOPOL"" Sp. z o.o."	PL	https://www.ztksiarkopol.pl
+4335	ZTK	Zaklad Transportu Kolejowego "SIARKOPOL" Sp. z o.o.	PL	https://www.ztksiarkopol.pl
 4336	ALROS	SC ALRO S.A. SLATINA	RO	https://www.alro.ro
 4337	GPRC	GP RAIL CARGO SA	RO	
 4338	MMVRR	SC MMV Rail Romania SA	RO	https://www.mmvrail.ro
@@ -1577,6 +1584,7 @@ code	short name	full name	country	url
 4391	ARGU	AR-GÜ Demiryolu Tasima ve Depoculuk A.S.	TR	https://www.ar-gu.com.tr
 4392	TRTUR	TRANSTUR Uluslararasi Nakliyat ve Ticaret A.S	TR	https://www.transtur.com.tr
 4393	IK	Infrakraft Sverige AB 	SE	http://www.infrakraft.se/
+4920	M-Rail	M-Rail za zeleznicki prevoz robe Krnjesevci	RS	
 5000	ZRK  DOM	Zakład Robót Komunikacyjnych - DOM w Poznaniu Sp. z o.o.	PL	https://www.zrk-dom.com.pl/
 5001	SVI	sncf Voyages Italia SRL	IT	
 5002	CLCAL	CL Cargo Logistics Sp. z o.o. 	PL	
@@ -1600,10 +1608,10 @@ code	short name	full name	country	url
 5020	CCSRO	Commercial Contact SRO	SK	http://www.commercialcontact.com/
 5021	LTE BG	LTE Bulgaria EOOD 	BG	http://www.lte-group.eu/
 5022	ECS AT	ECS EUROCARGO Speditionsges.m.b.H	AT	http://www.ecs-eurocargo.at/
-5023	Certus	Certus Rail Solutions NV	BE	
+5023	Certus	Certus Rail Solutions NV	BE	https://certusrailsolutions.be/
 5024	CT-D	Captrain Deutschland GmbH	DE	https://www.captrain.de/
 5025	STAB	Svensk Tågkraft AB 	SE	http://www.tagkraft.se/
-5026	DI	DE Infrastruktur GmbHfra	DE	
+5026	DI	DE Infrastruktur GmbH	DE	
 5027	BRE	Bayerische Regionaleisenbahn GmbH 	DE	
 5028	DRE	Deutsche Regionaleisenbahn GmbH 	DE	
 5029	DRE BV	DRE Bahnverkehr GmbH	DE	
@@ -1643,7 +1651,7 @@ code	short name	full name	country	url
 5063	Budamar West	Budamar West GmbH	DE	https://www.budamar.de/
 5064	BJs	Bergslagernas Jarnvagssallskap	SE	
 5065	FSVJ	Foreningen Sormlands Veteranjarnvag	SE	https://www.fsvj.se/
-5066	CD Cargo Adria	CD Cargo Adria d.o.o.	HR	http://www.cdcargoadria.hr/
+5066	ČD Cargo Adria d.o.o.	ČD Cargo Adria d.o.o. za usluge 	HR	http://www.cdcargoadria.hr/
 5067	METRANS Rail sp. z o.o.	METRANS Rail spolka z ograniczona odpowiedzialnoscia	PL	https://metrans.eu/
 5068	NAB	Norrtag AB	SE	https://www.norrtag.se/#/
 5069	Mobimeo 	Mobimeo GmbH	DE	https://mobimeo.com/
@@ -1654,21 +1662,513 @@ code	short name	full name	country	url
 5074	SHIPPEO 	SHIPPEO SAS	FR	
 5075	LTE IT	LTE Italia S.r.l.	IT	www.LTE-group.eu
 5076	KOL System 	KOL-System Ciezak Spolka Jawna 	PL	
-5077	PTMKZ	Pomorskie Towarzystwo Milosnikow Zelaznych	PL	
+5077	PTMKZ	Pomorskie Towarzystwo Milosnikow Kolei Zelaznych	PL	
 5078	East West Intermodal	East West Intermodal Logistics Service Provider private Limited Company	HU	
 5079	RSA	Boliden Milneral AB	SE	
 5080	PKP Energetyka	PKP Energetyka Spolka Akcyjna	PL	
 5081	Kotka	Kotkan Kaupunki (city of Kokta Finland)	FI	www.kotka.fi
+5082	EVRO	EVROINJENERING LTD	BG	
+5083	TTZ	Tavantolgoi railway LLC	MN	
+5084	VTSD	Voestalpine Track Solutions Duisburg GmbH	DE	https://www.voestalpine.com/track-solutions-duisburg/de/
+5085	SRT	Smart Rail Traction GmbH	DE	
+5086	Onrail	Onrail AS	NO	www.onrail.no
+5087	PORR BG	PORR Bulgaria EOOD	BG	www.porr-group.com
+5088	OSLO	OSLO SAS 	FR	
+5089	One Mobility Ticketing 	One Mobility Ticketing GmbH	AT	www.klimaticket.at
+5090	Vectigalis	Vectigalis d.o.o	SI	https://vectigalis.si/
+5091	Borgir 	Borgir Limited	GB	
+5092	Kombinirani prijevoz	Kombinirani prijevoz d.o.o.	HR	https://kprijevoz.com/
+5093	Bahnkonzept	Bahnkonzept GmbH Deutschland	DE	
+5094	RIN	Regio Infra Nord-Ost GmbH & Co. KG	DE	
+5095	TLL Sp. z o.o. Sp.K 	TLL Spolka z ograniczona odpowiedzialnoscia Spolka Komandytowa	PL	
+5096	RBP GmbH	RBP Rheinische Bahnpersonal- und Verkehrsgesellschaft mbH	DE	https://www.rbp-bahn.de/
+5097	UTL AG	Umwelt- und Transportlogistik AG	CH	https://www.utl-ag.ch/
+5098	KPM	Kombinovani Prevoz Montenegro DOO	ME	
+5099	MTRS	METRANS Rail Slovakia, s.r.o	SK	https://metrans.eu/
+5100	SMK	SMK s.r.o.	SK	
+5101	AS207960	AS207960 Cyfyngedig	GB	
+5102	VVT	Verkehrsverbund Tirol GesmbH	AT	https://www.vvt.at/
+5103	ENNA Transport SI	ENNA Transport SI d.o.o.	SI	https://transport.enna.hr/
+5104	FAIRTIQ	FAIRTIQ AG	CH	https://fairtiq.com/fr-ch/
+5105	YOSARIA TRAINS	YOSARIA TRAINS, a.s.  	SK	https://www.yosariatrains.sk/
+5106	ENNA BGD	ENNA Transport Bgd	RS	https://transport.enna.hr/
+5107	TDRR	Transdev Rhein-Ruhr GmbH	DE	https://www.rhein-ruhr-bahn.de/
+5108	SYTRAL	SYTRAL MOBILITES	FR	https://www.sytral.fr/
+5109	BRAG	BauRail AG	CH	https://www.baurail.ch/
+5110	Arkema	Arkema B.V.	NL	
+5111	SVSA 	SNCF Sud Azur SAS	FR	
+5112	CEFSA	Compania Europea Ferroviaria S.A.	ES	
+5113	LBE	LBE Logistics	FR	
+5114	LRW	LOGI Railway	FR	
+5115	SPL	SPL EisenbahnVerkehr GmbH	DE	https://www.spl-ev.de/
+5116	Altrans Sp. J.	Altrans Koczerski I., Kobierecki Z., Miloch A., Sarzynski P., Spolka Jawna.	PL	http://www.altrans.wroc.pl/RODO.html
+5117	INFRANORD	Infranord AB	SE	https://www.infranord.se/
+5118	ATM BG DOO NOVI BEOGRAD	ATM BG LIMITED LIABILITY CIE FOR AUTOMATION, ENERGY AND MEASUREMENT TECHNIQUES, BELGRADE (NOVI BEOGRAD)	RS	http://www.atmbg.rs/
+5119	ROP	Rail Operations SRL	RO	
+5120	Fairjungle	Fairjungle SAS	FR	
+5121	SWO	Stadtwerke Osnabruck AG	DE	https://www.stadtwerke-osnabrueck.de/ehb
+5122	KTB	Koole Terminals	NL	https://koole.com/
+5123	CTOS	Container Terminal Osnabruck GmbH	DE	https://ct-os.de/
+5124	GCA W	GCA Wagons	FR	https://www.charlesandre.com/
+5125	GBXEU	Greenbrier Leasing Europe  B.V.	NL	http://www.greenbrier-europe.com/fr/page-daccueil/
+5126	NOBEG	NordOstBayerischeEisenbahnGesellschaft	DE	http://nobeg.de/
+5127	Draslovka	Lucebni zavody Draslovka a.s. Kolin	CZ	https://www.draslovka.cz/cs
+5128	VSN	VIAS Nederland B.V. 	NL	https://www.vias-online.de/
+5129	Bahn PT 	Bahn PT GmbH	DE	https://www.bahnpersonal-training.de/
+5130	KV	Kalmar Veterantag	SE	https://www.kalmarveterantag.se/
+5131	SSG	SWEG Schienenwege GmbH	DE	https://www.sweg.de/
+5132	ZUGA	Zug Agency s.r.o.	CZ	
+5133	ENJ	Engelsbergs Norbers Jarnvagshistoriska Forening	SE	
+5134	AFJ	Arvidsjaurs jarnvagsforening	SE	
+5135	OUD	Osoblazska uzkorozchodna draha, o.p.s.	CZ	
+5136	ContecRail 	Contec Rail Aps	DK	
+5137	GGL	SC Global Grain Logistics SRL	RO	
+5138	PRM Kft.	Phoenix Rail Maganvasut Kft.	HU	
+5139	SAS	Stockholms Anglokssallskap	SE	https://anglok.com/
+5140	ADKRS	ADK Rail service s.r.o.	CZ	
+5141	Belfry PE Kft.	Belfry PE Korlatolt Felelossegu Tarsasag	HU	https://belfrygroup.eu/
+5142	Midnight Trains 	00H00 SAS	FR	https://www.midnight-trains.com/en/home
+5143	AMCON	AMCON Software GmbH	DE	
+5144	Alva Yhtiot	Alva Yhtiot Oy 	FI	
+5145	THC	Train Hungary Maganvasut KFT, Sucursala Craiova 	RO	
+5146	OJF	Orsa Jernvagsforening	SE	
+5147	Arail	Alstom Rail Sweden AB	SE	www.alstom.com
+5148	RNV	DB RegioNetz Verkehrs GmbH	DE	https://www.deutschebahn.com/de/
+5149	GYSEV CARGOROM	GYSEV CARGOROM srl	RO	
+5150	TiB	Tag i Bergslagen AB	SE	https://www.tagibergslagen.se/
+5151	JVM	Statens Maritima och Transporthistoriska Museer Jarnvagsmuseet	SE	https://www.jarnvagsmuseet.se/
+5152	Region Auvergne Rhone Alpes	Region  Auvergne Rhone Alpes	FR	https://www.auvergnerhonealpes.fr/
+5153	RATH Fleet 	RATH Fleet B.V.	NL	https://www.rath-gruppe.de/
+5154	NRFAB	Nordic Re-Finance AB	SE	https://www.nordicrefinance.se/
+5155	RC Trans Rail	RC Trans Rail Sp. zo.o. 	PL	
+5156	FOXFI	FoxRail Logistics Oy	FI	https://frlogistics.fi/
+5157	RTR	BTT Rail Terminal Rzepin Spolka z.o.o.	PL	https://www.bttmultimodal.nl/
+5158	RTE	Reseau de transport d'Electricité	FR	https://www.rte-france.com/
+5159	BSVG	Braunschweiger Verkehrs-GmbH	DE	www.bsvg.net
+5160	S-Bahn Hamburg	S-Bahn Hamburg GmbH	DE	
+5161	HEROH 	Rohstoffhandel Heroh GmbH	DE	www.heroh.de
+5162	V-Hid Cargo Zrt 	V-Hid Cargo Zartkoruen Mukodo Reszvenytarsasag	HU	https://vhid.hu/
+5163	RWX	Rail Wagon Xtra	NL	
+5164	KUMSK	Moravskoslezsky kraj	CZ	
+5165	DPWL	DPWorld Liege	BE	
+5166	GBR	GB Rail spolka z orgraniczona odpowiedzialnoscia	PL	
+5167	SWV	Stadtwerke Viernheim GmbH	DE	https://www.stadtwerke-viernheim.de/
+5168	POVED	Plzensky organizator verejne dopravy	CZ	
+5169	ecco-rail Kft	ecco-rail Korlatolt Felelossegu Tarsasag	HU	https://www.twentyone.eu/
+5170	ABFL	Aktiv Bus Flensburg GmbH	DE	https://aktivbus-flensburg.de/
+5171	Gijon Port Auth.	Gijon Port Authority	ES	https://www.puertogijon.es/
+5172	koveb	Koblenzer Verkehrsbetriebe GmbH	DE	https://www.koveb.de/
+5173	NASA GmbH	Nahverkehrsservice Sachsen-Anhalt GmbH	DE	https://www.nasa.de/
+5174	VCT	Via Cargo Technika Sp.  z o.o. 	PL	https://viacargo.pl/
+5175	TMI	Terminali Italia SrL	IT	
+5176	UTL 	UTL Umwelt- und Transportlogistik GmbH	DE	https://www.utl-gmbh.de/
+5177	FriBus	FriBus Inh. Holger Friederichs	DE	http://s556031754.website-start.de/
+5178	NZR	NZ Rail s.r.o.	SK	www.nzrail.sk
+5179	NGMA	NoHAB GM Foundation	HU	
+5180	UNPAL	Unimot Paliwa Sp. Z o.o	PL	https://www.unimot.pl/
+5181	Arcese 	Arcese	IT	https://arcese.com/
+5182	TCA Rail 	TCA Rail N.V.	BE	https://www.tca.be/fr
+5183	HVB	Harzer Verkehrsbetriebe GmbH	DE	https://hvb-harz.de/
+5184	SBB Infrastruktur Baulogistik	Schweizerische Bundesbahnen SBB Infrastruktur Baulogistik	CH	https://www.sbb.ch/de
+5185	WEG	Wurttembergische Eisenbahn Gesellschaft mbH	DE	https://www.weg-bahn.de/
+5186	SBB Infrastruktur PathOrderTool	Schweizerische Bundesbahnen SBB Infrastruktur	CH	https://www.sbb.ch/de
+5187	Euskotren	Euskotrenbideak-Ferrocarrilles Vascos S.A.	ES	https://www.euskotren.eus/
+5188	European Sleeper Exploitatie	European Sleeper Exploitatie B.V.	NL	
+5189	ZVS	Zweckverband Schonbuchbahn	DE	https://www.schoenbuchbahn.de/
+5190	MfOSJ	Museiforeningen Ostra Skanes Jarnvagar	SE	
+5191	KRE	KombiRail Europe GmbH	DE	
+5192	ENNA Logic	ENNA Logic d.o.o.	HR	https://transport.enna.hr/
+5193	WEBA	Westerwaldbahn des Kreises Altenkirchen GmbH	DE	https://www.westerwaldbahn.de/
+5194	DGW	KG Deutsche Gasrusswerke GmbH &Co	DE	https://gasruss.de/index.php/de/
+5195	Rossbergbahn	Stadt Bad Wurzach	DE	https://www.bad-wurzach.de/stadt/de/startseite
+5196	jubu	Jung Bus GmbH	DE	http://www.jung-bus.de/linienverkehr.html
+5197	AVV GmbH	Augsburger Verkehrs- und Tarifverbund GmbH	DE	https://www.avv-augsburg.de/
+5198	UBB Polska	UBB Polska Sp. z o.o.	PL	https://www.ubb-online.com/
+5199	UBB 	Usedomer Baderbahn GmbH	DE	https://www.ubb-online.com/
+5200	HVG	Halberstadter Verkehrs GmbH	DE	https://www.stadtverkehr-halberstadt.de/
+5201	Saga Rail 	Saga Rail AB	SE	https://www.sagarail.se/
+5202	Meso	Meso and more GmbH	DE	https://www.meso.de/
+5203	VWG Sommerda	Verwaltungsgesellschaft des OPNV Sommerda mbH	DE	https://www.linienverkehr.de/
+5204	ZVVW	Zweckverband Verkehrsverband Wieslauftalbahn	DE	https://www.rems-murr-kreis.de/
+5205	Griesar 	Griesar Reisen GmbH	DE	
+5206	SNG	Stadtische Nahverkehrs GmbH Suhl/Zella-Mehlis	DE	https://www.sngonline.de/
+5207	LKA	Lodzka Kolej Aglomeracyjna Sp. z o.o. 	PL	https://lka.lodzkie.pl/strona-glowna/
+5208	SAB	SAB Schwäbische Alb-Bahn GmbH	DE	https://www.alb-bahn.com/verkehr
+5209	DVF	DVF SAS	FR	https://www.dvfgroupe.fr/
+5210	MARS LOGISTICS	Mars Lojistik Uluslararası Taşımacılık Dep. Dağ. ve Tic. A.Ş	TR	https://www.marslogistics.com/
+5211	Vetter GmbH	Vetter GmbH Omnibus- und Mietwagenbetrieb 	DE	https://www.mein-bus.net/
+5212	PROMVAGONTRANS	LCC PROMVAGONTRANS	UA	
+5213	Etihad Rail	Etihad Rail Company - PJSC	AE	
+5214	GOEVB	Gottinger Verkehrsbetriebe GmbH	DE	https://www.goevb.de/
+5215	SWB GmbH	Schwabische-Wald-Bahn GmbH	DE	https://www.welzheim.de/stadt/startseite
+5216	TFI	Trasporti Ferroviari Italiani Srl	IT	
+5217	VGB	Verkehrsgesellschaft Bremerhaven AG	DE	https://bremerhavenbus.de/startseite/
+5218	VWG	Verkehr und Wasser GmbH	DE	https://www.vwg.de/Startseite.html
+5219	NAM	Nouvelle-Aquitaine Mobilités	FR	https://nouvelle-aquitaine-mobilites.fr/
+5220	FGC	Ferrocarils de la Generalitat de Catalunya	ES	https://www.fgc.cat/
+5221	MBV	Malmbanans Vanner	SE	
+5222	VGT mbH	Vorbereitungsgesellschaft Transporttechnik mbH	DE	http://www.vgt-bahn.de/
+5223	EEX	Europe Express	FR	
+5224	IGS	IGS Intermodal Container Logistics GmbH	DE	
+5225	MMM	MaltaMultimodal Limited	MT	
+5226	CJ	Chemins de fer du Jura	CH	https://www.les-cj.ch/
+5227	TRAVYS	TRAVYS SA	CH	https://www.travys.ch/
+5228	DW	Dowaldwerke GmbH	DE	https://dowaldwerke.griessbach.de/
+5229	Zippel	Konrad Zippel Spediteur GmbH & Co. KG	DE	
+5230	MBC	Transports de la region Morges Bière Cossonay SA	CH	http://www.mbc.ch/
+5231	TransRegio	TransRegio Deutsche Regionalbahn GmbH	DE	https://www.mittelrheinbahn.de/
+5232	NWB	NordWestBahn GmbH	DE	https://www.nordwestbahn.de/
+5233	KLOG	KLOG Logistica SA	PT	https://www.klog.pt/pt/
+5234	TPF INFRA	Transports publics fribourgeois TPF INFRA SA	CH	https://www.tpf.ch/fr/
+5235	SNCF Etoile Amiens SAS 	SNCF Etoile d'Amiens	FR	
+5236	TRK AT	Tourismus Region Klagenfurt am Worthersee GMBh	AT	https://www.visitklagenfurt.at/de/
+5237	TDH	Transdev Hannover GmbH	DE	https://www.sbahn-hannover.de/
+5238	LE TRAIN	LE TRAIN SAS	FR	https://www.letrainvoyage.fr/
+5239	EVU-ATG 	Alstom Transportation Germany GmbH	DE	www.alstom.com
+5240	HBSAG	Hafenbahn Schweiz AG	CH	www.portof.ch
+5241	TRSI	Transdev Rail Sud Inter - Metropoles 	FR	
+5242	FDM 	FDM REW Sp. z.o.o.	PL	
+5243	FDM Rail	FDM Rail Sp. z.o.o.	PL	
+5244	transN	transports publics neuchatelois	CH	
+5245	WSB	Würzburger Straßenbahn GmbH	DE	https://www.wvv.de/
+5246	Transdev Verkehr	Transdev Verkehr GmbH	DE	https://www.moselwein-bahn.de/
+5247	RCL DE	Rail Cargo Logistics Germany GmbH	DE	https://www.railcargo.com/de/
+5248	THF	TEHNOTRANS FEROVIAR SRL	RO	https://tehnotrans.com/
+5249	SZU	Sihltal Zürich Uetliberg Bahn SZU AG 	CH	https://www.szu.ch/
+5250	SPRI	Sprint Rail Inspeckt Kft	HU	
+5251	ST	Sursee-Triengen Bahn, ST	CH	
+5252	Certis 	Certis Belchim B.V.	DE	https://www.certis-railservice.de/
+5253	Rail&Sea Logistics	Rail&Sea Logistics GmbH	AT	https://www.railsea.at/
+5254	VSE DE	Verein Sächsischer Eisenbahnfreunde e. V.	DE	http://www.vse-eisenbahnmuseum-schwarzenberg.de
+5255	BRB	Bayerische Regiobahn GmbH	DE	https://www.brb.de/
+5256	BOB	Bayerische Oberlandbahn GmbH	DE	https://www.brb.de/
+5257	GRS GmbH	Graf Railservice GmbH	AT	
+5258	Zubacka 	Zubacka provoz s.r.o.	CZ	http://www.zubacka.cz/
+5259	PJSC Kryukovsky RCBW	Kryukovsky Railway Car Building Works Public Joint Stock Company	UA	
+5260	VIAS	VIAS Y CONSTRUCCIONES SA	ES	https://www.vias.es/html/Nacional.html
+5261	Train Europe Kft.	Train Europe Korlatolt Felelossegu Tarsasag	HU	
+5262	APROPORT	CCI Metropole de Bourgogne	FR	https://www.aproport.com/index.html
+5263	VSN GmbH	Verkehrsverbund Sud Niedersachsen GmbH	DE	https://vsninfo.de/de/home
+5264	Aprixon	Aprixon Information Services GmbH	DE	https://www.aprixon.de/
+5265	Eglo	Eglo Leuchten GmbH	AT	https://www.eglo.com/
+5266	TRClinic	Train-Clinic Kft	HU	https://train-clinic.com/
+5267	CARGOWAY	CARGOWAY SP. z.o.o.	PL	
+5268	Z&C logistica	Z&C logistica srl	IT	https://www.zclogistica.com/
+5269	PORR AUSTRIARAIL	PORR AUSTRIARAIL GMBH	AT	
+5270	SNCF V LO	SNCF Voyageurs Loire Ocean	FR	
+5271	MDWBE	Medway Belgium NV	BE	
+5272	ERMI	Ermewa Iberica	ES	
+5273	HLB	HLB Hessenbahn GmbH	DE	
+5274	RSTA	Rail & Sea Traction GmbH	AT	https://www.railsea.at/
+5275	BEF e.V.	Berliner Eisenbahnfreunde e.V.	DE	https://berliner-eisenbahnfreunde.de/
+5276	BOB-FN	Bodensee-Oberschwaben-Bahn GmbH & Co. KG	DE	https://www.bob-fn.de/
+5277	askeo rail	askeo rail GmbH	DE	https://www.askeorail.de/
+5278	FDE	Freightliner DE GmbH	DE	https://www.freightliner.eu/de/
+5279	WFB	WestfalenBahn GmbH	DE	
+5280	VEB	Vulkan-Eifel-Bahn Betriebsgesellschaft mbH	DE	https://www.veb.de/
 5281	RCCBG	Rail Cargo Carrier Bulgaria EOOD	BG	http://www.railcargocarrier.com/
+5282	NBE Nord	nordbahn Verkehrsgesellschaft Nord mbH	DE	https://www.nordbahn.de/
+5283	NBE Ost West	nordbahn Verkehrsgesellschaft Ost West mbH	DE 	https://www.nordbahn.de/
+5284	KVG Kiel	KVG Kieler Verkehrsgesellschaft mbH	DE	https://www.kvg-kiel.de/
+5285	VLO	VLO Verkehrsgesellschaft Landkreis Osnabruck GmbH	DE	https://www.vlo.de/
+5286	CBC	City-Bahn Chemnitz GmbH	DE	https://www.city-bahn.de/
+5287	PTD	PTD Czech s.r.o.	CZ	
+5288	GEVD	Gesellschaft fur Eisenbahnverkehrsdienstleustungen mbH	AT	
+5289	VLO Bahn	VLO Bahn GmbH	DE	https://www.vlo.de/
+5290	B&M EVU	Bolay & Moser EVU Gmbh	DE	
+5291	TDRO	Transdev Mitteldeutschland, Transdev Regio Ost GmbH	DE	www.mitteldeutsche-regiobahn.de
+5292	Lehmann	Lehmann GmbH	DE	https://www.hans-lehmann.de/
+5293	ITX	InterTourex GmbH	DE	
+5294	bconn	bConn GmbH	DE	https://bconn.de/
+5295	TDM	Transdev Mitteldeutschland GmbH	DE	www.mitteldeutsche-regiobahn.de
+5296	ITR	Intrarail s.r.o.	CZ	
+5297	STRABAG BL	STRABAG BahnLogistik GmbH	AT	
+5298	CAFFR	CAF REICHSHOFFEN SAS	FR	https://www.caf.net/
+5299	NAH.SH	Nahverkehrsverbund Schlessig -Holstein GmbH	DE	
+5300	FEG	Freiberger	DE	https://www.freiberger-eisenbahn.de/
+5301	CRX	CRX Software Netherlands B.V.	NL	www.railcube.com
+5302	EHB	Eisenbahn- und Hafen Betriebsgesellschaft Region Osnabruck mbH	DE	https://www.stadtwerke-osnabrueck.de/ehb  
+5303	DBST	DB Systemtechnik GmbH	DE	
+5304	S2TF	S2TF Services de Transports et Travaux Ferroviaires	FR	
+5305	RTH Kft	Rail Transport Hungary Korlatolt felelossegu tarsasag	HU	 www.rthkft.hu
+5306	Bayernhafen	Bayernhafen GmbH &Co. KG	DE	http://www.bayernhafen.de/
+5307	LNRE	Lao National Railway State Enterprise	LA	
+5308	AMS	ARRIVA Mobility Solutions, s.r.o.	SK	 www.arriva.sk
+5309	PNA	PNA SpLtd	BG	
+5310	TWE	Teutoburger Wald Eisenbahn GmbH	DE	https://www.captrain.de/
+5311	FVE	Farge Vegesacker Eisenbahn Gesellchaft mbH	DE	https://www.captrain.de/
+5312	DNV	DNV Verlag GmbH	DE	https://www.dnv-tours.de/
+5313	ÖBB PR	ÖBB Produktion GmbH	AT	https://www.oebb.at/
+5314	PORTOS	PORTOS sawicki i Perz sp.j.	PL	
+5315	IMS	Instandhaltung Management Service GmbH	DE	
+5316	Steam Story Agency	Steam Story Agency s.r.o.	CZ	https://festivalparnichlokomotiv.cz/
+5317	GEODIS	GEODIS Road Transport	FR	https://geodis.com/fr
+5318	SPNV Nord	Zweckverband Schienenpersonennahverkehr Rheinland-Pfalz Nord 	DE	https://www.spnv-nord.de/
+5319	NVV	Verkehrsverbund und Fördergesellschaft Nordhessen mbH 	DE	https://www.nvv.de/
+5320	EfW	EfW Verkehrsgesellschaft mbH	DE	https://www.efw-verkehrsgesellschaft.de/
+5321	Gelsen Log	Gelsenkirchener Logistik-, Hafen- und Servicegesellschaft mbH 	DE	www.gelsen-log.de
+5322	DWK	DWK Drahtwerk Koln GmbH	DE	www.dwk-koeln.de
+5323	MEG mbH	Märkische Eisenbahngesellschaft mbH.	DE	
+5324	GfF	GfF Gesellschaft fur Fahrzeugtechnik mbH	DE	https://www.gff-fahrzeugtechnik.de
+5325	NHAB	Norrkopings Hamn AB	SE	www.nhs.se 
+5326	RSC	Rail Service Center Rotterdam B.V.	NL	www.rscrotterdam.nl
+5327	KOLEJE MALOPOLSKIE	KOLEJE MALOPOLSKIE SP. Z.O.O	PL	https://www.kolejemalopolskie.com.pl/
+5328	ETB	Emmentalbahn GmbH	CH	etb-infra.ch
+5329	TAL	Talbot Services GmbH	DE	 http://www.Talbot-Services.com
+5330	Kiffe Sohne	Fahrzeugfabrik F. Kiffe Sohne GmbH &Co. KG 	DE	
+5331	MHP Trade	MHP Trade B.V.	NL	www.mhp.com.ua
+5332	RVB	Regionalverband Grossraum Braunschweig	DE	https://www.regionalverband-braunschweig.de/
+5333	RLS	Railpool Lokservice GmbH & Co. KG	DE	www.railpool-lokservice.eu
+5334	CMP	Copenhagen Malmö Port	SE	www.cmport.com
+5335	LNVG	Landesnahverkehrsgesellschaft Niedersachsen mbH 	DE	https://www.lnvg.de/
+5336	RAILC	Rail-Cars sp. z o.o.	PL	
+5337	NEB	NEB Betriebsgesellschaft mbH	DE	https://www.neb.de/
+5338	PTDSK	PTD SK, druzstvo	SK	https://www.railsupport.sk/
+5339	MA Group 	MA Group S.p.A.	IT	
+5340	KPPP	Kabel Premium Pulp & Paper 	DE	https://www.kabelpaper.de/
+5341	BLRA	BL Rail AB	SE	
+5342	DP Bahn 	Deutsche Privatbahn GmbH	DE	
+5343	RLGN	Raillog A/S	NO	
+5344	KHR	Kubler Heavy rail GmbH	DE	www.kuebler-heavy-rail.com
+5345	RPS	Rail power Systems GmbH	DE	https://www.rail-ps.com/
+5346	EBL	EBL EisenbahnBetriebsLeistungen GmbH	DE	
+5347	RTG	RegioTram Gesellschaft mbH	DE	
+5348	FME e.V.	Frankische Museums Eisenbahn e.V. Nurnberg	DE	https://www.fraenkische-museumseisenbahn.de/
+5349	CD DUSS	CD DUSS Terminal, a.s. 	CZ	www.cdduss.com
+5350	FKA	FKA Fahrzeugkompetenzzentrum Augsburg GmbH	DE	https://www.fka-augsburg.de/
+5351	RNGO	RailNaviGo Kft.	HU	https://www.railnavigo.hu/
+5352	HBN	Hanse Bahn Nord GmbH	DE	https://dereisenbahndienstleister.de/
+5353	LW	Leonhard Weiss GmbH & Co. KG 	DE	https://www.leonhard-weiss.de/
+5354	RBL	Rail Bavaria Logistik GmbH	DE	http://railbavaria.de/
+5355	HEFHV	Holsteinische Eisenbahngesellschaft für historischen Verkehr gGmbH 	DE	https://hefhv.eu/
+5356	PVT LLC	PVT Limited Liability Company	UA	
+5357	HISB	Historische S-Bahn e.V.	DE	https://www.hisb.de/
+5358	Strubebau	Hans Strube Gleisbau Hochbau Tiefbau GmbH	DE	
+5359	HBG	Hafenbetriebsgesellschafft mbH Hildesheim	DE	
+5360	STREIT	Karl Streit GmbH & Co KG	DE	https://www.saegewerk-streit.de/
+5361	DJH	Jospeh Hubert Bauunternehmung GmbH & Co. KG	DE	https://jhubert.de/
+5362	Infraserv Gendorf	Infraserv GmbH & Co. Gendorf KG	DE	https://www.infraserv.gendorf.de/
+5363	KORDIS	KORDIS JMK, a.s.	CZ	https://www.idsjmk.cz/index
+5364	Ecco Rail DE	Ecco Rail DE GmbH	DE	https://www.ecco-rail.at/
+5365	JT	JumboTec GmbH	DE	https://www.jumbotec.de/
+5366	AWILOG	AWILOG Transport GmbH	DE	http://www.awilog.de/
+5367	FWK	Fahrzeugwerk Karsdorf GmbH & Co KG	DE	
+5368	TRL GmbH	timberrail logistics GmbH	DE	
+5369	Railactive LLC	Railctive Limited Liability Companie	UA	
+5370	KD AB	Kraftdragarna AB	SE	https://kraftdragarna.se/
+5371	SCHW	Schwalbe Baugesellschaft mbH & Co. KG	DE	https://schwalbebau.de/
+5372	K+S	K+S Minerals and Agriculture GmbH	DE	https://www.kpluss.com/
+5373	MHEL	MHEL Müchelner Hoch-, Erd- und Leitungsbau GmbH	DE	https://www.mhel.eu/
+5374	ROPID	Regionální organizátor pražské integrované dopravy	CZ	https://pid.cz/
+5375	SBS	SWEG Bahn Stuttgart GmbH	DE	https://www.sweg.de/de/sbs/
+5376	FS ITALIANE S.p.A	Ferrovie Dello Stato Italiane S.p.A.	IT	http://www.fsitaliane.it/
+5377	GLRR	Gerhard Lang Recycling GmbH	DE	http://www.lang-recycling.de/
+5378	Pfalzbahn	Pfalzbahn Eisenbahnbetriebsgesellschaft mbH	DE	
+5379	Mentz	Mentz GmbH	DE	www.mentz.net
+5380	Ferromove	Ferromove SAS	FR	
+5381	ÖBB TS	ÖBB Technische Services GmbH	AT	https://ts.oebb.at/
+5382	STB GmbH	Süd Thüringen Bahn GmbH	DE	www.erfurter-bahn.de
+5383	HKH	H. Klostermann Baugesellschaft mbH	DE	https://klostermann-hamm.de/
+5384	Evers Umweltpflege	Ulrich Joh. Evers GmbH & Co. KG 	DE	
+5385	BtmH	Betriebe der Stadt Mulheim 	DE	
+5386	GOV	GoVolta	NL	http://www.govolta.eu/
+5387	Eurosand	Eurosand export AB	SE	https://www.eurosand.se/
+5388	BBL C	BBL Consulting GmbH	DE	
+5389	Arsenale	Arsenale Express S.p.A.	IT	
+5390	BSK	Baltycki Serwis Kolejowy Sp.z.o.o.	PL	https://bsk.szczecin.pl/
+5391	RTM	Régie des transports Métropolitains	FR	https://www.rtm.fr/
+5392	NSB GmbH	Naumburger Strassenbahn GmbH	DE	https://naumburger-strassenbahn.de/
+5393	K&W	K&W Mineralölgesellschaft Erfurt mbH 	DE	https://mineraloelgesellschaft.de/
+5394	Transachema	UAB Transachema	LT	
+5395	BDX Rail	BDX Rail AB	SE	https://bdx.se/
+5396	ABTB	Ablachtalbahn	DE	https://www.messkirch.de/Ablachtalbahn
+5397	Qnamic	Qnamic AG	CH	https://qnamic.com/de/
+5398	VKG	Verkehrsverbund Kärnten GmbH	AT	https://www.kaerntner-linien.at/
+5399	BDG	BDG Bahnservice und Dienstleistungsgesellschaft mbH & Co. KG	DE	https://www.bdg-bahnservice.de/
+5400	B&S Logistik	B&S  Logistik GmbH	AT	
+5401	DKB	Diepholzer Kreisbahn EVU GmbH	DE	
+5402	SGV	Svenska Godsvagnar AB	SE	
+5403	Menlo79	Menlo79 GmbH	DE	https://www.menlo79.com/
+5404	SBB D	SBB GmbH	DE	www.sbb-deutschland.de
+5405	Stretto 	Stretto SAS	FR	
+5406	Albert Fischer	Albert Fischer GmbH	DE	https://www.albert-fischer.de/
+5407	ATEF	Entreprise ferroviaire Alstom	FR	www.alstom.com
+5408	GZTR	GAZTRADE JSC	BG	
+5409	Reg Gavleborg 	Region Gavleborg 	SE	www.regiongavleborg.se
+5410	DFS	Dampfbahn Frankische Schweiz e.V.	DE	www.dampfbahn.net
+5411	GSCH	Geiger + Schule Bau GmbH & Co. KG	DE	https://gsbau.eu/
+5412	ERMESR	Ermes Rail	IT	
+5413	GT 	Good Thing s.r.o.	CZ	
+5414	MTR Rail	Metrans Rail Netherlands B.V.	NL	
+5415	CTL Polnoc 	CTL Polnoc Spolka z ograniczona odpowiedzialnoscia	PL	
+5416	MATT	Matthäi Trimodalbau GmbH & Co. KG	DE	https://www.matthaei.de/
+5417	NNG	Norddeutsche Naturstein GmbH	DE	https://www.nng.de/
+5418	Reederei Baltrum-Linie 	Reederei Baltrum-Linie GmbH	DE	https://www.baltrum-linie.de/
+5419	EPCPL	EP Cargo Polska S.A.	PL	https://www.epcargo.cz/pl/gdpr
+5420	BBG	Bahnbetrieb Gera GmbH	DE	
+5421	REDALSA	REDALSA S.A. S.M.E.	ES	https://redalsa.com/
+5422	MSM	MSM Gruppe e.K.	DE	https://urlaubs-express.de/
+5423	FEG mbH	Friesoyther Eisenbahngesellschaft mbH	DE	https://www.friesoyther-eisenbahngesellschaft.de/
+5424	SBSC	SBS Cargo Praha s.r.o.	CZ	
+5425	TEC	Train Europe Kft Budapesa - sucursala Craiova	RO	
+5426	VLCS	VELKOLOM CERTOVY SCHODY, akciova spolecnost	CZ	
+5427	SCANR	Scanrail AB	SE	
+5428	STS logistic	STS logistic Sp z o.o.	PL	https://clip-group.com/
+5429	TMR SA	Transports de Martigny et Regions SA	CH	tmrsa.ch
+5430	APDL	Administração dos Portos do Douro, Leixões e Viana do Castelo, S.A.	PT	https://www.apdl.pt/
+5431	CTL 	Cinerites Transport et Logistique	FR	https://www.cinerites.fr/
+5432	ART	ALTMANN RAIL TRACTION Srl	IT	
+5433	JAXAN KOLEJ	JAXAN KOLEJ sp. z o.o.	PL	
+5434	DAB RAIL	DAB RAIL sp. Z o.o.	PL	
+5435	NLE	Lausitzbahn GmbH	DE	
+5436	erixx Holstein	erixx Holstein GmbH	DE	www.erixx.de
+5437	Max Bogl TuG	Max Bogl TuG Transport und Gerate GmbH &Co. KG	DE	
+5438	RRT Kouvola	RRT Kouvola Oy 6 Railgate Finland	FI	
+5439	NVBW	Nahverkehrsgesellschaft Baden-Wurttemberg mbH	DE	https://www.nvbw.de/
+5440	DUK Dorpen	Dorpener Umschlaggesellschaft fur den kombinierten Verkehr mbH	DE	https://dukdoerpen.de/
+5441	ZLT	zl-traktion GmbH	DE	
+5442	RCM GmbH	RCM Rail Care and Management GmbH	DE	https://rcm-rail.com
+5443	HELM	HELM AG	DE	https://www.helmag.com/
+5444	MW RAIL	MW RAIL SA	PL	
+5445	LT SK	LokoTrain Slovakia s.r.o.	SK	https://www.lokotrain.eu/
+5446	RH	Region Hannover	DE	https://www.hannover.de/
+5447	PaletExpress	PaletExpress s.r.o.	SK	
+5448	TRI	TRI Train Rental GmbH 	DE	www.train-rental.com
+5449	EMS	Kommanditgesellschaft EMS-Gleisbau GmbH & Co.	DE	
+5450	SBSW	sbs wagon s.r.o.	CZ	
+5451	SBSWR	sbs wagon rail s.r.o.	CZ	
+5452	CER Poland Sp. z o.o.	CER Poland Spolka z ograniczona odpowiedzialnoscia 	PL	
+5453	catkin	catkin GmbH	DE	https://catkin.eu/
+5454	RO-RLBEU	SC CONSTANTIN GRUP RAIL LOGISTIC SRL	RO	https://constantingrupraillogistic.ro/
+5455	HK	Hans Kaiser GmbH & Co. KG	DE	https://www.kaiser-gleisbau.de/
+5456	IGEBA	IGEBA _ Ingenieurgesellschaft Bahn mbH	DE	https://www.igeba-online.de/
+5457	Kassecker	Franz Kassecker GmbH	DE	https://www.kassecker.de/
+5458	SOB T	Schweizerische Südostbahn AG, Transport EVU	CH	https://www.sob.ch/
+5459	SOB I-TI	Schweizerische Südostbahn AG, Infrastrukturmanager	CH	https://www.sob.ch/
+5460	SOB I	Schweizerische Südostbahn AG, Infrastruktur	CH	https://www.sob.ch/
+5461	RBG 	Die Regionenbahn GmbH	DE	www.regionenbahn.de  
+5462	KVG	Kahlgrung-Verkehrs-Geselleschaft mbH 	DE	https://www.kvg-mobil.de/
+5463	DGT	Duisburg Gateway Terminal GmbH	DE	
+5464	UniNow	UniNow GmbH	DE	https://www.uninow.de/
+5465	KWGlinde	Kieswerk Glinde Schweder GmbH & Co KG	DE	https://www.koops-gruppe.de/
+5466	Arsol	Arsol Aromatics GmbH  & Co. KG	DE	
+5467	EFC	Eisenbahnfreunde Chemnitztal e.v.	DE	https://www.chemnitztalbahn.de/
+5468	Athos	Athos Rail S.A.	ES	https://www.athosrail.com/
+5469	Prefere 	Prefere Paraform GmbH	DE	https://prefere.com/
+5470	KTSK GmbH	KTSK Kombi Terminal Schkopau GmbH	DE	http://www.hoyer-group.com/
+5471	Sternico	Sternico GmbH	DE	https://www.sternico.com/
+5472	EVERWELLE	EVERWELLE OU	EE	
+5473	E 60 Shipping 	E 60 Shipping Line LLC	GE	https://e60shipping.com/ka/
+5474	FS TTI	FS Treni Turistici Italiani S.r.l.	IT	
+5475	RAILIMPEX	RAILIMPEX doo	RS	
+5476	VSOE LTD	VENICE SIMPLON ORIENT EXPRESS LTD	FR	
+5477	TLVG	TrainLog GmbH	DE	https://www.train-log.com/
+5478	RNC	RAIL NET CARGO LTD	BG	
+5479	TTBG	TT Bulgaria Ltd	BG	
+5480	Viscaria	Viscaria Kiruna AB	SE	https://www.viscaria.com/en/
 5481	RCCCZ	Rail Cargo Carrier Czech republic	CZ	http://www.railcargocarrier.com/
+5482	IDSLR	IDS LogiRail s.r.o.	CZ	
+5483	RTV	Rail Trans Vagon	RO	
+5484	Logipart	Logipart Gesellschaft fur Logistik & Dienstleistungen mbH	DE	https://www.logipart.de/
+5485	ELG	ELG GmbH	DE	
+5486	KTV AD	Cargo Trans Wagon Bulgaria AD	BG	https://www.ttl-bg.com/
+5487	CRT	COLAS RAIL TRACTION 	FR	
+5488	CONVENSA SA	CONTRATAS Y VENTAS SA	ES	https://www.fccco.com/
+5489	LUGO TERMINAL	LUGO TERMINAL SPA	IT	
+5490	TransRail Kft.	TransRail Vasúti Fuvarozási és Szolgáltató Korlátolt Felelősségű Társaság	HU	
+5491	OeBB	Oensingen-Balsthal-Bahn AG	CH	
+5492	Railport Arad	S.C. Railport Arad S.r.l.	RO	
+5493	RTL PL	RailTrans Logistics  sp. zo.o. 	PL	https://railtrans.com.pl/
+5494	CEDROB Cargo	CEDROB Cargo sp. z o.o. 	PL	https://www.cedrob.com.pl/
+5495	TPF TRAFIC	Transports publics fribourgeois Trafic (TPF TRAFIC) SA	CH	https://www.tpf.ch/fr/
+5496	SLGPL	Service and Logistics Group Sp. zo.o.	PL	
+5497	ITB GmbH	Ilztalbahn GmbH	DE	https://ilztalbahn.eu/ilztalbahn-gmbh/
+5498	UZ Cargo Poland 	Ukrainian Railways Cargo Poland 	PL	
+5499	agilis E	agilis Eisenbahngesellschaft mbH & Co. KG	DE	https://www.agilis.de/
+5500	HBD	Hering Bahndienste GmbH	DE	https://www.heringinternational.com/fr/
+5501	LH	LONGITUDE HOLDING SRL	IT	www.arenaways.it
+5502	VBB	Verkehrsbetriebe Burgenland Gesellschaft m.b.H.	AT	https://www.verkehrsbetriebe-burgenland.at/
+5503	Bertani Rail	Bertani Trasporti GmbH Deutschland	DE	https://bertanitrasporti.it/
+5504	TMK-TRAIN Kft.	TMK-TRAIN Korlátolt Felelősségű Társaság	HU	
+5505	AGRNF	Aktiengesellschaft Reederei Norden-Frisia	DE	
+5506	PIMK Ro	PIMK Rail S.R.L.	RO	
+5507	Schavemaker Invest	Schavemaker Invest Sp. z o.o.	PL	
+5508	SBB CF	SBB Cargo France	FR	sbbcargo-international.com
+5509	Trakol	Trakol sp. z o.o.	PL	
+5510	DEVEGA Rail	SC DEVEGA RAIL SRL	RO	https://www.devega.ro/en/
+5511	HSL BE	HSL Belgium GmbH	BE	https://hsl-belgium.eu
+5512	TAF mobile	TAF mobile GmbH	DE	https://www.tafmobile.de/
+5513	EWN GmbH	EWN Entsorgungswerk für Nuklearanlagen GmbH	DE	https://www.ksv-europe.de/
+5514	VHH	Verkehrsbetriebe Hamburg-Holstein GmbH	DE	vhh-mobility.de
+5515	Schavemaker Intermodal	Schavemaker Intermodal Sp. z o.o.	PL	https://www.schavemaker.pl/
+5516	Stega	Stega GmbH	DE	https://www.stega.tv/
+5517	vbe	Verkehrsbetriebe Extertal GmbH	DE	https://vbe-extertal.de/
+5518	RWI Train Kft.	RWI Train Korlatolt Felelossegu Tarsasag 	HU	
+5519	Adler-Schiffe	Adler-Schiffe & Co KG	DE	https://www.adler-schiffe.de/
+5520	SEM	SAINT ETIENNE METROPOLE	FR	https://www.saint-etienne-metropole.fr/
+5521	TT-TRANS	TT-TRANS s.r.o.	SK	
+5522	Ferysped	Ferysped AD	BG	https://www.ferysped.com/bg/
+5523	S-Rail HU	S-Rail HU Kft.	HU	https://www.setg.at/
+5524	APSS	Adminitração de Portos de Setubal e Sesimbra	PT	https://www.portodesetubal.pt/apss
+5525	SR SK	S-Rail SK s.r.o.	SK	https://www.setg.at/
+5526	NMEG	Neukölln-Mittenwalder Eisenbahn-Gesellschaft Aktiengesellschaft in Berlin 	DE	
+5527	Freshrail	FFWD Fresh Rail Holding B.V.	NL	
+5528	dream	dream mobility 	DE	
+5529	VUKV	VUKV a.s.	CZ	https://www.vukv.cz/
+5530	EMAR	EMA Rail srl	RO	
+5531	SRA SI	S-Rail Adria d.o.o.	SI	https://www.s-rail.si/
+5532	KIP Infra	KIP Infra Oy	FI	https://kipinfra.fi/en/home/
+5533	RER	Regione Emilia Romagna	IT	https://kipinfra.fi/
+5534	Stork	Stork Cargo GmbH	DE	
+5535	PCLA	Povazska cementaren a.s.	SK	https://www.pcla.sk/en/
+5536	BZB AG	Bayerische Zugspitzbahn Bergbahn AG	DE	https://zugspitze.de/en
+5537	Mdr	Mdrivers BV	NL	
+5538	LOKOV	LOKO vlecky s.r.o.	CZ	
+5539	LOKOP	LOKO prepravy s.r.o.	CZ	
+5540	LokoTrain Polska 	LokoTrain Polska spolka z ograniczona odpowiedzialnoscia 	PL	https://lokotrain.eu/
+5541	NPDG	Neue Pellwormer Dampfschiffahrts GmbH	DE	
+5542	EDS	EDS Eisenbahndienstleistungen Suderelbe GmbH	DE	
+5543	Rheinkalk GmbH	Lhoist Germany / Rheinkalk GmbH	DE	
+5544	NDH	Neuss-Dusseldorfer Hafen GmbH Co. KG 	DE	https://nd-haefen.de/
+5545	Rostock Port	Rostock Port GmbH	DE	https://www.rostock-port.de/
+5546	Hüttner	Hüttner Transport & Logistik GmbH & Co KG	DE	https://www.huettner-holztransporte.de/
+5547	RC ASO	RATP Cap Arc Sud et Ouest	FR	https://ratpgroup.com/fr/
+5548	CTSF	Compagnie de traction et de services ferroviaires 	FR	
+5549	Marschbahn	DB Regio Marschbahn GmbH	DE	
+5550	LAG	Lokalbahn Betriebsgesellschaft mbH	DE	
+5551	Weisse Flotte 	Weisse Flotte GmbH	DE	
+5552	FRS Sylt	FRS Syltfahre GmbH & Co. KG	DE	https://www.frs.world/
+5553	FRS Helgo	FRS Helgoline GmbH & Co. KG	DE	https://www.frs.world/
+5554	VHB	Verkehrsunternehmen Hegau-Bodensee Verbund GmbH	DE	https://www.vhb-info.de/
+5555	WESTbahn DE	WESTbahn Deutschland GmbH	DE	https://westbahn.at/en/
+5556	ARO	Adria Rail operator d.o.o.	HR	https://metrans.eu/
+5557	GWEM	GWEMER S.R.L.	IT	https://duro-dakovic.com/
+5558	Inferno Comms	Inferno Communications Ltd	GB	https://inferno.co.uk/
+5559	GCA TRAC	GCA TRACTION	FR	https://www.charlesandre.com/
+5560	ALVER Grain International	ALVER Grain International Ltd	BG	
+5561	W.D.R.	Wyker Dampfschiffs-Reederei Föhr-Amrum GmbH	DE	https://www.faehre.de/
+5562	ITB EVU	ITB GmbH BRB EVU	DE	https://www.villmann-gruppe.de/
+5563	Silverstar RW	Silverstar Railways GmbH	AT	
+5564	Belog	Belog Baustoffe-Entsorgung-Logistik GmbH & Co. KG	DE	
+5565	BTE Bremen 	BTE Bremen-Thedinghauser Eisenbahn GmbH	DE	https://www.bte-eisenbahn.de/
+5567	Bahnbetriebe Blumberg	Bahnbetriebe Blumberg GmbH & CO. KG 	DE	www.bahnbetriebe-blumberg.de 
+5568	AGROL	Agrol Matejka M Sp. K.	PL	www.agrolmatejka.pl
+5569	TRPL Sp.z o.o.	TRANS RAPID Sp.z o.o.	PL	
+5570	CEF 	Centre d'essais Ferroviaires 	FR	
+5572	SIW	DB Fernverkehr AG, Schifffahrt & Inselbahn Wangerooge	DE	https://www.deutschebahn.com/
+5573	PSP Terminal 	PSP Terminal Kft.	HU	
+5574	BBVA S.A.	Banco Bilbao Vizcaya Argentaria, S.A.	ES	
 6100	KHIND	Korea Heavy Industry and Development	KR	www.Khind.co.kr
 6880	DDSV	Duro Dakovic Special vehicles 	HR	http://www.ddsv.hr/en/index.php
+7085	Chemoil	Chemoil Logistics AG	CH	https://www.chemoil.ch/de/
 7087	VSUK	Voyages SNCF UK Limited	GB	https://uk.voyages-sncf.com/
 7187	VSB	Voyages SNCF Benelux SPRL	BE	https://benelux.voyages-sncf.eu/
+7281	RCC RS 	Rail Cargo Carrier- Serbia d.o.o. 	RS	https://www.railcargo.com/
 7287	VSD	Voyages SNCF Deutschland GmbH	DE	http://de.voyages-sncf.com/de/
 7387	VSS	Voyages SNCF Suisse SARL	CH	https://www.voyages-sncf.eu/
 7487	VSI	Voyages SNCF Italia SRL	IT	https://italia.voyages-sncf.eu/
 7587	VSE	Voyages SNCF Espana SRLU	ES	http://iberica.voyages-sncf.eu/
+7824	THM-PZ	TRAIN HUNGARY MAGÁNVASÚT KFT, Podružnica u Zagrebu za pružanje željezničkih usluga	HR	
 7881	RCCHR	Rail Cargo Carrier Croatia d.o.o.	HR	http://www.railcargocarrier.com/
 7981	RCCSI	Rail Cargo Carrier, d.o.o.	SI	http://www.railcargocarrier.com/
 8987	SIB	SIBELIT S.A.	LU	
