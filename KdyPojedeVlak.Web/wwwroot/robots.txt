@@ -1,11 +1,5 @@
-User-agent: SemrushBot
-Disallow: /Train/
-Disallow: /Transits/
+Allow: /Transits/Nearest/CZ:57076
+Allow: /Train/Details/170
 
-User-agent: AhrefsBot
-Disallow: /Train/
-Disallow: /Transits/
-
-User-agent: barkrowler
 Disallow: /Train/
 Disallow: /Transits/
