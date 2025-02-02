@@ -271,7 +271,7 @@ public class PointCodebook(string path)
         }
 
         var problematicPoints = new HashSet<String>();
-        foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2025-01-24.tsv", '\t', Encoding.UTF8)
+        foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2025-02-02.tsv", '\t', Encoding.UTF8)
                      .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
                 )
         {
