@@ -1,0 +1,2 @@
+placeholder.example.com, placeholder, DIRECT, placeholder
+# Placeholder to indicate no ads served whatsoever

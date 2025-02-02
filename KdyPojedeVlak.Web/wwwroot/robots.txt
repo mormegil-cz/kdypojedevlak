@@ -1,4 +1,6 @@
+Allow: /Transits/ChoosePoint
 Allow: /Transits/Nearest/CZ:57076
+Allow: /Train
 Allow: /Train/Details/170
 
 Disallow: /Train/
