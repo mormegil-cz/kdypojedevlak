@@ -1,0 +1,8 @@
+﻿@model int
+@{
+    ViewData["Title"] = "Chyba " + Model;
+}
+
+<img class="error-icon" src="images/error-sem.png" alt="" role="presentation" />
+<h1 class="text-danger">HTTP @Model</h1>
+<h2 class="text-danger">Váš prohlížeč odeslal nesprávný požadavek.</h2>

@@ -67,6 +67,7 @@ public class Startup(IConfiguration configuration)
 
         app.UseStaticFiles();
         app.UseCookiePolicy();
+        app.UseStatusCodePagesWithReExecute("/Home/Error", "?status={0}");
 
         app.UseRouting();
         app.UseEndpoints(endpoints =>

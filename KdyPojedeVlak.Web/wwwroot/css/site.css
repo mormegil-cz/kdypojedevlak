@@ -196,3 +196,12 @@ a.silent-link {
     border: 1px solid grey;
     padding: 0 2px;
 }
+
+.error-icon {
+    float: left;
+    margin: 1em 2em 1em 1em;
+}
+
+hr {
+    clear: both;
+}
