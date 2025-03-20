@@ -6,10 +6,10 @@ namespace KdyPojedeVlak.Web.Models;
 
 public static class DisplayConsts
 {
-    public static readonly FrozenDictionary<TrainOperation, string> TrainOperationIcons = new Dictionary<TrainOperation, string>
+    public static readonly FrozenDictionary<TrainOperation, string?> TrainOperationIcons = new Dictionary<TrainOperation, string>
     {
-        { TrainOperation.Unknown, "" },
-        { TrainOperation.StopRequested, "" },
+        { TrainOperation.Unknown, null },
+        { TrainOperation.StopRequested, null },
         { TrainOperation.Customs, "🛂" },
         { TrainOperation.Other, "" },
         { TrainOperation.EmbarkOnly, "◗" },
@@ -344,4 +344,5 @@ public static class DisplayConsts
     public const string PublicTransportServiceDescription = "Veřejná služba";
     public const string AlternativeTransportDescription = "Náhradní autobusová doprava";
     public const string InconsistentTimeDescription = "Nenavazující čas příjezdu a odjezdu";
+    public const string GenericInfoIcon = "🛈";
 }

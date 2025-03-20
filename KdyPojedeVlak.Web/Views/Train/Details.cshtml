@@ -152,7 +152,7 @@
                         }
                         @foreach (var note in pttNotes.OfType<NonCentralPttNoteForVariant>())
                         {
-                            <span class="note-noncentral-icon" title="@note.Text.Str">🛈</span>
+                            <span class="note-noncentral-icon" title="@note.Text.Str">@DisplayConsts.GenericInfoIcon</span>
                         }
                     </div>
                 }
@@ -207,7 +207,9 @@
                         @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZAlternativeTransport, DisplayConsts.AlternativeTransportIcon, DisplayConsts.AlternativeTransportDescription); }
                         @foreach (var operation in pointVariant.TrainOperations)
                         {
-                            <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@DisplayConsts.TrainOperationIcons[operation]</span>
+                            var icon = DisplayConsts.TrainOperationIcons[operation];
+                            var iconOrDefault = icon == "" ? DisplayConsts.GenericInfoIcon : icon;
+                            <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@iconOrDefault</span>
                         }
                     </td>
                 }
