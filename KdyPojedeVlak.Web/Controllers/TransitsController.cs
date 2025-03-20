@@ -72,7 +72,8 @@ public class TransitsController(DbModelContext dbModelContext) : Controller
         var now = DateTime.Now;
         var startDate = at ?? now;
         var neighbors = dbModelContext.GetNeighboringPoints(point);
-        var currentTimetableYear = dbModelContext.TimetableYears.SingleOrDefault(y => y.MinDate <= startDate && y.MaxDate >= startDate);
+        var currentTimetableYear = dbModelContext.TimetableYears.SingleOrDefault(y => y.MinDate <= startDate && y.MaxDate >= startDate)
+                                   ?? dbModelContext.TimetableYears.OrderByDescending(y => y.MaxDate).FirstOrDefault();
         if (currentTimetableYear == null)
         {
             // ??
