@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Frozen;
+using System.Collections.Generic;
 using KdyPojedeVlak.Web.Engine.Djr;
 
 namespace KdyPojedeVlak.Web.Models;
 
 public static class DisplayConsts
 {
-    public static readonly Dictionary<TrainOperation, string> TrainOperationIcons = new()
+    public static readonly FrozenDictionary<TrainOperation, string> TrainOperationIcons = new Dictionary<TrainOperation, string>
     {
         { TrainOperation.Unknown, "" },
         { TrainOperation.StopRequested, "" },
@@ -62,7 +63,7 @@ public static class DisplayConsts
         { TrainOperation.TrainWaiting, "" },
         { TrainOperation.SimpleBreakTest, "" },
         { TrainOperation.FullBreakTest, "" },
-        { TrainOperation.TrainReportStop, "" },
+        { TrainOperation.TrainReportStop, "☎" },
         { TrainOperation.OtnChange, "" },
         { TrainOperation.FinalTechnicalCheck, "" },
         { TrainOperation.DeliveryManipulation, "" },
@@ -70,9 +71,9 @@ public static class DisplayConsts
         { TrainOperation.DepartureViaShunting, "" },
         { TrainOperation.TimeOffsetLevelling, "" },
         { TrainOperation.SecondTrainInD3, "" },
-        { TrainOperation.RegularEntryOnFullVehicleTrack, "" },
-        { TrainOperation.RegularSimultaneousEntryOnFullVehicleTrack, "" },
-        { TrainOperation.RegularEntryOnFullTrack, "" },
+        { TrainOperation.RegularEntryOnFullVehicleTrack, "◻" },
+        { TrainOperation.RegularSimultaneousEntryOnFullVehicleTrack, "◻" },
+        { TrainOperation.RegularEntryOnFullTrack, "◯" },
         { TrainOperation.CrossingTechnicalCheck, "" },
         { TrainOperation.TransitTechnicalCheck, "" },
         { TrainOperation.AllOperatorActionsCancelled, "" },
@@ -82,9 +83,9 @@ public static class DisplayConsts
         { TrainOperation.StartOfPublicPusherService, "" },
         { TrainOperation.EndOfPublicPusherService, "" },
         { TrainOperation.WithoutPublicPusherService, "" },
-    };
+    }.ToFrozenDictionary();
 
-    public static readonly Dictionary<TrainOperation, string> TrainOperationDescriptions = new()
+    public static readonly FrozenDictionary<TrainOperation, string> TrainOperationDescriptions = new Dictionary<TrainOperation, string>
     {
         { TrainOperation.Unknown, "" },
         { TrainOperation.StopRequested, "Nástup a výstup cestujících" },
@@ -159,50 +160,50 @@ public static class DisplayConsts
         { TrainOperation.StartOfPublicPusherService, "Začátek VPS" },
         { TrainOperation.EndOfPublicPusherService, "Konec VPS" },
         { TrainOperation.WithoutPublicPusherService, "Nevyužití VPS" },
-    };
+    }.ToFrozenDictionary();
 
-    public static readonly Dictionary<CentralPttNote, string> CentralPttNoteDescriptions = new()
+    public static readonly FrozenDictionary<CentralPttNote, string> CentralPttNoteDescriptions = new Dictionary<CentralPttNote, string>
     {
         { CentralPttNote.Unknown, "" },
-        { CentralPttNote.Class12, "Ve vlaku řazeny k sezení i vozy 1.\u00A0vozové třídy" },
-        { CentralPttNote.Class1, "Ve vlaku řazeny pouze vozy 1.\u00A0vozové třídy" },
-        { CentralPttNote.Class2, "Ve vlaku řazeny pouze vozy 2.\u00A0vozové třídy" },
-        { CentralPttNote.SleepingCar, "Lůžkový vůz (nerozlišuje se třída)" },
+        { CentralPttNote.Class12, "U vlaků kategorie Sp a Os – ve vlaku řazeny k sezení i vozy 1. vozové třídy" },
+        { CentralPttNote.Class1, "Ve vlaku řazeny k sezení pouze vozy 1. vozové třídy" },
+        { CentralPttNote.Class2, "U vlaků kategorie R a vyšší – ve vlaku řazeny k sezení pouze vozy 2. vozové třídy" },
+        { CentralPttNote.SleepingCar, "Lůžkový vůz" },
         { CentralPttNote.CouchetteCar, "Lehátkový vůz" },
         { CentralPttNote.DirectCar, "Přímý vůz" },
         { CentralPttNote.Cars, "Vůz pro přepravu osobních automobilů a motocyklů" },
-        { CentralPttNote.Disabled, "Vůz vhodný pro přepravu cestujících na vozíku" },
+        { CentralPttNote.Disabled, "Vůz vhodný pro přepravu cestujících na vozíku, nebo vůz se zvedací plošinou; doporučeno objednání přepravy" },
         { CentralPttNote.Restaurant, "Restaurační vůz" },
         { CentralPttNote.Reservation, "Do označených vozů možno zakoupit místenku" },
-        { CentralPttNote.ObligatoryReservation, "Povinná rezervace míst – nutno zakoupit místenku" },
+        { CentralPttNote.ObligatoryReservation, "Povinná rezervace míst" },
         { CentralPttNote.Baggage, "Úschova během přepravy (do vyčerpání kapacity)" },
         { CentralPttNote.Bicycle, "Přeprava spoluzavazadel (do vyčerpání kapacity)" },
         { CentralPttNote.Transfer, "Nutno přestoupit" },
         { CentralPttNote.Refreshments, "Občerstvení (roznášková služba nebo samoobslužný automat)" },
         { CentralPttNote.Cafe, "Bistrovůz" },
-        { CentralPttNote.BaggageReservation, "Úschova během přepravy s možností rezervace místa pro jízdní kolo" },
-        { CentralPttNote.BaggageObligatoryReservation, "Úschova během přepravy s povinnou rezervací místa pro jízdní kolo" },
-        { CentralPttNote.BicycleReservation, "Přeprava spoluzavazadel s možností rezervace místa pro jízdní kolo a cestujícího, v některých vlacích pouze pro jízdní kolo" },
-        { CentralPttNote.BicycleObligatoryReservation, "Přeprava spoluzavazadel s povinnou rezervací místa pro jízdní kolo a cestujícího, v některých vlacích pouze pro jízdní kolo" },
-        { CentralPttNote.PowerSocket, "Ve vlaku je řazen vůz s přípojkou 230\u00A0V" },
-        { CentralPttNote.ReplacementBus, "ND – náhradní doprava" },
-        { CentralPttNote.Children, "Vůz nebo oddíly vyhrazené pro cestující s dětmi do 10\u00A0let" },
-        { CentralPttNote.DisabledPlatform, "Vůz vhodný pro přepravu cestujících na vozíku, vybavený zvedací plošinou" },
-        { CentralPttNote.SelfService, "Samoobslužný způsob odbavení cestujících, cestující bez jízdenky nastupují do vlaku pouze dveřmi u stanoviště strojvedoucího" },
-        { CentralPttNote.NoBicycles, "Přeprava jízdních kol jako spoluzavazadel vyloučena" },
+        { CentralPttNote.BaggageReservation, "Úschova během přepravy s možností rezervace místa pro jízdní kolo" },
+        { CentralPttNote.BaggageObligatoryReservation, "Úschova během přepravy s povinnou rezervací místa pro jízdní kolo" },
+        { CentralPttNote.BicycleReservation, "Přeprava spoluzavazadel s možností rezervace místa pro jízdní kolo a cestujícího, v některých vlacích pouze pro jízdní kolo" },
+        { CentralPttNote.BicycleObligatoryReservation, "Přeprava spoluzavazadel s povinnou rezervací místa pro jízdní kolo a cestujícího, v některých vlacích pouze pro jízdní kolo" },
+        { CentralPttNote.PowerSocket, "Ve vlaku je řazen vůz s přípojkou 230 V" },
+        { CentralPttNote.ReplacementBus, AlternativeTransportDescription },
+        { CentralPttNote.Children, "Vůz nebo oddíly vyhrazené pro cestující s dětmi do 10 let" },
+        { CentralPttNote.DisabledPlatform, "Vůz vhodný pro přepravu cestujících na vozíku, je nutné objednání přepravy" },
+        { CentralPttNote.SelfService, "Samoobslužný způsob odbavení cestujících" },
+        { CentralPttNote.NoBicycles, "Přeprava jízdních kol jako spoluzavazadel je vyloučena" },
         { CentralPttNote.HistoricTrain, "Historický vlak" },
         { CentralPttNote.WomenSectionCD, "Dámský oddíl (oddíl pro samostatně cestující ženy)" },
         { CentralPttNote.SilentSectionCD, "Tichý oddíl" },
-        { CentralPttNote.WifiCD, "Ve vlaku je plánováno řazení vozu s bezdrátovým připojením k internetu" },
+        { CentralPttNote.WifiCD, "Ve vlaku je řazen vůz s bezdrátovým připojením k internetu" },
         { CentralPttNote.PortalCD, "Palubní portál" },
         { CentralPttNote.CinemaCD, "Dětské kino" },
         { CentralPttNote.ExcludedFromStateDiscount, "Ve vlaku neplatí zvláštní jízdné pro žáky a studenty 18–26 let a pro cestující 65+" },
-        { CentralPttNote.IntegratedTransportSystem, "Vlak zařazen v integrovaném dopravním systému" },
+        { CentralPttNote.IntegratedTransportSystem, "Vlak kategorie R a vyšší zařazený v integrovaném dopravním systému" },
         { CentralPttNote.DirectedBoarding, "Usměrněný nástup" },
-        { CentralPttNote.NoWc, "vlak není vybaven WC" },
-    };
+        { CentralPttNote.NoWc, "Vlak není vybaven WC" },
+    }.ToFrozenDictionary();
 
-    public static readonly Dictionary<CentralPttNote, string> CentralPttNoteIcons = new()
+    public static readonly FrozenDictionary<CentralPttNote, string> CentralPttNoteIcons = new Dictionary<CentralPttNote, string>
     {
         { CentralPttNote.Unknown, "" },
         { CentralPttNote.Class12, "𝟣.𝟤." },
@@ -226,7 +227,7 @@ public static class DisplayConsts
         { CentralPttNote.BicycleReservation, "🚲\uFE0E⃝" },
         { CentralPttNote.BicycleObligatoryReservation, "🚲\uFE0E⃞" },
         { CentralPttNote.PowerSocket, "⚇\uFE0E" },
-        { CentralPttNote.ReplacementBus, "🚌\uFE0E" },
+        { CentralPttNote.ReplacementBus, AlternativeTransportIcon },
         { CentralPttNote.Children, "𝗗" },
         { CentralPttNote.DisabledPlatform, "♿\uFE0E⃞" },
         { CentralPttNote.SelfService, "👁\uFE0E" },
@@ -240,10 +241,10 @@ public static class DisplayConsts
         { CentralPttNote.ExcludedFromStateDiscount, "⏺" },
         { CentralPttNote.IntegratedTransportSystem, "⇔" },
         { CentralPttNote.DirectedBoarding, "⛝" },
-        { CentralPttNote.NoWc, "𝗐̵𝖼̵" }, 
-    };
+        { CentralPttNote.NoWc, "𝗐̵𝖼̵" },
+    }.ToFrozenDictionary();
 
-    public static readonly Dictionary<TrainCategory, string> TrainCategoryNames = new()
+    public static readonly FrozenDictionary<TrainCategory, string> TrainCategoryNames = new Dictionary<TrainCategory, string>
     {
         { TrainCategory.Unknown, "" },
         { TrainCategory.EuroCity, "EC" },
@@ -264,9 +265,9 @@ public static class DisplayConsts
         { TrainCategory.NightJet, "NJ" },
         { TrainCategory.LeoExpresTenders, "LET" },
         { TrainCategory.EuroSleeper, "ES" },
-    };
+    }.ToFrozenDictionary();
 
-    public static readonly Dictionary<TrafficType, string> TrafficTypeNames = new()
+    public static readonly FrozenDictionary<TrafficType, string> TrafficTypeNames = new Dictionary<TrafficType, string>
     {
         { TrafficType.Unknown, "" },
         { TrafficType.Os, "Osobní vlak" },
@@ -281,16 +282,16 @@ public static class DisplayConsts
         { TrafficType.Vleč, "Vlečkový vlak" },
         { TrafficType.Služ, "Služební vlak" },
         { TrafficType.Pom, "Nutný pomocný vlak" },
-    };
+    }.ToFrozenDictionary();
 
-    public static readonly Dictionary<SubsidiaryLocationType, string> SubsidiaryLocationTypeNames = new()
+    public static readonly FrozenDictionary<SubsidiaryLocationType, string> SubsidiaryLocationTypeNames = new Dictionary<SubsidiaryLocationType, string>
     {
         { SubsidiaryLocationType.Unknown, "" },
         { SubsidiaryLocationType.None, "" },
-        { SubsidiaryLocationType.StationTrack, "kolej " }
-    };
+        { SubsidiaryLocationType.StationTrack, "kolej " },
+    }.ToFrozenDictionary();
 
-    public static readonly Dictionary<string, string> PublicTransportNames = new()
+    public static readonly FrozenDictionary<string, string> PublicTransportNames = new Dictionary<string, string>
     {
         { "9", "PID" },
         { "10", "PID" },
@@ -333,5 +334,14 @@ public static class DisplayConsts
         { "80", "ODIS" },
         { "97", "IREDO PU DD" },
         { "98", "IREDO-" },
-    };
+    }.ToFrozenDictionary();
+
+    public const string PublicTransportServiceIcon = "🏛\uFE0E";
+    public const string PublicTransportCompanyIcon = "🏢\uFE0E";
+    public const string InconsistentTimeIcon = "◪";
+    public const string AlternativeTransportIcon = "🚌\uFE0E";
+
+    public const string PublicTransportServiceDescription = "Veřejná služba";
+    public const string AlternativeTransportDescription = "Náhradní autobusová doprava";
+    public const string InconsistentTimeDescription = "Nenavazující čas příjezdu a odjezdu";
 }
