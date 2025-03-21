@@ -8,13 +8,16 @@
     ViewData["Title"] = "Vlak " + DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] + " " + Model.Train.TrainNumber + " " + Model.Train.Name;
     var pointCount = Model.Points.Count;
 
-    void ShowPassageNetworkSpecificParamIcon(List<NetworkSpecificParameterForPassage> parameters, NetworkSpecificParameterPassage parameter, String icon, String description)
+    bool ShowPassageNetworkSpecificParamIcon(List<NetworkSpecificParameterForPassage> parameters, NetworkSpecificParameterPassage parameter, String icon, String description)
     {
         var value = parameters.FirstOrDefault(p => p.Type == parameter);
-        if (value?.Value == "1")
+        if (value?.Value != "1")
         {
-            <span class="network-specific-icon network-specific-icon-@parameter" title="@description">@icon</span>
+            return false;
         }
+
+        <span class="network-specific-icon network-specific-icon-@parameter" title="@description">@icon</span>
+        return true;
     }
 }
 
@@ -203,13 +206,21 @@
                         }
                     </td>
                     <td class="operation-icons">
-                        @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZInconsistentTime, DisplayConsts.InconsistentTimeIcon, DisplayConsts.InconsistentTimeDescription); }
+                        @{ var hasInconsistentTime = ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZInconsistentTime, DisplayConsts.InconsistentTimeIcon, DisplayConsts.InconsistentTimeDescription); }
                         @{ ShowPassageNetworkSpecificParamIcon(pointVariant.NetworkSpecificParameters, NetworkSpecificParameterPassage.CZAlternativeTransport, DisplayConsts.AlternativeTransportIcon, DisplayConsts.AlternativeTransportDescription); }
                         @foreach (var operation in pointVariant.TrainOperations)
                         {
                             var icon = DisplayConsts.TrainOperationIcons[operation];
                             var iconOrDefault = icon == "" ? DisplayConsts.GenericInfoIcon : icon;
                             <span class="operation-icon-@operation" title="@DisplayConsts.TrainOperationDescriptions[operation]">@iconOrDefault</span>
+                        }
+                        @if (pointVariant.DwellTime != null)
+                        {
+                            var dwellTimeSpan = TimeSpan.FromMinutes((double)pointVariant.DwellTime.GetValueOrDefault());
+                            if (pointVariant.ArrivalTime == null || pointVariant.DepartureTime == null || hasInconsistentTime || dwellTimeSpan != (pointVariant.DepartureTime - pointVariant.ArrivalTime))
+                            {
+                                <span class="operation-icon-dwellTime" title="Doba pobytu: @dwellTimeSpan.MinutesToString()">@DisplayConsts.GenericInfoIcon</span>
+                            }
                         }
                     </td>
                 }

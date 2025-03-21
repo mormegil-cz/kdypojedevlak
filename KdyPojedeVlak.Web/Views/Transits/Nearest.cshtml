@@ -1,5 +1,7 @@
 ﻿@using System.Globalization
+@using KdyPojedeVlak.Web.Helpers
 @using KdyPojedeVlak.Web.Models
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model KdyPojedeVlak.Web.Models.NearestTransits
 @{
     ViewData["Title"] = $"Nejbližší vlaky v „{Model.Point.Name}“";
@@ -62,7 +64,7 @@
 <form class="form-inline">
     <div class="form-group">
         <label for="at">Datum/čas:</label>
-        <input type="datetime" class="form-control" id="at" name="at" placeholder="@Model.StartDate.ToString("s")"/>
+        <input type="datetime" class="form-control click-prefill" id="at" name="at" placeholder="@Model.StartDate.ToString("s")"/>
     </div>
     <button type="submit" class="btn btn-default">Aktualizovat</button>
 </form>
@@ -99,6 +101,10 @@
                 else
                 {
                     descriptionPieces.Add($"směr {train.NextPointName}");
+                }
+                if (train.DwellTime != null)
+                {
+                    descriptionPieces.Add(TimeSpan.FromMinutes((double)train.DwellTime.GetValueOrDefault()).MinutesToString());
                 }
                 <text>(@String.Join("; ", descriptionPieces))</text>
             }

@@ -773,6 +773,8 @@ public static class DjrSchedule
             { "C9", TrafficType.Vleč },
             { "CA", TrafficType.Služ },
             { "CB", TrafficType.Pom },
+            { "32", TrafficType.Bus },
+            { "33", TrafficType.Lod },
         };
 
     private static readonly Dictionary<string, TrainCategory> defTrainCategory =
@@ -964,7 +966,7 @@ public enum TrafficType
     Služ,
     Pom,
     Bus,
-    Lod
+    Lod,
 }
 
 public enum TrainCategory

@@ -8,28 +8,18 @@ using KdyPojedeVlak.Web.Helpers;
 
 namespace KdyPojedeVlak.Web.Models;
 
-public class NearestTransits
+public class NearestTransits(RoutingPoint point, DateTime startDate, int currentTimetableYear, IEnumerable<NearestTransits.Transit> transits, HashSet<RoutingPoint> neighboringPoints, List<RoutingPoint>? nearestPoints)
 {
-    public RoutingPoint Point { get; }
-    public DateTime StartDate { get; }
-    public IEnumerable<Transit> Transits { get; }
+    public RoutingPoint Point { get; } = point;
+    public DateTime StartDate { get; } = startDate;
+    public IEnumerable<Transit> Transits { get; } = transits;
 
-    public int CurrentTimetableYear { get; }
+    public int CurrentTimetableYear { get; } = currentTimetableYear;
 
-    public HashSet<RoutingPoint> NeighboringPoints { get; }
-    public List<RoutingPoint>? NearestPoints { get; }
+    public HashSet<RoutingPoint> NeighboringPoints { get; } = neighboringPoints;
+    public List<RoutingPoint>? NearestPoints { get; } = nearestPoints == null || nearestPoints.Count == 0 ? null : nearestPoints;
 
-    public NearestTransits(RoutingPoint point, DateTime startDate, int currentTimetableYear, IEnumerable<Transit> transits, HashSet<RoutingPoint> neighboringPoints, List<RoutingPoint>? nearestPoints)
-    {
-        Point = point;
-        StartDate = startDate;
-        CurrentTimetableYear = currentTimetableYear;
-        Transits = transits;
-        NeighboringPoints = neighboringPoints;
-        NearestPoints = nearestPoints == null || nearestPoints.Count == 0 ? null : nearestPoints;
-    }
-
-    public record Transit(int TimetableYear, CalendarDefinition Calendar, TimeSpan? ArrivalTime, TimeSpan? DepartureTime, TrainCategory TrainCategory, string? TrainNumber, string? TrainName, string? SubsidiaryLocationDescription, string? PreviousPointName, string? NextPointName)
+    public record Transit(int TimetableYear, CalendarDefinition Calendar, TimeSpan? ArrivalTime, TimeSpan? DepartureTime, decimal? DwellTime, TrainCategory TrainCategory, string? TrainNumber, string? TrainName, string? SubsidiaryLocationDescription, string? PreviousPointName, string? NextPointName)
     {
         public TimeSpan? AnyScheduledTime => ArrivalTime ?? DepartureTime;
 

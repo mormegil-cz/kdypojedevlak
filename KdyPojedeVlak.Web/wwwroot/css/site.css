@@ -192,6 +192,10 @@ a.silent-link {
     color: darkorange;
 }
 
+.note-icon-NoWc {
+    text-decoration: line-through;
+}
+
 .passenger-service-number {
     border: 1px solid grey;
     padding: 0 2px;

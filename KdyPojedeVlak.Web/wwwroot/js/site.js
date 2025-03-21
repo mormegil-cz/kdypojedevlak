@@ -57,9 +57,16 @@
         });
         $(buttonContainerId).append($button);
     }
-    
+
     window['kdyPojedeVlak'] = {
         initMapFrame: initMapFrame,
         initGeoLocationButton: initGeoLocationButton
     };
+
+    $(function() {
+        $('.click-prefill').click(function() {
+            let $1 = $(this);
+            if (!$1.val()) $1.val($1.attr('placeholder'));
+        });
+    });
 })();

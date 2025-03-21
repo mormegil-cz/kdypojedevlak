@@ -10,8 +10,8 @@ public static class DisplayConsts
     {
         { TrainOperation.Unknown, null },
         { TrainOperation.StopRequested, null },
-        { TrainOperation.Customs, "🛂" },
-        { TrainOperation.Other, "" },
+        { TrainOperation.Customs, "🛂\uFE0E" },
+        { TrainOperation.Other, "﹖" },
         { TrainOperation.EmbarkOnly, "◗" },
         { TrainOperation.DisembarkOnly, "◖" },
         { TrainOperation.RequestStop, "⨯" },
@@ -63,7 +63,7 @@ public static class DisplayConsts
         { TrainOperation.TrainWaiting, "" },
         { TrainOperation.SimpleBreakTest, "" },
         { TrainOperation.FullBreakTest, "" },
-        { TrainOperation.TrainReportStop, "☎" },
+        { TrainOperation.TrainReportStop, "☎\uFE0E" },
         { TrainOperation.OtnChange, "" },
         { TrainOperation.FinalTechnicalCheck, "" },
         { TrainOperation.DeliveryManipulation, "" },
@@ -238,10 +238,10 @@ public static class DisplayConsts
         { CentralPttNote.WifiCD, "𝗐𝗂𝖿𝗂" },
         { CentralPttNote.PortalCD, "⏵⃞" },
         { CentralPttNote.CinemaCD, "𝗸𝗶𝗻𝗼" },
-        { CentralPttNote.ExcludedFromStateDiscount, "⏺" },
+        { CentralPttNote.ExcludedFromStateDiscount, "⏺\uFE0E" },
         { CentralPttNote.IntegratedTransportSystem, "⇔" },
         { CentralPttNote.DirectedBoarding, "⛝" },
-        { CentralPttNote.NoWc, "𝗐̵𝖼̵" },
+        { CentralPttNote.NoWc, "W̵C̵" },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<TrainCategory, string> TrainCategoryNames = new Dictionary<TrainCategory, string>
@@ -282,6 +282,8 @@ public static class DisplayConsts
         { TrafficType.Vleč, "Vlečkový vlak" },
         { TrafficType.Služ, "Služební vlak" },
         { TrafficType.Pom, "Nutný pomocný vlak" },
+        { TrafficType.Bus, "Autobus – NAD" },
+        { TrafficType.Lod, "Loď – NAD" },
     }.ToFrozenDictionary();
 
     public static readonly FrozenDictionary<SubsidiaryLocationType, string> SubsidiaryLocationTypeNames = new Dictionary<SubsidiaryLocationType, string>
