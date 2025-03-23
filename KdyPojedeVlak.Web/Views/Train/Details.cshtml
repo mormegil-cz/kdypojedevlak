@@ -144,7 +144,12 @@
                     <div class="note-icons">
                         @foreach (var note in pttNotes.OfType<CentralPttNoteForVariant>())
                         {
-                            <span class="note-icon-@note.Type" title="@DisplayConsts.CentralPttNoteDescriptions[note.Type]">@DisplayConsts.CentralPttNoteIcons[note.Type]</span>
+                            var description = DisplayConsts.CentralPttNoteDescriptions[note.Type];
+                            if (note.From.Point != Model.Points[0] || note.To.Point != Model.Points[^1])
+                            {
+                                description = $"{note.From.Point.Name} – {note.To.Point.Name}: {description}";
+                            }
+                            <span class="note-icon-@note.Type" title="@description">@DisplayConsts.CentralPttNoteIcons[note.Type]</span>
                         }
                         @if (passengerServiceNumbers.Count == 0)
                         {
