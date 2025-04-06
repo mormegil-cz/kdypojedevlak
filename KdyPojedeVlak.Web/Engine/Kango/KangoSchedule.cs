@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using CoreFtp.Infrastructure.Extensions;
 using KdyPojedeVlak.Web.Engine.SR70;
 
 namespace KdyPojedeVlak.Web.Engine.Kango;

@@ -530,6 +530,7 @@ public class Text
 
         var newText = new Text { Str = str };
         context.Add(newText);
+        context.SaveChanges();
         return newText;
     }
 }
