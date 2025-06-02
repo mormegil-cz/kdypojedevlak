@@ -2,6 +2,7 @@
 App_Data/cisjrdata
 App_Data/data-*
 App_Data/temp-*
+App_Data/*.db
 App_Data/.*
 
 # Production config
