@@ -113,14 +113,15 @@
                     var publicService = pointVariant.NetworkSpecificParameters.FirstOrDefault(p => p.Type == NetworkSpecificParameterPassage.CZPublicService);
                     var publicTransportOrderingCo = pointVariant.NetworkSpecificParameters.FirstOrDefault(p => p.Type == NetworkSpecificParameterPassage.CZPassengerPublicTransportOrderingCoName);
                     if (publicService?.Value == "1")
-                        return new { Icon = DisplayConsts.PublicTransportServiceIcon, Text = publicTransportOrderingCo?.Value ?? DisplayConsts.PublicTransportServiceDescription };
+                        return new { Icon = DisplayConsts.PublicTransportServiceIcon, Text = publicTransportOrderingCo?.Value ?? DisplayConsts.PublicTransportServiceDescription, Passage = publicTransportOrderingCo?.Passage };
                     else if (!String.IsNullOrEmpty(publicTransportOrderingCo?.Value))
-                        return new { Icon = DisplayConsts.PublicTransportCompanyIcon, Text = publicTransportOrderingCo.Value };
+                        return new { Icon = DisplayConsts.PublicTransportCompanyIcon, Text = publicTransportOrderingCo.Value, Passage = publicTransportOrderingCo.Passage };
                     else
                         return null;
                 })
                 .WhereNotNull()
-                .Distinct()
+                .GroupBy(n => new { n.Icon, n.Text })
+                .Select(n => new { Icon = n.Key.Icon, Text = n.Key.Text, From = n.FirstOrDefault()?.Passage?.Point, To = n.LastOrDefault()?.Passage?.Point })
                 .OrderBy(n => n.Icon)
                 .ThenBy(n => n.Text)
                 .ToList();
@@ -134,7 +135,12 @@
                         }
                         @foreach (var orderingCompany in publicTransportOrderingCompanies)
                         {
-                            <span class="note-icon" title="@orderingCompany.Text">@orderingCompany.Icon</span>
+                            var description = orderingCompany.Text;
+                            if (orderingCompany.From != Model.Points[0] || orderingCompany.To != Model.Points[^1])
+                            {
+                                description = $"{orderingCompany.From.Name} – {orderingCompany.To.Name}: {description}";
+                            }
+                            <span class="note-icon" title="@description">@orderingCompany.Icon</span>
                         }
                     </div>
                 }
