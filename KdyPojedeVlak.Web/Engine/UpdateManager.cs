@@ -69,39 +69,43 @@ public class UpdateManager
 
         while (!terminated)
         {
-            Dictionary<string, long> availableDataFiles;
-            try
-            {
-                availableDataFiles = CisjrUpdater.DownloadMissingFiles(basePath).Result;
-            }
-            catch (Exception ex)
-            {
-                DebugLog.LogProblem("Error downloading new schedule files: {0}", ex);
-                return;
-            }
-
-            try
-            {
-                using var serviceScope = serviceScopeFactory.CreateScope();
-                using var dbModelContext = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
-                dbModelContext.ChangeTracker.AutoDetectChangesEnabled = false;
-
-                DjrSchedule.ImportNewFiles(dbModelContext, availableDataFiles);
-
-                dbModelContext.SaveChanges();
-
-                dbModelContext.Database.ExecuteSqlRaw("PRAGMA optimize");
-            }
-            catch (Exception ex)
-            {
-                DebugLog.LogProblem("Error importing new schedule files: {0}", ex);
-                return;
-            }
+            TryUpdate();
 
             lock (sync)
             {
                 Monitor.Wait(sync, WakeupInterval);
             }
+        }
+    }
+
+    private void TryUpdate()
+    {
+        Dictionary<string, long> availableDataFiles;
+        try
+        {
+            availableDataFiles = CisjrUpdater.DownloadMissingFiles(basePath).Result;
+        }
+        catch (Exception ex)
+        {
+            DebugLog.LogProblem("Error downloading new schedule files: {0}", ex);
+            return;
+        }
+
+        try
+        {
+            using var serviceScope = serviceScopeFactory.CreateScope();
+            using var dbModelContext = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
+            dbModelContext.ChangeTracker.AutoDetectChangesEnabled = false;
+
+            DjrSchedule.ImportNewFiles(dbModelContext, availableDataFiles);
+
+            dbModelContext.SaveChanges();
+
+            dbModelContext.Database.ExecuteSqlRaw("PRAGMA optimize");
+        }
+        catch (Exception ex)
+        {
+            DebugLog.LogProblem("Error importing new schedule files: {0}", ex);
         }
     }
 }
