@@ -136,7 +136,7 @@
                         @foreach (var orderingCompany in publicTransportOrderingCompanies)
                         {
                             var description = orderingCompany.Text;
-                            if (orderingCompany.From != Model.Points[0] || orderingCompany.To != Model.Points[^1])
+                            if (orderingCompany.From != null && orderingCompany.To != null && (orderingCompany.From != Model.Points[0] || orderingCompany.To != Model.Points[^1]))
                             {
                                 description = $"{orderingCompany.From.Name} – {orderingCompany.To.Name}: {description}";
                             }
