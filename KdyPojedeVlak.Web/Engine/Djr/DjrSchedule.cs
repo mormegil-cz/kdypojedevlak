@@ -32,8 +32,9 @@ public static class DjrSchedule
         DebugLog.LogDebugMsg("Import done");
     }
 
-    public static void RenameAllCalendars(DbModelContext dbModelContext)
+    public static int RenameAllCalendars(DbModelContext dbModelContext)
     {
+        var changedCount = 0;
         foreach (var calendar in dbModelContext.CalendarDefinitions)
         {
             var newName = CalendarNamer.DetectName(calendar.Bitmap, calendar.StartDate, calendar.EndDate);
@@ -41,43 +42,56 @@ public static class DjrSchedule
             {
                 DebugLog.LogDebugMsg("Changed calendar name from '{0}' to '{1}'", calendar.Description, newName);
                 calendar.Description = newName;
+                ++changedCount;
             }
         }
         dbModelContext.SaveChanges();
+        return changedCount;
     }
 
-    public static void RecomputeYearLimits(DbModelContext dbModelContext)
+    public static int RecomputeYearLimits(DbModelContext dbModelContext)
     {
+        var changedCount = 0;
         foreach (var year in dbModelContext.TimetableYears)
         {
             var minDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Min(c => (DateTime?) c.StartDate);
             var maxDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Max(c => (DateTime?) c.EndDate);
 
+            var changed = false;
             if (minDate != null && year.MinDate > minDate)
             {
                 DebugLog.LogProblem("Changed MinDate for {0} from {1} to {2}", year.Year, year.MinDate, minDate);
                 year.MinDate = minDate.GetValueOrDefault();
+                changed = true;
             }
             if (maxDate != null && year.MaxDate < maxDate)
             {
                 DebugLog.LogProblem("Changed MaxDate for {0} from {1} to {2}", year.Year, year.MaxDate, maxDate);
                 year.MaxDate = maxDate.GetValueOrDefault();
+                changed = true;
             }
 
             if (minDate != null && year.MinDate != minDate)
             {
                 DebugLog.LogProblem("MinDate mismatch for {0}: {1} vs {2}", year.Year, year.MinDate, minDate);
+                changed = true;
             }
             if (maxDate != null && year.MaxDate != maxDate)
             {
                 DebugLog.LogProblem("MaxDate mismatch for {0}: {1} vs {2}", year.Year, year.MaxDate, maxDate);
+                changed = true;
             }
+
+            if (changed) ++changedCount;
         }
         dbModelContext.SaveChanges();
+
+        return changedCount;
     }
 
-    public static void ReloadPointCoordinates(DbModelContext dbModelContext)
+    public static int ReloadPointCoordinates(DbModelContext dbModelContext)
     {
+        var changedCount = 0;
         var pointCodebook = Program.PointCodebook;
         foreach (var point in dbModelContext.RoutingPoints)
         {
@@ -97,6 +111,7 @@ public static class DjrSchedule
                 DebugLog.LogDebugMsg("Filling missing coordinates for {0}", point.Code);
                 point.Latitude = lat;
                 point.Longitude = lon;
+                ++changedCount;
             }
             else
             {
@@ -106,6 +121,7 @@ public static class DjrSchedule
                 if (dist > 0.005)
                 {
                     DebugLog.LogProblem("Fixing wrong geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", point.Code, lat, lon, currLat, currLon, dist * 40000.0f / 360.0f, pointCodebookEntry.WikidataItem);
+                    ++changedCount;
                 }
 
                 point.Latitude = lat;
@@ -113,6 +129,8 @@ public static class DjrSchedule
             }
         }
         dbModelContext.SaveChanges();
+
+        return changedCount;
     }
 
     public static int FillMissingPointNames(DbModelContext dbModelContext)
