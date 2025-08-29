@@ -67,18 +67,18 @@ public class AdminController(IConfiguration configuration, DbModelContext dbMode
         switch (action)
         {
             case "RenameAllCalendars":
-                DjrSchedule.RenameAllCalendars(dbModelContext);
-                InfoMessage.RegisterMessage(TempData, MessageClass.Success, "Pojmenování všech kalendářů přepočítáno");
+                var changedCalendars = DjrSchedule.RenameAllCalendars(dbModelContext);
+                InfoMessage.RegisterMessage(TempData, MessageClass.Success, $"Pojmenování všech kalendářů přepočítáno, změněno {changedCalendars} kalendářů");
                 return RedirectToAction("Index");
 
             case "RecomputeYearLimits":
-                DjrSchedule.RecomputeYearLimits(dbModelContext);
-                InfoMessage.RegisterMessage(TempData, MessageClass.Success, "Rozsahy všech roků přepočítány");
+                var changedYears = DjrSchedule.RecomputeYearLimits(dbModelContext);
+                InfoMessage.RegisterMessage(TempData, MessageClass.Success, $"Rozsahy všech roků přepočítány, změněno {changedYears} roků");
                 return RedirectToAction("Index");
 
             case "ReloadPointCoordinates":
-                DjrSchedule.ReloadPointCoordinates(dbModelContext);
-                InfoMessage.RegisterMessage(TempData, MessageClass.Success, "Souřadnice všech bodů načteny z číselníku");
+                var changedPointCoords = DjrSchedule.ReloadPointCoordinates(dbModelContext);
+                InfoMessage.RegisterMessage(TempData, MessageClass.Success, $"Souřadnice všech bodů načteny z číselníku, změněno {changedPointCoords} bodů");
                 return RedirectToAction("Index");
 
             case "FillMissingPointNames":
