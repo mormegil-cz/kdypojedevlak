@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Microsoft.JSInterop.Infrastructure;
 
 namespace KdyPojedeVlak.Web.Engine.Algorithms;
 
@@ -28,7 +29,8 @@ public static class CalendarNamer
         SaturdayNonHoliday
     }
 
-    private static readonly string[] monthToRoman = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+    private static readonly string[] monthToRoman =
+        ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
     private static readonly HashSet<DateTime> holidays =
     [
@@ -175,7 +177,10 @@ public static class CalendarNamer
 
         { DayClass.All, _ => true },
         { DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt) },
-        { DayClass.Workday, dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt) },
+        {
+            DayClass.Workday,
+            dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt)
+        },
         { DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt) },
         { DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt) },
         { DayClass.NonSaturdayHoliday, dt => dt.DayOfWeek != DayOfWeek.Saturday && holidays.Contains(dt) },
@@ -185,9 +190,15 @@ public static class CalendarNamer
     {
         public readonly SortedSet<DateTime> YesDates = [];
         public readonly SortedSet<DateTime> NoDates = [];
+        public readonly SortedSet<DateTime> DontCareDates = [];
     }
 
-    private record NamingResult(string Name, SortedSet<DateTime> ExceptionalGo, SortedSet<DateTime> ExceptionalNoGo);
+    private record NamingResult(
+        string Name,
+        SortedSet<DateTime> ExceptionalGo,
+        SortedSet<DateTime> ExceptionalNoGo,
+        SortedSet<DateTime> NormalGo,
+        SortedSet<DateTime> NormalNoGo);
 
     private static readonly List<Func<Dictionary<DayClass, ClassPresence>, NamingResult>> namingStrategies =
     [
@@ -204,62 +215,90 @@ public static class CalendarNamer
         var resultName = new StringBuilder(7);
         var exceptionalGo = new SortedSet<DateTime>();
         var exceptionalNoGo = new SortedSet<DateTime>();
+        var normalGo = new SortedSet<DateTime>();
+        var normalNoGo = new SortedSet<DateTime>();
         for (DayClass cls = DayClass.Monday; cls <= DayClass.Sunday; ++cls)
         {
             var presence = classPresences[cls];
             if (presence.YesDates.Count >= presence.NoDates.Count)
             {
                 // U+2460 = ①
-                resultName.Append((char) (((int) cls) - ((int) DayClass.Monday) + 0x2460));
+                resultName.Append((char)(((int)cls) - ((int)DayClass.Monday) + 0x2460));
+                normalGo.AddAll(presence.YesDates);
                 exceptionalNoGo.AddAll(presence.NoDates);
             }
             else
             {
                 exceptionalGo.AddAll(presence.YesDates);
+                normalNoGo.AddAll(presence.NoDates);
             }
         }
 
         return new NamingResult(
             resultName.ToString(),
             exceptionalGo,
-            exceptionalNoGo
+            exceptionalNoGo,
+            normalGo,
+            normalNoGo
         );
     }
 
     private static NamingResult EverydayStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
         "denně",
         Sets<DateTime>.EmptySortedSet,
-        classPresences[DayClass.All].NoDates
+        classPresences[DayClass.All].NoDates,
+        classPresences[DayClass.All].YesDates,
+        Sets<DateTime>.EmptySortedSet
     );
 
     private static NamingResult WorkdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
         "⚒\uFE0E",
-        new SortedSet<DateTime>(classPresences[DayClass.Holiday].YesDates.Concat(classPresences[DayClass.Saturday].YesDates)),
-        classPresences[DayClass.Workday].NoDates
+        new SortedSet<DateTime>(classPresences[DayClass.Holiday].YesDates
+            .Concat(classPresences[DayClass.Saturday].YesDates)),
+        classPresences[DayClass.Workday].NoDates,
+        classPresences[DayClass.Workday].YesDates,
+        classPresences[DayClass.Workday].DontCareDates
     );
 
     private static NamingResult WorkdaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
         "⚒\uFE0E⑥",
-        new SortedSet<DateTime>(classPresences[DayClass.Sunday].YesDates.Concat(classPresences[DayClass.NonSaturdayHoliday].YesDates)),
-        new SortedSet<DateTime>(classPresences[DayClass.Workday].NoDates.Concat(classPresences[DayClass.Saturday].NoDates))
+        new SortedSet<DateTime>(classPresences[DayClass.Sunday].YesDates
+            .Concat(classPresences[DayClass.NonSaturdayHoliday].YesDates)),
+        new SortedSet<DateTime>(classPresences[DayClass.Workday].NoDates
+            .Concat(classPresences[DayClass.Saturday].NoDates)),
+        new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates
+            .Concat(classPresences[DayClass.Saturday].YesDates)),
+        IntersectOf(classPresences[DayClass.Workday].DontCareDates, classPresences[DayClass.Saturday].DontCareDates)
     );
 
     private static NamingResult HolidaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
         "✝\uFE0E",
-        new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates.Concat(classPresences[DayClass.SaturdayNonHoliday].YesDates)),
-        new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates)
+        new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates
+            .Concat(classPresences[DayClass.SaturdayNonHoliday].YesDates)),
+        new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates),
+        new SortedSet<DateTime>(classPresences[DayClass.Holiday].YesDates),
+        new SortedSet<DateTime>(classPresences[DayClass.Holiday].DontCareDates)
     );
 
     private static NamingResult HolidaysAndSaturdaysStrategy(Dictionary<DayClass, ClassPresence> classPresences) => new(
         "✝\uFE0E⑥",
         new SortedSet<DateTime>(classPresences[DayClass.Workday].YesDates),
-        new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates.Concat(classPresences[DayClass.SaturdayNonHoliday].NoDates))
+        new SortedSet<DateTime>(classPresences[DayClass.Holiday].NoDates
+            .Concat(classPresences[DayClass.SaturdayNonHoliday].NoDates)),
+        new SortedSet<DateTime>(classPresences[DayClass.Holiday].YesDates
+            .Concat(classPresences[DayClass.SaturdayNonHoliday].YesDates)),
+        IntersectOf(classPresences[DayClass.Holiday].DontCareDates,
+            classPresences[DayClass.SaturdayNonHoliday].DontCareDates)
     );
 
-    private static Predicate<DateTime> MakeDayClassifier(DayOfWeek dayOfWeek)
+    private static SortedSet<T> IntersectOf<T>(IEnumerable<T> list1, IEnumerable<T> list2)
     {
-        return dt => dt.DayOfWeek == dayOfWeek;
+        var result = new SortedSet<T>(list1);
+        result.IntersectWith(list2);
+        return result;
     }
+
+    private static Predicate<DateTime> MakeDayClassifier(DayOfWeek dayOfWeek) => dt => dt.DayOfWeek == dayOfWeek;
 
     public static string DetectName(bool[] calendarBitmap, DateTime validFrom, DateTime validTo)
     {
@@ -280,7 +319,8 @@ public static class CalendarNamer
                         .Select((active, dayIndex) => (Active: active, Date: validFrom.AddDays(dayIndex)))
                         .Where(r => r.Active)
                         .Select(r => r.Date)
-                )
+                ),
+                []
             ).ToString();
         }
 
@@ -289,9 +329,11 @@ public static class CalendarNamer
             return "jede denně";
         }
 
-        var classes = new Dictionary<DayClass, ClassPresence>(Enum.GetValues(typeof(DayClass)).Length);
+        // for each class of days, separate the set of all days in the class to going and non-going days 
+        var classes = Enum.GetValues(typeof(DayClass)).Cast<DayClass>()
+            .ToDictionary(cls => cls, _ => new ClassPresence());
 
-        var dayCount = (int) ((validTo - validFrom).TotalDays) + 1;
+        var dayCount = (int)((validTo - validFrom).TotalDays) + 1;
         DateTime? firstGoDate = null;
         DateTime? lastGoDate = null;
         for (int dayIndex = 0; dayIndex < dayCount; ++dayIndex)
@@ -307,16 +349,15 @@ public static class CalendarNamer
 
             foreach (var classifier in classifiers)
             {
-                if (!classes.TryGetValue(classifier.Key, out var cls))
-                {
-                    cls = new ClassPresence();
-                    classes.Add(classifier.Key, cls);
-                }
-
+                var classPresence = classes[classifier.Key];
                 if (classifier.Value(day))
                 {
-                    if (bitmapValue) cls.YesDates.Add(day);
-                    else cls.NoDates.Add(day);
+                    if (bitmapValue) classPresence.YesDates.Add(day);
+                    else classPresence.NoDates.Add(day);
+                }
+                else
+                {
+                    classPresence.DontCareDates.Add(day);
                 }
             }
         }
@@ -324,6 +365,7 @@ public static class CalendarNamer
         Debug.Assert(firstGoDate != null);
         Debug.Assert(lastGoDate != null);
 
+        // now try to find the best naming strategy for the calendar
         NamingResult? bestNaming = null;
         var bestScore = Int32.MaxValue;
         var bestSuspendedStart = false;
@@ -383,13 +425,13 @@ public static class CalendarNamer
                 result.Append(" a ");
             }
 
-            AppendListOfDays(result, bestNaming.ExceptionalGo);
+            AppendListOfDays(result, bestNaming.ExceptionalGo, bestNaming.NormalGo);
         }
 
         if (bestNaming.ExceptionalNoGo.Count > 0)
         {
             result.Append(", nejede ");
-            AppendListOfDays(result, bestNaming.ExceptionalNoGo);
+            AppendListOfDays(result, bestNaming.ExceptionalNoGo, bestNaming.NormalNoGo);
         }
 
         if (bestScore > 10)
@@ -400,36 +442,79 @@ public static class CalendarNamer
         return result.ToString();
     }
 
-    private static StringBuilder AppendListOfDays(StringBuilder result, SortedSet<DateTime> dates)
+    private enum RunState
+    {
+        Outside,
+        InsideRun,
+        InnerDontCare
+    }
+
+    private static StringBuilder AppendListOfDays(StringBuilder result, SortedSet<DateTime> dates,
+        SortedSet<DateTime> dontCareDates)
     {
         var currStart = DateTime.MinValue;
-        var prevDate = DateTime.MinValue;
+        var currEnd = DateTime.MinValue;
+        var prevDateAny = DateTime.MinValue;
         var currMonth = -1;
         var first = true;
+        var state = RunState.Outside; 
 
-        // TODO: Day ranges
-        foreach (var date in dates)
+        var allDates = new SortedSet<DateTime>(dates);
+        allDates.UnionWith(dontCareDates);
+        foreach (var date in allDates)
         {
-            if (prevDate == date.AddDays(-1))
+            var continues = prevDateAny == date.AddDays(-1);
+            var insideDate = dates.Contains(date);
+
+            if (continues)
             {
-                // continuing the previous run
-                prevDate = date;
+                if (insideDate)
+                {
+                    if (state == RunState.Outside)
+                    {
+                        currMonth = currStart <= DateTime.MinValue ? -1 : currEnd.Month;
+                        first = currStart <= DateTime.MinValue;
+                        currStart = date;
+                    }
+                    currEnd = date;
+                    state = RunState.InsideRun;
+                }
+                else
+                {
+                    state = state == RunState.Outside ? RunState.Outside : RunState.InnerDontCare;
+                }
             }
             else
             {
-                AppendDateRange(result, currStart, prevDate, currMonth, first);
+                if (state != RunState.Outside)
+                {
+                    AppendDateRange(result, currStart, currEnd, currMonth, first);
+                }
 
-                currMonth = currStart <= DateTime.MinValue ? -1 : prevDate.Month;
-                first = currStart <= DateTime.MinValue;
-                currStart = date;
-                prevDate = date;
+                if (insideDate)
+                {
+                    state = RunState.InsideRun;
+                    currMonth = currStart <= DateTime.MinValue ? -1 : currEnd.Month;
+                    first = currStart <= DateTime.MinValue;
+                    currStart = date;
+                    currEnd = date;
+                }
+                else
+                {
+                    state = RunState.Outside;
+                }
             }
+
+            prevDateAny = date;
         }
 
-        AppendDateRange(result, currStart, prevDate, currMonth, first);
+        if (state != RunState.Outside)
+        {
+            AppendDateRange(result, currStart, currEnd, currMonth, first);
+        }
 
         result.Append('\u00A0');
-        result.Append(monthToRoman[prevDate.Month]);
+        result.Append(monthToRoman[currEnd.Month]);
         result.Append('.');
 
         return result;
