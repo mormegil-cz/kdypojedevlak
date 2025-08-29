@@ -394,7 +394,7 @@ public static class CalendarNamer
 
         if (bestScore > 10)
         {
-            DebugLog.LogProblem("Suspicious calendar: " + result);
+            DebugLog.LogProblem("Suspicious calendar: {0}", result);
         }
 
         return result.ToString();

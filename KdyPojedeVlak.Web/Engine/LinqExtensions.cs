@@ -18,7 +18,7 @@ public static class LinqExtensions
             if (destination.ContainsKey(key))
             {
                 // WTF?
-                DebugLog.LogProblem($"Duplicate key '{key}' when preparing dictionary");
+                DebugLog.LogProblem("Duplicate key '{0}' when preparing dictionary", key);
             }
             else
             {

@@ -105,7 +105,7 @@ public static class DjrSchedule
                 var dist = Math.Abs(lat - currLat) + Math.Abs(lon - currLon);
                 if (dist > 0.005)
                 {
-                    DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Fixing wrong geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", point.Code, lat, lon, currLat, currLon, dist * 40000.0f / 360.0f, pointCodebookEntry.WikidataItem));
+                    DebugLog.LogProblem("Fixing wrong geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", point.Code, lat, lon, currLat, currLon, dist * 40000.0f / 360.0f, pointCodebookEntry.WikidataItem);
                 }
 
                 point.Latitude = lat;
@@ -123,18 +123,18 @@ public static class DjrSchedule
         {
             if (point.Name != "#" + point.ShortCzechIdentifier)
             {
-                DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious name for point {0}: {1}", point.Code, point.Name));
+                DebugLog.LogProblem("Suspicious name for point {0}: {1}", point.Code, point.Name);
                 continue;
             }
 
             var codebookEntry = pointCodebook.Find(point.Code);
             if (codebookEntry == null)
             {
-                DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Unknown name for point {0}", point.Code));
+                DebugLog.LogProblem("Unknown name for point {0}", point.Code);
             }
             else
             {
-                DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Fixing name for point {0}: {1} → {2}", point.Code, point.Name, codebookEntry.LongName));
+                DebugLog.LogProblem("Fixing name for point {0}: {1} → {2}", point.Code, point.Name, codebookEntry.LongName);
                 point.Name = codebookEntry.LongName;
                 ++count;
             }

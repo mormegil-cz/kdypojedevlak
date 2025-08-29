@@ -304,7 +304,7 @@ public class PointCodebook(string path)
                     var dist = Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude);
                     if (dist > 0.005)
                     {
-                        DebugLog.LogProblem(String.Format(CultureInfo.InvariantCulture, "Suspicious geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f, row.ItemQ));
+                        DebugLog.LogProblem("Suspicious geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f, row.ItemQ);
                         problematicPoints.Add(entry.FullIdentifier);
                     }
                 }
