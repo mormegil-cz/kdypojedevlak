@@ -1,10 +1,12 @@
 using System;
 using System.Linq;
+using JetBrains.Annotations;
 using KdyPojedeVlak.Web.Engine.Algorithms;
 using Xunit;
 
 namespace KdyPojedeVlak.Web.Tests.Engine.Algorithms;
 
+[TestSubject(typeof(CalendarNamer))]
 public class CalendarNamerTests
 {
     [Theory, ClassData(typeof(DetectNameTestCases))]
@@ -46,7 +48,7 @@ public class CalendarNamerTests
         {
             Add(new string('1', days), from, from.AddDays(days - 1), expected);
         }
-            
+
         private static DateTime Dt(int year, int month, int day) => new(year, month, day);
     }
 }

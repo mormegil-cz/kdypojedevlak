@@ -43,7 +43,7 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
 
             if (newestTrainByName == null)
             {
-                return View((object) "Vlak nebyl nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
+                return View((object)"Vlak nebyl nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
             }
 
             return RedirectToAction("Details", new { id = newestTrainByName.TrainNumber, year = newestTrainByName.YearId });
@@ -60,7 +60,7 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
         }
         else
         {
-            return View((object) $"Vlak nebyl pro JŘ {year} nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
+            return View((object)$"Vlak nebyl pro JŘ {year} nalezen. Zadejte číslo vlaku, případně včetně uvedení typu, např. „12345“, „Os 12345“, „R135“ apod., popř. název vlaku");
         }
     }
 
@@ -71,7 +71,7 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
             var newestTrain = dbModelContext.TrainTimetables.Where(tt => tt.Train.Number == id).OrderByDescending(tt => tt.YearId).FirstOrDefault();
             if (newestTrain == null)
             {
-                return View((object) $"Vlak č. {id} nebyl nalezen.");
+                return View((object)$"Vlak č. {id} nebyl nalezen.");
             }
             return RedirectToAction("Details", new { id, year = newestTrain.YearId });
         }
@@ -83,7 +83,7 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
         }
         else
         {
-            return View((object) $"Vlak č. {id} nebyl pro JŘ {year} nalezen.");
+            return View((object)$"Vlak č. {id} nebyl pro JŘ {year} nalezen.");
         }
     }
 
@@ -95,17 +95,16 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
             .Set<TrainTimetableVariant>()
             .Where(ttv => dbModelContext.ImportedFiles.OrderByDescending(f => f.CreationDate).Take(limit).Contains(ttv.ImportedFrom))
             .OrderByDescending(ttv => ttv.ImportedFrom.CreationDate)
-            .Select(
-                ttv =>
-                    new BasicTrainInfo(
-                        ttv.Calendar.TimetableYearYear,
-                        ttv.Timetable.Train.Number,
-                        ttv.Timetable.Name,
-                        ttv.Points.OrderBy(np => np.Order).Select(np => np.Point.Name).FirstOrDefault(),
-                        ttv.Points.OrderByDescending(np => np.Order).Select(np => np.Point.Name).FirstOrDefault(),
-                        ttv.Timetable.TrainCategory,
-                        ttv.Timetable.TrafficType
-                    )
+            .Select(ttv =>
+                new BasicTrainInfo(
+                    ttv.Calendar.TimetableYearYear,
+                    ttv.Timetable.Train.Number,
+                    ttv.Timetable.Name,
+                    ttv.Points.OrderBy(np => np.Order).Select(np => np.Point.Name).FirstOrDefault(),
+                    ttv.Points.OrderByDescending(np => np.Order).Select(np => np.Point.Name).FirstOrDefault(),
+                    ttv.Timetable.TrainCategory,
+                    ttv.Timetable.TrafficType
+                )
             )
             .Take(limit)
             .ToList();
@@ -155,11 +154,10 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
             return RedirectToAction("Index", new { search = id, year });
         }
 
-        var pointsInVariants = timetable.Variants.Select(
-            variant => variant.Points
-                .OrderBy(p => p.Order)
-                .Select(point => point.Point)
-                .ToList()
+        var pointsInVariants = timetable.Variants.Select(variant => variant.Points
+            .OrderBy(p => p.Order)
+            .Select(point => point.Point)
+            .ToList()
         ).ToList();
 
         var points = new HashSet<RoutingPoint>(pointsInVariants.SelectMany(pl => pl.Where(p => p.Latitude != null))).Select(p => new JObject
@@ -225,7 +223,7 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
             .ThenInclude(ttv => ttv.Calendar)
             .Include(tt => tt.Variants)
             .ThenInclude(ttv => ttv.PttNotes)
-            .ThenInclude(n => ((NonCentralPttNoteForVariant) n).Text)
+            .ThenInclude(n => ((NonCentralPttNoteForVariant)n).Text)
             .Include(tt => tt.Variants)
             .Include(tt => tt.Variants)
             .ThenInclude(ttv => ttv.Cancellations)
@@ -255,16 +253,15 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
 
         var passagesInVariants = timetableVariants
             .OrderBy(variant => variant.ImportedFrom.CreationDate)
-            .Select(
-                variant => variant.Points
-                    .OrderBy(p => p.Order)
-                    .Select(point => point)
-                    .ToList()
+            .Select(variant => variant.Points
+                .OrderBy(p => p.Order)
+                .Select(point => point)
+                .ToList()
             ).ToList();
         var pointsInVariants = passagesInVariants.Select(variant => variant.Select(passage => passage.Point).ToList()).ToList();
         var pointList = ListMerger.MergeLists(pointsInVariants);
         var pointIndices = pointList
-            .Select(((point, index) => new { point, index }))
+            .Select((point, index) => new { point, index })
             .GroupBy(rp => rp.point)
             .ToDictionary(g => g.Key, g => g.Select(rp => rp.index).ToList());
 
@@ -272,28 +269,24 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
         foreach (var pointsInVariant in passagesInVariants)
         {
             var column = new Passage?[pointList.Count];
-            var usedPointIndices = new Dictionary<RoutingPoint, int>(pointList.Count);
-            var lastIndex = -1;
+
+            var rowIndex = 0;
             foreach (var point in pointsInVariant)
             {
-                var pointIndexList = pointIndices[point.Point];
-                usedPointIndices.TryGetValue(point.Point, out var currentPointIndex);
-                var pointIndex = pointIndexList[currentPointIndex];
-                usedPointIndices[point.Point] = currentPointIndex + 1;
-                if (column[pointIndex] != null)
+                if (rowIndex >= pointList.Count)
                 {
-                    DebugLog.LogProblem("Point #{0} ({1}) is duplicated after {2}", pointIndex, point.Point.Name, lastIndex);
-                    // throw new NotSupportedException("Cannot insert duplicate route point");
+                    DebugLog.LogProblem("No more points to find point {0}", point.Point.Name);
+                    break;
                 }
-
-                if (pointIndex < lastIndex)
+                var pointIndex = pointList.IndexOf(point.Point, rowIndex);
+                if (pointIndex < 0)
                 {
-                    DebugLog.LogProblem("Point #{0} ({1}) goes into reverse after {2}", pointIndex, point.Point.Name, lastIndex);
-                    //throw new NotSupportedException("Cannot go in reverse");
+                    DebugLog.LogProblem("Unable to find point {0} after index {1}", point.Point.Name, rowIndex);
+                    continue;
                 }
 
                 column[pointIndex] = point;
-                lastIndex = pointIndex;
+                rowIndex = pointIndex + 1;
             }
 
             columns.Add(column.ToList()!);

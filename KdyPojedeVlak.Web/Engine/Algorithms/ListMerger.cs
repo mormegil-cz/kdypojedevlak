@@ -7,24 +7,16 @@ namespace KdyPojedeVlak.Web.Engine.Algorithms;
 
 public static class ListMerger
 {
-    public static List<T> MergeLists<T>(List<List<T>> lists)
-    {
-        return Implementation<T>.MergeLists(lists);
-    }
+    public static List<T> MergeLists<T>(List<List<T>> lists) => Implementation<T>.MergeLists(lists);
 
     private static class Implementation<T>
     {
         private static readonly ListSection<T> emptyList = new([], 0, 0);
 
-        public static List<T> MergeLists(List<List<T>> lists)
-        {
-            ListSection<T> result = emptyList;
-            foreach (var list in lists)
-            {
-                result = MergeSingle(new ListSection<T>(list), result);
-            }
-            return result.ToList();
-        }
+        public static List<T> MergeLists(List<List<T>> lists) =>
+            lists
+                .Aggregate(emptyList, (current, list) => MergeSingle(new ListSection<T>(list), current))
+                .ToList();
 
         private static ListSection<T> MergeSingle(ListSection<T> left, ListSection<T> right)
         {
@@ -54,26 +46,16 @@ public static class ListMerger
         }
     }
 
-    private struct ListSection<T> : IReadOnlyCollection<T>
+    private readonly struct ListSection<T>(List<T> list, int start, int end) : IReadOnlyCollection<T>
     {
-        private readonly List<T> list;
-        private readonly int start;
-        private readonly int end;
+        private readonly List<T> list = list;
+        private readonly int start = start;
+        private readonly int end = end;
 
         public int Count => end - start;
 
-        public ListSection(List<T> list)
+        public ListSection(List<T> list) : this(list, 0, list.Count)
         {
-            this.list = list;
-            this.start = 0;
-            this.end = list.Count;
-        }
-
-        public ListSection(List<T> list, int start, int end)
-        {
-            this.list = list;
-            this.start = start;
-            this.end = end;
         }
 
         public ListSection<T> Concat(ListSection<T> other)
@@ -86,10 +68,7 @@ public static class ListMerger
                 : new ListSection<T>(Enumerable.Concat(this, other).ToList());
         }
 
-        public int IndexOf(T item)
-        {
-            return list.IndexOf(item, start, Count) - start;
-        }
+        public int IndexOf(T item) => list.IndexOf(item, start, Count) - start;
 
         public ListSection<T> Section(int innerStart) => Section(innerStart, Count);
 
@@ -97,20 +76,14 @@ public static class ListMerger
         {
             if (innerStart < 0) throw new ArgumentOutOfRangeException(nameof(innerStart), innerStart, "Start cannot be negative");
             if (innerStart > innerEnd) throw new ArgumentOutOfRangeException(nameof(innerEnd), innerEnd, "End must not be before start");
-            if (innerEnd > Count) throw new ArgumentOutOfRangeException(nameof(innerEnd), innerEnd, String.Format("End comes after the end of the {0}-element section", Count));
+            if (innerEnd > Count) throw new ArgumentOutOfRangeException(nameof(innerEnd), innerEnd, $"End comes after the end of the {Count}-element section");
 
             return new ListSection<T>(list, this.start + innerStart, this.start + innerEnd);
         }
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            return list.Skip(start).Take(Count).GetEnumerator();
-        }
+        public IEnumerator<T> GetEnumerator() => list.Skip(start).Take(Count).GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public T this[int i] =>
             i < 0 || i >= Count
