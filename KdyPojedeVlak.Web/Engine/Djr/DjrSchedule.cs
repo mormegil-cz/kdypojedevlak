@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -54,8 +52,8 @@ public static class DjrSchedule
         var changedCount = 0;
         foreach (var year in dbModelContext.TimetableYears)
         {
-            var minDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Min(c => (DateTime?) c.StartDate);
-            var maxDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Max(c => (DateTime?) c.EndDate);
+            var minDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Min(c => (DateTime?)c.StartDate);
+            var maxDate = dbModelContext.CalendarDefinitions.Where(c => c.TimetableYear == year).Max(c => (DateTime?)c.EndDate);
 
             var changed = false;
             if (minDate != null && year.MinDate > minDate)
@@ -120,7 +118,8 @@ public static class DjrSchedule
                 var dist = Math.Abs(lat - currLat) + Math.Abs(lon - currLon);
                 if (dist > 0.005)
                 {
-                    DebugLog.LogProblem("Fixing wrong geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", point.Code, lat, lon, currLat, currLon, dist * 40000.0f / 360.0f, pointCodebookEntry.WikidataItem);
+                    DebugLog.LogProblem("Fixing wrong geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", point.Code, lat, lon, currLat, currLon, dist * 40000.0f / 360.0f,
+                        pointCodebookEntry.WikidataItem);
                     ++changedCount;
                 }
 
@@ -269,7 +268,8 @@ public static class DjrSchedule
         using var xmlReader = XmlReader.Create(stream);
 
         xmlReader.MoveToContent();
-        if (xmlReader.NodeType != XmlNodeType.Element || !String.IsNullOrEmpty(xmlReader.NamespaceURI)) throw new FormatException($"Unexpected XML file content: {xmlReader.NodeType} {xmlReader.NamespaceURI} {xmlReader.LocalName}");
+        if (xmlReader.NodeType != XmlNodeType.Element || !String.IsNullOrEmpty(xmlReader.NamespaceURI))
+            throw new FormatException($"Unexpected XML file content: {xmlReader.NodeType} {xmlReader.NamespaceURI} {xmlReader.LocalName}");
 
         var ser = xmlReader.LocalName switch
         {
@@ -278,7 +278,7 @@ public static class DjrSchedule
             _ => throw new FormatException($"Unsupported XML element: ${xmlReader.LocalName}")
         };
 
-        return (CZPTTCISMessageBase) ser.Deserialize(xmlReader)!;
+        return (CZPTTCISMessageBase)ser.Deserialize(xmlReader)!;
     }
 
     private static string? ImportTrainToDatabase(CZPTTCISMessage message, ImportedFile importedFile, DbModelContext dbModelContext)
@@ -384,7 +384,8 @@ public static class DjrSchedule
         var locationIndex = 0;
         RoutingPoint? prevPoint = null;
         var passages = new Dictionary<string, List<Passage>>(message.CZPTTInformation.CZPTTLocation.Count);
-        foreach (var locationDirect in LinqExtensions.ConcatExisting<LocationBasicInfo>(message.CZPTTHeader?.CZForeignOriginLocation, message.CZPTTInformation.CZPTTLocation, message.CZPTTHeader?.CZForeignDestinationLocation))
+        foreach (var locationDirect in LinqExtensions.ConcatExisting<LocationBasicInfo>(message.CZPTTHeader?.CZForeignOriginLocation, message.CZPTTInformation.CZPTTLocation,
+                     message.CZPTTHeader?.CZForeignDestinationLocation))
         {
             var locationData = locationDirect.Location ?? locationDirect;
             if (String.IsNullOrWhiteSpace(locationData.CountryCodeISO) || String.IsNullOrWhiteSpace(locationData.LocationPrimaryCode)) throw new FormatException("Missing location identifiers");
@@ -533,7 +534,9 @@ public static class DjrSchedule
         if (networkSpecificParameters != null)
         {
             // 0. List<string> → List<string[]>
-            var calendarDefinitionPieces = networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZCalendarPTTNote.ToString(), out var calendarPttNoteDefinitionLines) ? calendarPttNoteDefinitionLines.Select(line => line.Split('|')).ToList() : null;
+            var calendarDefinitionPieces = networkSpecificParameters.TryGetValue(NetworkSpecificParameterGlobal.CZCalendarPTTNote.ToString(), out var calendarPttNoteDefinitionLines)
+                ? calendarPttNoteDefinitionLines.Select(line => line.Split('|')).ToList()
+                : null;
 
             // 1. List<string> → Dictionary<string, string>
             var calendarDefinitionStrings = calendarDefinitionPieces == null ? null : MergeNetworkSpecificCalendarDefinitions(calendarDefinitionPieces);
@@ -596,7 +599,7 @@ public static class DjrSchedule
                 .Where(ttv => ttv.YearId == cancellation.Calendar.TimetableYearYear
                               && ttv.TrainVariantId == cancellation.TrainVariantId
                               && ttv.PathVariantId == cancellation.PathVariantId)
-                .Select(ttv => (int?) ttv.Id)
+                .Select(ttv => (int?)ttv.Id)
                 .SingleOrDefault();
             if (trainTimetableVariantId == null)
             {
@@ -669,7 +672,8 @@ public static class DjrSchedule
         return result;
     }
 
-    private static IDictionary<string, CalendarDefinition> ParseNetworkSpecificCalendarDefinitions(IDictionary<string, string[]> calendarDefinitionStrings, TimetableYear dbTimetableYear, DbModelContext dbModelContext)
+    private static IDictionary<string, CalendarDefinition> ParseNetworkSpecificCalendarDefinitions(IDictionary<string, string[]> calendarDefinitionStrings, TimetableYear dbTimetableYear,
+        DbModelContext dbModelContext)
     {
         var pttNoteCalendars = new Dictionary<string, CalendarDefinition>(calendarDefinitionStrings.Count);
         foreach (var def in calendarDefinitionStrings)
@@ -697,7 +701,8 @@ public static class DjrSchedule
         return pttNoteCalendars;
     }
 
-    private static CentralPttNoteForVariant ParseCentralPttNoteDefinition(string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition>? calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
+    private static CentralPttNoteForVariant ParseCentralPttNoteDefinition(string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition>? calendarDefinitions,
+        TrainTimetableVariant trainTimetableVariant)
     {
         var pieces = definition.Split('|');
 
@@ -725,7 +730,8 @@ public static class DjrSchedule
         };
     }
 
-    private static NonCentralPttNoteForVariant ParseNonCentralPttNoteDefinition(DbModelContext dbModelContext, string definition, Dictionary<string, List<Passage>> passages, IDictionary<string, CalendarDefinition>? calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
+    private static NonCentralPttNoteForVariant ParseNonCentralPttNoteDefinition(DbModelContext dbModelContext, string definition, Dictionary<string, List<Passage>> passages,
+        IDictionary<string, CalendarDefinition>? calendarDefinitions, TrainTimetableVariant trainTimetableVariant)
     {
         var pieces = definition.Split('|');
 

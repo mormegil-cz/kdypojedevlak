@@ -1,11 +1,8 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Microsoft.JSInterop.Infrastructure;
 
 namespace KdyPojedeVlak.Web.Engine.Algorithms;
 
@@ -457,7 +454,7 @@ public static class CalendarNamer
         var prevDateAny = DateTime.MinValue;
         var currMonth = -1;
         var first = true;
-        var state = RunState.Outside; 
+        var state = RunState.Outside;
 
         var allDates = new SortedSet<DateTime>(dates);
         allDates.UnionWith(dontCareDates);
@@ -476,6 +473,7 @@ public static class CalendarNamer
                         first = currStart <= DateTime.MinValue;
                         currStart = date;
                     }
+
                     currEnd = date;
                     state = RunState.InsideRun;
                 }

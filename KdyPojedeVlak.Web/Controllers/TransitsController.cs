@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using KdyPojedeVlak.Web.Engine.DbStorage;
@@ -94,8 +92,7 @@ public class TransitsController(DbModelContext dbModelContext) : Controller
             .Select(g => g
                 .Where(p => p.TrainTimetableVariant.Calendar.EndDate >= now)
                 .OrderByDescending(p => p.TrainTimetableVariant.ImportedFrom.CreationDate)
-                .Select(
-                    p => new NearestTransits.Transit(
+                .Select(p => new NearestTransits.Transit(
                         p.TrainTimetableVariant.Calendar.TimetableYearYear,
                         p.TrainTimetableVariant.Calendar,
                         p.ArrivalTime,
@@ -164,7 +161,7 @@ public class TransitsController(DbModelContext dbModelContext) : Controller
         var bitmap = calendar.Bitmap;
         if (bitmap == null) return true;
 
-        var offset = (int) day.AddDays(-dayOffset).Subtract(calendar.StartDate).TotalDays;
+        var offset = (int)day.AddDays(-dayOffset).Subtract(calendar.StartDate).TotalDays;
         if (offset < 0 || offset >= bitmap.Length) return false;
         return bitmap[offset];
     }
@@ -179,8 +176,7 @@ public class TransitsController(DbModelContext dbModelContext) : Controller
             .Select(np => np.FullIdentifier)
             .Where(id => !neighborCodes.Contains(id))
             .ToList();
-        return dbModelContext.RoutingPoints.Where(
-            rp => nearestPointCodes.Contains(rp.Code)
+        return dbModelContext.RoutingPoints.Where(rp => nearestPointCodes.Contains(rp.Code)
         ).ToList();
     }
 }

@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -42,7 +41,8 @@ public static class LinqExtensions
         foreach (var key in keys) dictionary.Remove(key);
     }
 
-    public static IEnumerable<T> ConcatExisting<T>(params IEnumerable<T>?[] sequences) => sequences.Where(s => s != null).SelectMany(s => s!);
+    public static IEnumerable<T> ConcatExisting<T>(params IEnumerable<T>?[] sequences) =>
+        sequences.Where(s => s != null).SelectMany(s => s!);
 
     public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> sequence)
         where T : notnull

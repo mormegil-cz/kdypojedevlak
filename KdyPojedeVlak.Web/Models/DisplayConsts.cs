@@ -6,7 +6,7 @@ namespace KdyPojedeVlak.Web.Models;
 
 public static class DisplayConsts
 {
-    public static readonly FrozenDictionary<TrainOperation, string?> TrainOperationIcons = new Dictionary<TrainOperation, string>
+    public static readonly FrozenDictionary<TrainOperation, string?> TrainOperationIcons = new Dictionary<TrainOperation, string?>
     {
         { TrainOperation.Unknown, null },
         { TrainOperation.StopRequested, null },

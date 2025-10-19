@@ -9,6 +9,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>default</LangVersion>
     <RootNamespace>KdyPojedeVlak.Web</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <None Update="wwwroot\**\*;Views\**\*;Areas\**\Views">

@@ -1,10 +1,7 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Linq;
 using KdyPojedeVlak.Web.Engine.DbStorage;
 using KdyPojedeVlak.Web.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace KdyPojedeVlak.Web.Engine;
 
@@ -21,7 +18,7 @@ public static class ScheduleVersionInfo
     {
         lock (syncObj)
         {
-            latestImport = dbModelContext.ImportedFiles.Max(f => (DateTime?) f.ImportTime) ?? DateTime.MinValue;
+            latestImport = dbModelContext.ImportedFiles.Max(f => (DateTime?)f.ImportTime) ?? DateTime.MinValue;
             var newestFile = dbModelContext.ImportedFiles.OrderByDescending(f => f.CreationDate).FirstOrDefault();
             if (newestFile == null)
             {

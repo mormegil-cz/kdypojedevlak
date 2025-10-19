@@ -1,5 +1,3 @@
-#nullable enable
-
 using System;
 
 namespace KdyPojedeVlak.Web.Models;
