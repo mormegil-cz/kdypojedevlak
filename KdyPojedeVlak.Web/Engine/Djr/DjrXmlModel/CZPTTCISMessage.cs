@@ -20,7 +20,7 @@ public class CZPTTCISMessage : CZPTTCISMessageBase
 {
     public Identifiers Identifiers { get; set; }
     public DateTime CZPTTCreation { get; set; }
-    public CZPTTHeader CZPTTHeader { get; set; }
+    public CZPTTHeader? CZPTTHeader { get; set; }
     public CZPTTInformation CZPTTInformation { get; set; }
 
     [XmlElement]
@@ -94,13 +94,13 @@ public class LocationData
 {
     public string CountryCodeISO { get; set; }
     public string LocationPrimaryCode { get; set; }
-    public string PrimaryLocationName { get; set; }
-    public LocationSubsidiaryIdentification LocationSubsidiaryIdentification { get; set; }
+    public string? PrimaryLocationName { get; set; }
+    public LocationSubsidiaryIdentification? LocationSubsidiaryIdentification { get; set; }
 }
 
 public abstract class LocationBasicInfo : LocationData
 {
-    public LocationData Location { get; set; }
+    public LocationData? Location { get; set; }
 }
 
 public class CZPTTLocation : LocationBasicInfo
@@ -108,16 +108,16 @@ public class CZPTTLocation : LocationBasicInfo
     [XmlAttribute]
     public string JourneyLocationTypeCode { get; set; }
 
-    public TimingAtLocation TimingAtLocation { get; set; }
+    public TimingAtLocation? TimingAtLocation { get; set; }
     public string ResponsibleRU { get; set; }
     public string ResponsibleIM { get; set; }
     public string TrainType { get; set; }
-    public string TrafficType { get; set; }
-    public string CommercialTrafficType { get; set; }
-    public string OperationalTrainNumber { get; set; }
+    public string? TrafficType { get; set; }
+    public string? CommercialTrafficType { get; set; }
+    public string? OperationalTrainNumber { get; set; }
 
     [XmlElement]
-    public List<TrainActivity> TrainActivity { get; set; }
+    public List<TrainActivity>? TrainActivity { get; set; }
 
     [XmlElement]
     public List<NetworkSpecificParameter> NetworkSpecificParameter { get; set; }
@@ -129,7 +129,7 @@ public class CZForeignLocation : LocationBasicInfo
 
 public class LocationSubsidiaryIdentification
 {
-    public LocationSubsidiaryCode LocationSubsidiaryCode { get; set; }
+    public LocationSubsidiaryCode? LocationSubsidiaryCode { get; set; }
     public string LocationSubsidiaryName { get; set; }
     public string AllocationCompany { get; set; }
 }
@@ -148,7 +148,7 @@ public class TimingAtLocation
     public decimal? DwellTime { get; set; }
 
     [XmlElement]
-    public List<Timing> Timing { get; set; }
+    public List<Timing>? Timing { get; set; }
 }
 
 public class Timing : IEquatable<Timing>
@@ -161,7 +161,7 @@ public class Timing : IEquatable<Timing>
 
     public TimeSpan ToTimeSpan => AsTimeSpan().Add(TimeSpan.FromDays(Offset));
 
-    public bool Equals(Timing other) => other != null && other.ToTimeSpan.Equals(ToTimeSpan);
+    public bool Equals(Timing? other) => other != null && other.ToTimeSpan.Equals(ToTimeSpan);
 
     public TimeSpan AsTimeSpan() => DateTimeOffset.ParseExact(Time, @"HH:mm:ss.fffffffzzz", CultureInfo.InvariantCulture).TimeOfDay;
 }

@@ -9,39 +9,37 @@ namespace KdyPojedeVlak.Web.Engine;
 public static class DebugLog
 {
     private static readonly bool logDisabled = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOG") == "disabled";
-    private static readonly string logFilename = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOGFILE");
+    private static readonly string? logFilename = Environment.GetEnvironmentVariable("KDYPOJEDEVLAK_LOGFILE");
     private static readonly Lock initLock = new();
-    private static volatile TextWriter logWriter;
+    private static volatile TextWriter? logWriter;
 
     private static TextWriter InitLogWriter()
     {
-        if (logDisabled || logWriter != null) return logWriter;
+        if (logWriter != null) return logWriter;
 
         lock (initLock)
         {
             if (logWriter != null) return logWriter;
 
-            if (logFilename == null)
+            if (logDisabled || logFilename == null)
             {
-                logWriter = Console.Out;
-                return logWriter;
+                return logWriter = Console.Out;
             }
 
             try
             {
-                logWriter = new StreamWriter(logFilename, false, Encoding.UTF8);
-                return logWriter;
+                // ReSharper disable once PossibleMultipleWriteAccessInDoubleCheckLocking
+                return logWriter = new StreamWriter(logFilename, false, Encoding.UTF8);
             }
             catch (IOException e)
             {
                 Console.Error.WriteLine("Error opening log file: " + e);
-                logWriter = null;
                 return Console.Error;
             }
         }
     }
 
-    private static void WriteLogMessage(string type, string msgFormat, params object[] args)
+    private static void WriteLogMessage(string type, string msgFormat, params object?[] args)
     {
         if (logDisabled) return;
 
@@ -63,7 +61,7 @@ public static class DebugLog
         WriteLogMessage("WARN", "{0}", msg);
     }
 
-    public static void LogProblem(string msgFormat, params object[] args)
+    public static void LogProblem(string msgFormat, params object?[] args)
     {
         WriteLogMessage("WARN", msgFormat, args);
     }
@@ -73,7 +71,7 @@ public static class DebugLog
         WriteLogMessage("DEBUG", "{0}", msg);
     }
 
-    public static void LogDebugMsg(string msgFormat, params object[] args)
+    public static void LogDebugMsg(string msgFormat, params object?[] args)
     {
         WriteLogMessage("DEBUG", msgFormat, args);
     }

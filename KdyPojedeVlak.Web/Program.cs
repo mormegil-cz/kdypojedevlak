@@ -1,5 +1,4 @@
-﻿using System.IO;
-using KdyPojedeVlak.Web.Engine.SR70;
+﻿using KdyPojedeVlak.Web.Engine.SR70;
 using KdyPojedeVlak.Web.Engine.Uic;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -9,8 +8,8 @@ namespace KdyPojedeVlak.Web;
 public class Program
 {
     // TODO: Dependency injection
-    public static PointCodebook PointCodebook;
-    public static CompanyCodebook CompanyCodebook;
+    public static PointCodebook PointCodebook = null!;
+    public static CompanyCodebook CompanyCodebook = null!;
 
     public static void Main(string[] args)
     {

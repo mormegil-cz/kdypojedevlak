@@ -335,13 +335,13 @@ public static class DjrSchedule
             Bitmap = calendarBitmap
         });
 
-        var trainCategories = message.CZPTTInformation.CZPTTLocation.Where(loc => loc.CommercialTrafficType != null).Select(loc => defTrainCategory[loc.CommercialTrafficType]).ToHashSet();
+        var trainCategories = message.CZPTTInformation.CZPTTLocation.Where(loc => loc.CommercialTrafficType != null).Select(loc => defTrainCategory[loc.CommercialTrafficType!]).ToHashSet();
         if (trainCategories.Count > 1)
         {
             DebugLog.LogProblem("Train {0} contains {1} categories", trainIdentifier, trainCategories.Count);
         }
 
-        var trafficTypes = message.CZPTTInformation.CZPTTLocation.Where(loc => loc.TrafficType != null).Select(loc => defTrafficType[loc.TrafficType]).ToHashSet();
+        var trafficTypes = message.CZPTTInformation.CZPTTLocation.Where(loc => loc.TrafficType != null).Select(loc => defTrafficType[loc.TrafficType!]).ToHashSet();
         if (trafficTypes.Count > 1)
         {
             DebugLog.LogProblem("Train {0} contains {1} traffic types", trainIdentifier, trafficTypes.Count);
@@ -389,14 +389,14 @@ public static class DjrSchedule
         {
             var locationData = locationDirect.Location ?? locationDirect;
             if (String.IsNullOrWhiteSpace(locationData.CountryCodeISO) || String.IsNullOrWhiteSpace(locationData.LocationPrimaryCode)) throw new FormatException("Missing location identifiers");
-            var locationRawID = locationData.CountryCodeISO + locationData.LocationPrimaryCode;
-            var locationID = locationData.CountryCodeISO + ":" + locationData.LocationPrimaryCode;
-            var dbPoint = dbModelContext.RoutingPoints.SingleOrDefault(rp => rp.Code == locationID);
+            var locationRawId = locationData.CountryCodeISO + locationData.LocationPrimaryCode;
+            var locationId = locationData.CountryCodeISO + ":" + locationData.LocationPrimaryCode;
+            var dbPoint = dbModelContext.RoutingPoints.SingleOrDefault(rp => rp.Code == locationId);
             if (dbPoint == null)
             {
-                var codebookEntry = Program.PointCodebook.Find(locationID) ?? new PointCodebookEntry
+                var codebookEntry = Program.PointCodebook.Find(locationId) ?? new PointCodebookEntry
                 {
-                    ID = locationID,
+                    ID = locationId,
                     LongName = locationData.PrimaryLocationName ?? $"#{locationData.LocationPrimaryCode}",
                     ShortName = locationData.PrimaryLocationName,
                     Type = locationData.CountryCodeISO == "CZ" ? PointType.Unknown : PointType.Point
@@ -404,7 +404,7 @@ public static class DjrSchedule
 
                 dbPoint = new RoutingPoint
                 {
-                    Code = locationID,
+                    Code = locationId,
                     Name = codebookEntry.LongName,
                     Latitude = codebookEntry.Latitude,
                     Longitude = codebookEntry.Longitude,
@@ -426,7 +426,7 @@ public static class DjrSchedule
             if ((locationFull?.TrainActivity?.Count ?? 0) > 0)
             {
                 trainOperations = new SortedSet<TrainOperation>();
-                foreach (var activity in locationFull!.TrainActivity)
+                foreach (var activity in locationFull!.TrainActivity!)
                 {
                     trainOperations.Add(defTrainOperation[activity.TrainActivityType]);
                 }
@@ -485,7 +485,7 @@ public static class DjrSchedule
                     ?.LocationSubsidiaryTypeCode == null
                     ? SubsidiaryLocationType.None
                     : defSubsidiaryLocationType[
-                        locationFull?.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
+                        locationFull.LocationSubsidiaryIdentification?.LocationSubsidiaryCode
                             ?.LocationSubsidiaryTypeCode ?? "0"]
                 // TODO: JourneyLocationTypeCode
             };
@@ -494,9 +494,9 @@ public static class DjrSchedule
 
             if (passages.Count == 0) passages["_FIRST"] = [passage];
 
-            if (!passages.TryGetValue(locationRawID, out var passageListPerID)) passageListPerID = new List<Passage>(2);
-            passageListPerID.Add(passage);
-            passages[locationRawID] = passageListPerID;
+            if (!passages.TryGetValue(locationRawId, out var passageListPerId)) passageListPerId = new List<Passage>(2);
+            passageListPerId.Add(passage);
+            passages[locationRawId] = passageListPerId;
 
             var networkSpecificParametersForPassage = ReadNetworkSpecificParameters(locationFull?.NetworkSpecificParameter);
             if (networkSpecificParametersForPassage != null)
@@ -965,6 +965,9 @@ public static class DjrSchedule
             { "4", FooterDisplay.EverythingExceptSection },
         };
 }
+
+// ReSharper disable InconsistentNaming
+// ReSharper disable IdentifierTypo
 
 public enum TrainType
 {

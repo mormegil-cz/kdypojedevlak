@@ -12,13 +12,13 @@ namespace KdyPojedeVlak.Web.Engine.Kango;
 public class DataDownloader
 {
     private const string clientName = "KdyPojedeVlak/CoreFTP";
-    private static readonly Uri serverBaseUri = new Uri(@"ftp://ftp.cisjr.cz/draha/celostatni/");
+    private static readonly Uri serverBaseUri = new(@"ftp://ftp.cisjr.cz/draha/celostatni/");
     private const string filenameFormat = "VS_{0}.ZIP";
-    private static readonly Regex reFilename = new Regex(@"^VS_([0-9_-]+)\.ZIP$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+    private static readonly Regex reFilename = new(@"^VS_([0-9_-]+)\.ZIP$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     private const int BUFF_SIZE = 10240;
 
-    private FtpClient ftp;
+    private FtpClient? ftp;
 
     public async Task Connect()
     {
@@ -37,8 +37,10 @@ public class DataDownloader
         ftp = null;
     }
 
-    public async Task<string> GetLatestVersionAvailable()
+    public async Task<string?> GetLatestVersionAvailable()
     {
+        if (ftp == null) throw new InvalidOperationException("Not connected");
+
         var files = await ftp.ListFilesAsync();
         var newest = files
             .Select(file => new { File = file, Match = reFilename.Match(file.Name) })
@@ -50,27 +52,27 @@ public class DataDownloader
 
     public async Task<Tuple<string, long>> DownloadZip(string version, string destinationFilename)
     {
-        using (var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
+        if (ftp == null) throw new InvalidOperationException("Not connected");
+
+        using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        var size = 0L;
+        await using (var receiveStream = await ftp.OpenFileReadStreamAsync(String.Format(CultureInfo.InvariantCulture, filenameFormat, version)))
         {
-            var size = 0L;
-            using (var receiveStream = await ftp.OpenFileReadStreamAsync(String.Format(CultureInfo.InvariantCulture, filenameFormat, version)))
+            await using (var storeStream = new FileStream(destinationFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
             {
-                using (var storeStream = new FileStream(destinationFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
+                var buffer = new byte[BUFF_SIZE];
+                while (true)
                 {
-                    var buffer = new byte[BUFF_SIZE];
-                    while (true)
-                    {
-                        var read = await receiveStream.ReadAsync(buffer, 0, buffer.Length);
-                        if (read == 0) break;
-                        var writeTask = storeStream.WriteAsync(buffer, 0, read);
-                        hasher.AppendData(buffer, 0, read);
-                        size += read;
-                        await writeTask;
-                    }
+                    var read = await receiveStream.ReadAsync(buffer, 0, buffer.Length);
+                    if (read == 0) break;
+                    var writeTask = storeStream.WriteAsync(buffer, 0, read);
+                    hasher.AppendData(buffer, 0, read);
+                    size += read;
+                    await writeTask;
                 }
             }
-            var hash = hasher.GetHashAndReset();
-            return Tuple.Create(BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant(), size);
         }
+        var hash = hasher.GetHashAndReset();
+        return Tuple.Create(Convert.ToHexStringLower(hash), size);
     }
 }

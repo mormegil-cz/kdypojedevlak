@@ -13,7 +13,7 @@ public static class CodebookHelpers
         using var stream = new FileStream(Path.Combine(path, fileName), FileMode.Open, FileAccess.Read, FileShare.Read);
         using var reader = new StreamReader(stream, encoding);
 
-        string line;
+        string? line;
         var firstLine = true;
         while ((line = reader.ReadLine()) != null)
         {

@@ -176,7 +176,7 @@ public static class CalendarNamer
         { DayClass.Holiday, dt => dt.DayOfWeek == DayOfWeek.Sunday || holidays.Contains(dt) },
         {
             DayClass.Workday,
-            dt => dt.DayOfWeek >= DayOfWeek.Monday && dt.DayOfWeek <= DayOfWeek.Friday && !holidays.Contains(dt)
+            dt => dt.DayOfWeek is >= DayOfWeek.Monday and <= DayOfWeek.Friday && !holidays.Contains(dt)
         },
         { DayClass.SaturdayHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && holidays.Contains(dt) },
         { DayClass.SaturdayNonHoliday, dt => dt.DayOfWeek == DayOfWeek.Saturday && !holidays.Contains(dt) },
@@ -327,7 +327,7 @@ public static class CalendarNamer
         }
 
         // for each class of days, separate the set of all days in the class to going and non-going days 
-        var classes = Enum.GetValues(typeof(DayClass)).Cast<DayClass>()
+        var classes = Enum.GetValues<DayClass>()
             .ToDictionary(cls => cls, _ => new ClassPresence());
 
         var dayCount = (int)((validTo - validFrom).TotalDays) + 1;
@@ -340,7 +340,7 @@ public static class CalendarNamer
 
             if (bitmapValue)
             {
-                if (firstGoDate == null) firstGoDate = day;
+                firstGoDate ??= day;
                 lastGoDate = day;
             }
 

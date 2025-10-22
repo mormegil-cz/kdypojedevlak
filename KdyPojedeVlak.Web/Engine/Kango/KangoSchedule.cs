@@ -14,12 +14,7 @@ public class Train
     public string TrainNumber { get; set; }
     public string TrainCategory { get; set; }
     public string TrainName { get; set; }
-    public List<TrainRoutePoint> Route { get; }
-
-    public Train()
-    {
-        Route = [];
-    }
+    public List<TrainRoutePoint> Route { get; } = [];
 }
 
 public class TrainCalendar
@@ -47,7 +42,7 @@ public class TrainRoutePoint : IComparable<TrainRoutePoint>
 
     public TimeSpan AnyScheduledTime => ScheduledArrival ?? ScheduledDeparture.GetValueOrDefault();
 
-    public int CompareTo(TrainRoutePoint other)
+    public int CompareTo(TrainRoutePoint? other)
     {
         if (other == null) return +1;
         var timeResult = AnyScheduledTime.CompareTo(other.AnyScheduledTime);
@@ -61,14 +56,8 @@ public class RoutingPoint
     public string ID { get; set; }
     public string Name { get; set; }
     public PointCodebookEntry CodebookEntry { get; set; }
-    public SortedSet<TrainRoutePoint> PassingTrains { get; }
-    public HashSet<RoutingPoint> NeighboringPoints { get; }
-
-    public RoutingPoint()
-    {
-        PassingTrains = [];
-        NeighboringPoints = [];
-    }
+    public SortedSet<TrainRoutePoint> PassingTrains { get; } = [];
+    public HashSet<RoutingPoint> NeighboringPoints { get; } = [];
 
     public string LongName => CodebookEntry.LongName;
 
@@ -153,10 +142,10 @@ public class KangoSchedule(string path)
         trains.Values
             .IntoDictionary(trainsByNumber, t => t.TrainNumber, t => t);
 
-        Train currTrain = null;
-        TrainCalendar currCalendar = null;
+        Train? currTrain = null;
+        TrainCalendar? currCalendar = null;
         TimeSpan? lastTime = null;
-        RoutingPoint lastRoutingPoint = null;
+        RoutingPoint? lastRoutingPoint = null;
         foreach (var row in LoadKangoData(path, "TRV"))
         {
             if (currTrain == null || row[0] != currTrain.ID)
@@ -171,9 +160,9 @@ public class KangoSchedule(string path)
             if (!String.IsNullOrEmpty(row[36])) currCalendar = calendars[row[36]];
 
             lastTime = arrival ?? departure ?? lastTime;
-            if (lastTime == null) throw new NotSupportedException(String.Format("{0}: No time", currTrain.ID));
+            if (lastTime == null) throw new NotSupportedException($"{currTrain.ID}: No time");
 
-            if (currCalendar == null) throw new NotSupportedException(String.Format("{0}: No calendar", currTrain.ID));
+            if (currCalendar == null) throw new NotSupportedException($"{currTrain.ID}: No calendar");
             var routingPoint = points[BuildPointId(row, 1)];
             var trainRoutePoint = new TrainRoutePoint
             {
@@ -205,10 +194,9 @@ public class KangoSchedule(string path)
         foreach (var ep in emptyPoints) points.Remove(ep);
     }
 
-    public IEnumerable<TrainRoutePoint> GetPassesThrough(string pointID)
+    public IEnumerable<TrainRoutePoint>? GetPassesThrough(string pointId)
     {
-        RoutingPoint point;
-        if (!points.TryGetValue(pointID, out point)) return null;
+        if (!points.TryGetValue(pointId, out var point)) return null;
         return point.PassingTrains;
     }
 
@@ -219,23 +207,15 @@ public class KangoSchedule(string path)
 
     private static IEnumerable<string[]> LoadKangoData(string filename)
     {
-        using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+        using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using var reader = new StreamReader(stream, Encoding.GetEncoding(1250));
+        while (reader.ReadLine() is { } line)
         {
-            using (var reader = new StreamReader(stream, Encoding.GetEncoding(1250)))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    yield return line.Split('|');
-                }
-            }
+            yield return line.Split('|');
         }
     }
 
-    private static string BuildPointId(string[] row, int start)
-    {
-        return String.Concat(row[start + 0], "-", row[start + 1], "-", row[start + 2]);
-    }
+    private static string BuildPointId(string[] row, int start) => String.Concat(row[start + 0], "-", row[start + 1], "-", row[start + 2]);
 
     private static bool IsBetterTrainType(string type1, string type2)
     {

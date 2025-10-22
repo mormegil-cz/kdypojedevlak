@@ -14,7 +14,7 @@ public class AdminController(IConfiguration configuration, DbModelContext dbMode
 {
     private const string PasswordCookieName = "MJPAdminPass";
 
-    private readonly string correctPassword = configuration["AdminPassword"];
+    private readonly string correctPassword = configuration["AdminPassword"] ?? Guid.NewGuid().ToString();
 
     // GET
     public IActionResult Index()
@@ -36,7 +36,11 @@ public class AdminController(IConfiguration configuration, DbModelContext dbMode
         else
         {
             // TODO: FIXME! The redirect does not work!
-            return new SetCookieResult(PasswordCookieName, password, new CookieOptions { Path = Url.RouteUrl(new { Controller = "Admin", Action = "Index" }), HttpOnly = true, IsEssential = true, SameSite = SameSiteMode.Strict, Secure = Request.IsHttps }, RedirectToAction("Index"));
+            return new SetCookieResult(PasswordCookieName, password,
+                new CookieOptions
+                {
+                    Path = Url.RouteUrl(new { Controller = "Admin", Action = "Index" }), HttpOnly = true, IsEssential = true, SameSite = SameSiteMode.Strict, Secure = Request.IsHttps
+                }, RedirectToAction("Index"));
         }
     }
 
@@ -49,7 +53,7 @@ public class AdminController(IConfiguration configuration, DbModelContext dbMode
         }
     }
 
-    private static bool ConstantTimeEqual(string a, string b)
+    private static bool ConstantTimeEqual(string? a, string? b)
     {
         if (a == null || b == null || a.Length != b.Length) return false;
 

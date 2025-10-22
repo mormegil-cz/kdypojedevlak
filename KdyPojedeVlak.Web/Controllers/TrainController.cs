@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using KdyPojedeVlak.Web.Engine;
 using KdyPojedeVlak.Web.Engine.Algorithms;
 using KdyPojedeVlak.Web.Engine.DbStorage;
+using KdyPojedeVlak.Web.Engine.Uic;
 using KdyPojedeVlak.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -162,12 +163,12 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
 
         var points = new HashSet<RoutingPoint>(pointsInVariants.SelectMany(pl => pl.Where(p => p.Latitude != null))).Select(p => new JObject
         {
-            new JProperty("coords", new JArray(p!.Latitude!, p!.Longitude!)),
+            new JProperty("coords", new JArray(p.Latitude!, p.Longitude!)),
             new JProperty("title", p.Name)
         }).Cast<object>().ToArray();
         // TODO: Line titles
         var lines = pointsInVariants.Select(ttv =>
-            new JArray(ttv.Where(p => p.Latitude != null).Select(p => new JArray(p!.Latitude!, p!.Longitude!)).Cast<object>().ToArray())
+            new JArray(ttv.Where(p => p.Latitude != null).Select(p => new JArray(p.Latitude!, p.Longitude!)).Cast<object>().ToArray())
         ).Cast<object>().ToArray();
 
         JObject dataJson = new JObject
@@ -182,7 +183,7 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
             .OrderByDescending(g => g.Count())
             .AsEnumerable()
             .Select(g => Program.CompanyCodebook.Find(g.Key))
-            .Where(c => c != null)
+            .WhereNotNull()
             .ToList();
 
         string? vagonWebCompanyId = null;
@@ -260,12 +261,8 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
             ).ToList();
         var pointsInVariants = passagesInVariants.Select(variant => variant.Select(passage => passage.Point).ToList()).ToList();
         var pointList = ListMerger.MergeLists(pointsInVariants);
-        var pointIndices = pointList
-            .Select((point, index) => new { point, index })
-            .GroupBy(rp => rp.point)
-            .ToDictionary(g => g.Key, g => g.Select(rp => rp.index).ToList());
 
-        var columns = new List<List<Passage>>(passagesInVariants.Count);
+        var columns = new List<List<Passage?>>(passagesInVariants.Count);
         foreach (var pointsInVariant in passagesInVariants)
         {
             var column = new Passage?[pointList.Count];
@@ -289,13 +286,13 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
                 rowIndex = pointIndex + 1;
             }
 
-            columns.Add(column.ToList()!);
+            columns.Add(column.ToList());
         }
 
-        var variantRoutingPoints = new List<List<Passage>>(pointList.Count);
+        var variantRoutingPoints = new List<List<Passage?>>(pointList.Count);
         for (var i = 0; i < pointList.Count; ++i)
         {
-            var variants = new List<Passage>(passagesInVariants.Count);
+            var variants = new List<Passage?>(passagesInVariants.Count);
             for (var j = 0; j < passagesInVariants.Count; ++j)
             {
                 variants.Add(columns[j][i]);
@@ -306,10 +303,10 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
 
         var isFirstPoint = true;
         var majorPointFlags = new List<bool>(variantRoutingPoints.Count);
-        foreach (var point in variantRoutingPoints)
+        foreach (var pointPassages in variantRoutingPoints)
         {
-            majorPointFlags.Add(isFirstPoint || point.Any(variant => variant is { IsMajorPoint: true }));
-            if (isFirstPoint && point.Any(variant => variant != null && (variant.ArrivalTime != null || variant.DepartureTime != null))) isFirstPoint = false;
+            majorPointFlags.Add(isFirstPoint || pointPassages.Any(variant => variant is { IsMajorPoint: true }));
+            if (isFirstPoint && pointPassages.Any(variant => variant != null && (variant.ArrivalTime != null || variant.DepartureTime != null))) isFirstPoint = false;
         }
         if (majorPointFlags.Count > 0) majorPointFlags[^1] = true;
 
@@ -319,7 +316,7 @@ public partial class TrainController(DbModelContext dbModelContext) : Controller
             .OrderByDescending(g => g.Count())
             .AsEnumerable()
             .Select(g => Program.CompanyCodebook.Find(g.Key))
-            .Where(c => c != null)
+            .WhereNotNull()
             .ToList();
 
         string? vagonWebCompanyId = null;

@@ -2,9 +2,9 @@ namespace KdyPojedeVlak.Web.Engine.Uic;
 
 public class CompanyCodebookEntry
 {
-    public string ID { get; set; }
-    public string ShortName { get; set; }
-    public string LongName { get; set; }
-    public string Country { get; set; }
-    public string Web { get; set; }
+    public required string ID { get; init; }
+    public required string ShortName { get; init; }
+    public required string LongName { get; init; }
+    public string? Country { get; init; }
+    public string? Web { get; init; }
 }

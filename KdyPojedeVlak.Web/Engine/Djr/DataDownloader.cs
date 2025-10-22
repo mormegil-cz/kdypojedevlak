@@ -28,7 +28,7 @@ public partial class DataDownloader
     [GeneratedRegex(@"^2[0-9]{3}-[0-9]{2}$", RegexOptions.Singleline | RegexOptions.CultureInvariant)]
     private static partial Regex RegexSubdirectory();
 
-    private FtpClient ftp;
+    private FtpClient? ftp;
 
     public async Task Connect()
     {
@@ -49,19 +49,7 @@ public partial class DataDownloader
 
     public async Task<Dictionary<string, long>> GetListOfFilesAvailable()
     {
-        async Task AddListOfFilesAvailableInDir(Dictionary<string, long> dictionary, string dir)
-        {
-            var files = (await ftp.ListFilesAsync())
-                .Select(file => new { File = file, Match = reFilename.Match(file.Name) })
-                .Where(f => f.Match.Success)
-                .OrderByDescending(f => f.Match.Groups[1].Value)
-                .Select(f => f.File);
-
-            foreach (var file in files)
-            {
-                dictionary.Add(dir + "/" + file.Name, file.Size);
-            }
-        }
+        if (ftp == null) throw new InvalidOperationException("Not connected");
 
         var directories = (await ftp.ListDirectoriesAsync())
             .Select(dir => new { Directory = dir, Match = reDirectory.Match(dir.Name) })
@@ -92,10 +80,26 @@ public partial class DataDownloader
             await ftp.ChangeWorkingDirectoryAsync("..");
         }
         return results;
+
+        async Task AddListOfFilesAvailableInDir(Dictionary<string, long> dictionary, string dir)
+        {
+            var files = (await ftp.ListFilesAsync())
+                .Select(file => new { File = file, Match = reFilename.Match(file.Name) })
+                .Where(f => f.Match.Success)
+                .OrderByDescending(f => f.Match.Groups[1].Value)
+                .Select(f => f.File);
+
+            foreach (var file in files)
+            {
+                dictionary.Add(dir + "/" + file.Name, file.Size);
+            }
+        }
     }
 
-    public async Task<string> GetLatestVersionAvailable()
+    public async Task<string?> GetLatestVersionAvailable()
     {
+        if (ftp == null) throw new InvalidOperationException("Not connected");
+
         var directories = await ftp.ListDirectoriesAsync();
         var newestDirectory = directories
             .Select(dir => new { Directory = dir, Match = reDirectory.Match(dir.Name) })
@@ -122,6 +126,8 @@ public partial class DataDownloader
 
     public async Task<(string, long)> DownloadZip(string path, string destinationFilename)
     {
+        if (ftp == null) throw new InvalidOperationException("Not connected");
+
         var originalDirectory = ftp.WorkingDirectory;
         var versionSegments = path.Split('/');
         for (var i = 0; i < versionSegments.Length - 1; ++i)

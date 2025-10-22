@@ -4,18 +4,10 @@ using KdyPojedeVlak.Web.Engine.Uic;
 
 namespace KdyPojedeVlak.Web.Models;
 
-public class TrainMapData
+public class TrainMapData(TrainTimetable train, string dataJson, List<CompanyCodebookEntry> companyCodebookEntries, string? vagonWebCompanyId)
 {
-    public TrainTimetable Train { get; }
-    public string DataJson { get; }
-    public List<CompanyCodebookEntry> CompanyCodebookEntries { get; }
-    public string VagonWebCompanyID { get; }
-
-    public TrainMapData(TrainTimetable train, string dataJson, List<CompanyCodebookEntry> companyCodebookEntries, string vagonWebCompanyId)
-    {
-        Train = train;
-        DataJson = dataJson;
-        CompanyCodebookEntries = companyCodebookEntries;
-        VagonWebCompanyID = vagonWebCompanyId;
-    }
+    public TrainTimetable Train { get; } = train;
+    public string DataJson { get; } = dataJson;
+    public List<CompanyCodebookEntry> CompanyCodebookEntries { get; } = companyCodebookEntries;
+    public string? VagonWebCompanyId { get; } = vagonWebCompanyId;
 }

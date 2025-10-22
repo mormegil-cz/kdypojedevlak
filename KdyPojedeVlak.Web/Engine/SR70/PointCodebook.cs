@@ -11,10 +11,11 @@ namespace KdyPojedeVlak.Web.Engine.SR70;
 
 public class PointCodebook(string path)
 {
-    private static readonly Regex regexGeoCoordinate = new Regex(@"\s*^[NE]\s*(?<deg>[0-9]+)\s*°\s*(?<min>[0-9]*)\s*'\s*(?<sec>[0-9]*\s*(,\s*([0-9]+)?)?)\s*""\s*$", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
+    private static readonly Regex regexGeoCoordinate = new Regex(@"\s*^[NE]\s*(?<deg>[0-9]+)\s*°\s*(?<min>[0-9]*)\s*'\s*(?<sec>[0-9]*\s*(,\s*([0-9]+)?)?)\s*""\s*$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture);
 
-    private Dictionary<string, PointCodebookEntry> codebook;
-    private KdTree<float, string> tree;
+    private Dictionary<string, PointCodebookEntry>? codebook;
+    private KdTree<float, string>? tree;
 
     static PointCodebook()
     {
@@ -288,7 +289,7 @@ public class PointCodebook(string path)
             DebugLog.LogDebugMsg("Additional point in 2013 codebook: {0}", point.ID);
         }
 
-        var problematicPoints = new HashSet<String>();
+        var problematicPoints = new HashSet<string>();
         foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2025-02-02.tsv", '\t', Encoding.UTF8)
                      .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
                 )
@@ -299,12 +300,13 @@ public class PointCodebook(string path)
                )
             {
                 entry.WikidataItem = row.ItemQ;
-                if (entry.Latitude != null && entry.Longitude != null)
+                if (entry is { Latitude: not null, Longitude: not null })
                 {
                     var dist = Math.Abs(entry.Latitude.GetValueOrDefault() - latitude) + Math.Abs(entry.Longitude.GetValueOrDefault() - longitude);
                     if (dist > 0.005)
                     {
-                        DebugLog.LogProblem("Suspicious geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude, dist * 40000.0f / 360.0f, row.ItemQ);
+                        DebugLog.LogProblem("Suspicious geographical position for point #{0} ({6}): {1}, {2} versus {3}, {4}: {5}", row.ID, latitude, longitude, entry.Latitude, entry.Longitude,
+                            dist * 40000.0f / 360.0f, row.ItemQ);
                         problematicPoints.Add(entry.FullIdentifier);
                     }
                 }
@@ -351,7 +353,7 @@ public class PointCodebook(string path)
         }
         */
 
-        DebugLog.LogDebugMsg("{0} point(s)", codebook.Count);
+        DebugLog.LogDebugMsg("{0} point(s), {1} problematic", codebook.Count, problematicPoints.Count);
 
         var pointsWithWikidata = new Dictionary<PointType, Tuple<int, int>>(codebook.Count);
         foreach (var entry in codebook.Values.Where(value => value.Latitude != null))
@@ -380,21 +382,24 @@ public class PointCodebook(string path)
         }
     }
 
-    public PointCodebookEntry Find(string id)
+    public PointCodebookEntry? Find(string id)
     {
+        if (codebook == null) throw new InvalidOperationException("Not yet loaded");
         codebook.TryGetValue(id, out var result);
         return result;
     }
 
     public List<PointCodebookEntry> FindNearest(float latitude, float longitude, int neighbors)
     {
-        return tree.GetNearestNeighbours([latitude, longitude], neighbors).Select(point => Find(point.Value)).Where(x => x != null).ToList();
+        if (tree == null) throw new InvalidOperationException("Not yet loaded");
+        return tree
+            .GetNearestNeighbours([latitude, longitude], neighbors)
+            .Select(point => Find(point.Value))
+            .WhereNotNull()
+            .ToList();
     }
 
-    private static PointType ParsePointType(string typeStr)
-    {
-        return !pointTypePerName.TryGetValue(typeStr.Trim(), out var type) ? PointType.Unknown : type;
-    }
+    private static PointType ParsePointType(string typeStr) => !pointTypePerName.TryGetValue(typeStr.Trim(), out var type) ? PointType.Unknown : type;
 
     private static float? ParseGeoCoordinate(string posStr)
     {
@@ -429,7 +434,7 @@ public class PointCodebook(string path)
         return result;
     }
 
-    private static readonly Dictionary<string, PointType> pointTypePerName = new Dictionary<string, PointType>(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, PointType> pointTypePerName = new(StringComparer.OrdinalIgnoreCase)
     {
         { "Automatické hradlo", PointType.Point },
         { "Automatické hradlo a zastávka", PointType.Stop },

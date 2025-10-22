@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KdyPojedeVlak.Web.Engine;
 using KdyPojedeVlak.Web.Engine.DbStorage;
 using KdyPojedeVlak.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -109,8 +110,7 @@ public class TransitsController(DbModelContext dbModelContext) : Controller
                 .FirstOrDefault()
             )
             .AsEnumerable()
-            .Where(t => t != null)
-            .Cast<NearestTransits.Transit>()
+            .WhereNotNull()
             .OrderBy(t => t.AnyScheduledTimeOfDay)
             .ToList();
         var passingTrains = allPassingTrains

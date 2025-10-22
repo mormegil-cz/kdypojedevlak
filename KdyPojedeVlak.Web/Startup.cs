@@ -44,10 +44,9 @@ public class Startup(IConfiguration configuration)
             loggingBuilder.AddDebug();
         });
 
-        services.AddDbContext<DbModelContext>(
-            options => options
-                .UseSqlite(configuration.GetConnectionString("Database"))
-                .ConfigureWarnings(w => w.Log(RelationalEventId.MultipleCollectionIncludeWarning))
+        services.AddDbContext<DbModelContext>(options => options
+            .UseSqlite(configuration.GetConnectionString("Database"))
+            .ConfigureWarnings(w => w.Log(RelationalEventId.MultipleCollectionIncludeWarning))
         );
     }
 
@@ -77,7 +76,7 @@ public class Startup(IConfiguration configuration)
                 pattern: "{controller=Home}/{action=Index}/{id?}");
         });
 
-        var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+        var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>() ?? throw new InvalidOperationException("Service scope factory not available");
 
         Program.PointCodebook = new PointCodebook(configuration["PointCodebookLocation"] ?? "App_Data");
         try
@@ -106,11 +105,13 @@ public class Startup(IConfiguration configuration)
             using var serviceScope = serviceScopeFactory.CreateScope();
             using var dbModelContext = serviceScope.ServiceProvider.GetRequiredService<DbModelContext>();
 
+#pragma warning disable CS0162 // Unreachable code detected
             if (RecreateDatabase)
             {
                 dbModelContext.Database.EnsureDeleted();
                 dbModelContext.Database.EnsureCreated();
             }
+#pragma warning restore CS0162 // Unreachable code detected
             if (dbModelContext.Database.GetPendingMigrations().Any())
             {
                 DebugLog.LogDebugMsg("Migrating database");

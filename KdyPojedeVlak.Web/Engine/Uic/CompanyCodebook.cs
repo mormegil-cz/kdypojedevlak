@@ -6,7 +6,7 @@ namespace KdyPojedeVlak.Web.Engine.Uic;
 
 public class CompanyCodebook(string path)
 {
-    private Dictionary<string, CompanyCodebookEntry> codebook;
+    private Dictionary<string, CompanyCodebookEntry>? codebook;
 
     public void Load()
     {
@@ -24,14 +24,15 @@ public class CompanyCodebook(string path)
             });
     }
 
-    private static string NormalizeUrl(string urlStr)
+    private static string? NormalizeUrl(string urlStr)
     {
         var basicUrlStr = urlStr.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) ? urlStr : "http://" + urlStr;
         return Uri.TryCreate(basicUrlStr, UriKind.Absolute, out _) ? basicUrlStr : null;
     }
 
-    public CompanyCodebookEntry Find(string id)
+    public CompanyCodebookEntry? Find(string id)
     {
+        if (codebook == null) throw new InvalidOperationException("Not loaded");
         codebook.TryGetValue(id, out var result);
         return result;
     }
