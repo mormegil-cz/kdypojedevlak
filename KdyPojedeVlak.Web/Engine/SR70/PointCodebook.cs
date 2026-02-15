@@ -28,20 +28,38 @@ public class PointCodebook(string path)
 
         codebook = new Dictionary<string, PointCodebookEntry>();
 
-        CodebookHelpers.LoadCsvData(path, @"SR70-2025-03-15.csv", ';', Encoding.GetEncoding(1250))
+        CodebookHelpers.LoadCsvData(path, @"SR70-2025-12-14.csv", ';', Encoding.GetEncoding(1250))
             .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r))
             .IntoDictionary(codebook, r => r.ID, r => new PointCodebookEntry
             {
                 ID = r.Row[0],
                 LongName = r.Row[1],
-                ShortName = r.Row[3],
-                Type = ParsePointType(r.Row[10]),
-                Longitude = ParseGeoCoordinate(r.Row[28]),
-                Latitude = ParseGeoCoordinate(r.Row[29]),
+                ShortName = r.Row[4],
+                Type = ParsePointType(r.Row[12]),
+                Longitude = ParseGeoCoordinate(r.Row[24]),
+                Latitude = ParseGeoCoordinate(r.Row[23]),
             });
 
         // add historical data for missing points
 
+        foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2025-03-15.csv", ';', Encoding.GetEncoding(1250))
+                     .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
+        {
+            if (codebook.ContainsKey(point.ID)) continue;
+
+            codebook.Add(point.ID, new PointCodebookEntry
+            {
+                ID = point.Row[0],
+                LongName = point.Row[1],
+                ShortName = point.Row[3],
+                Type = ParsePointType(point.Row[10]),
+                Longitude = ParseGeoCoordinate(point.Row[28]),
+                Latitude = ParseGeoCoordinate(point.Row[29]),
+            });
+
+            DebugLog.LogDebugMsg("Additional point in 2025-03 codebook: {0}", point.ID);
+        }
+        
         /*
         foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2024-12-15.csv", ';', Encoding.GetEncoding(1250))
                      .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
@@ -290,7 +308,7 @@ public class PointCodebook(string path)
         }
 
         var problematicPoints = new HashSet<string>();
-        foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2025-02-02.tsv", '\t', Encoding.UTF8)
+        foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2026-02-21.tsv", '\t', Encoding.UTF8)
                      .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
                 )
         {
@@ -399,7 +417,7 @@ public class PointCodebook(string path)
             .ToList();
     }
 
-    private static PointType ParsePointType(string typeStr) => !pointTypePerName.TryGetValue(typeStr.Trim(), out var type) ? PointType.Unknown : type;
+    private static PointType ParsePointType(string typeStr) => !pointTypePerName.TryGetValue(typeStr.Trim(), out var type) ? throw new FormatException("Unknown point type " + typeStr) : type;
 
     private static float? ParseGeoCoordinate(string posStr)
     {
@@ -437,11 +455,20 @@ public class PointCodebook(string path)
     private static readonly Dictionary<string, PointType> pointTypePerName = new(StringComparer.OrdinalIgnoreCase)
     {
         { "Automatické hradlo", PointType.Point },
+        { "Automatické hradlo a nákladiště", PointType.Point },
         { "Automatické hradlo a zastávka", PointType.Stop },
         { "Automatické hradlo, nákladiště a zastávka", PointType.Stop },
+        { "Centrální dispečerské pracoviště", PointType.Unknown },
+        { "Cestovní kancelář vydávající jízdní doklady ED", PointType.Unknown },
         { "Dopr.body na cizím území (blíže neurčené)", PointType.Point },
+        { "DVM na cizím území (blíže neurčené)", PointType.Point },
         { "Dopravna D3", PointType.Stop },
         { "Dopravna radiobloku", PointType.Stop },
+        { "Dopravní uzel – dopravna D3", PointType.Stop },
+        { "Dopravní uzel – nákladiště zastávka", PointType.Stop },
+        { "Dopravní uzel – odbočka", PointType.Crossing },
+        { "Dopravní uzel – výhybna", PointType.Siding },
+        { "Dopravní uzel – železniční stanice", PointType.Station },
         { "Hláska", PointType.Point },
         { "Hláska a zastávka", PointType.Stop },
         { "Hláska, nákladiště a zastávka", PointType.Stop },
@@ -450,32 +477,49 @@ public class PointCodebook(string path)
         { "Hranice infrastruktur", PointType.InnerBoundary },
         { "Hranice oblastí", PointType.InnerBoundary },
         { "Hranice OPŘ totožná s hranicí VÚSC", PointType.InnerBoundary },
+        { "Hranice OŘ totožná s hranicí VÚSC", PointType.InnerBoundary },
+        { "Hranice pro návrat vozidel ze širé trati", PointType.InnerBoundary },
+        { "Hranice TUDU", PointType.InnerBoundary },
         { "Hranice TUDU (začátek nebo konec TUDU)", PointType.InnerBoundary },
         { "Hranice třídy sklonu", PointType.InnerBoundary },
+        { "Hranice VÚSC", PointType.InnerBoundary },
         { "Jiné dopravní body", PointType.Point },
+        { "Jiné DVM", PointType.Point },
         { "Kolejová křižovatka", PointType.Crossing },
+        { "Kolejová skupina DVM", PointType.Point },
+        { "Kolejová skupina DVM se zastávkou", PointType.Stop },
         { "Kolejová skupina stanice nebo jiného DVM", PointType.Point },
         { "Nákladiště", PointType.Point },
         { "Nákladiště a zastávka", PointType.Stop },
         { "Obvod DVM nebo staniční kolejová skupina se zastávkou", PointType.Stop },
+        { "Odbočení v DVM", PointType.Crossing },
         { "Odbočení ve stanici nebo v jiném DVM", PointType.Crossing },
         { "Odbočení vlečky", PointType.Crossing },
+        { "Odbočení vlečky na širé trati", PointType.Crossing },
         { "Odbočka (dopravna s kolejovým rozvětvením)", PointType.Crossing },
+        { "Odbočka (dopravna)", PointType.Stop },
         { "Odbočka (dopravna) a zastávka", PointType.Stop },
         { "Odbočka (dopravna), nákladiště a zastávka", PointType.Stop },
         { "Odstup nezavěšeného postrku (na širé trati)", PointType.Point },
+        { "Regionální dispečerské pracoviště", PointType.Unknown },
         { "Samostatné kolejiště vlečky", PointType.Point },
+        { "Samostatné tarifní místo v rámci jiného DVM", PointType.Point },
         { "Samostatné tarif.místo v rámci stanice nebo jiného DVM", PointType.Point },
         { "Skok ve staničení", PointType.Point },
         { "Stanice", PointType.Station },
         { "Stanice (z přepravního hlediska blíže neurčená)", PointType.Station },
         { "Státní hranice", PointType.StateBoundary },
+        { "Trasovací DVM", PointType.Point },
         { "Trasovací bod TUDU, SENA", PointType.Point },
         { "Výhybna", PointType.Siding },
+        { "Zákaznická centra osobní dopravy", PointType.Unknown },
         { "Zastávka", PointType.Stop },
         { "Zastávka lanové dráhy", PointType.Stop },
         { "Zastávka náhradní autobusové dopravy", PointType.Point },
+        { "Zastávka náhradní dopravy", PointType.Point },
         { "Zastávka v obvodu stanice", PointType.Stop },
-        { "Závorářské stanoviště", PointType.Point }
+        { "Zastávka v obvodu stanice, výhybny, dopravny D3, dopravny RB", PointType.Stop },
+        { "Závorářské stanoviště", PointType.Point },
+        { "Železniční stanice", PointType.Station },
     };
 }

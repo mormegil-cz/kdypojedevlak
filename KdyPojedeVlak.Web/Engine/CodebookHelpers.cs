@@ -17,27 +17,64 @@ public static class CodebookHelpers
         var firstLine = true;
         while ((line = reader.ReadLine()) != null)
         {
+            if (firstLine)
+            {
+                firstLine = false;
+                continue;
+            }
+
             // TODO: Real CSV processing
             if (line.Contains('"'))
             {
-                yield return line.Split(fieldSeparator).Select(field =>
-                {
-                    if (!field.Contains('"')) return field;
-                    if (field.Length < 2 || field[0] != '"' || field[^1] != '"') throw new FormatException($"Invalid or unsupported CSV file: '{field}' at '{line}'");
-                    if (field.Count(c => c == '"') % 2 != 0) throw new FormatException($"Unsupported CSV file: '{field}' at '{line}'");
-                    return field.Substring(1, field.Length - 2).Replace("\"\"", "\"");
-                }).ToArray();
+                yield return SplitCsvLine(line, fieldSeparator).ToArray();
             }
             else
             {
-                if (firstLine)
-                {
-                    firstLine = false;
-                    continue;
-                }
-
                 yield return line.Split(fieldSeparator);
             }
         }
+    }
+
+    private static IEnumerable<string> SplitCsvLine(string line, char fieldSeparator)
+    {
+        var insideQuotes = false;
+        var currStart = 0;
+        for (var i = 0; i < line.Length; ++i)
+        {
+            var c = line[i];
+            if (insideQuotes)
+            {
+                if (c == '"')
+                {
+                    if (i < line.Length - 1 && line[i + 1] == '"')
+                    {
+                        ++i;
+                        continue;
+                    }
+
+                    insideQuotes = false;
+                    if (i < line.Length - 1 && line[i + 1] != fieldSeparator) throw new FormatException("Unsupported partially quoted field at " + line);
+                    yield return line[currStart..i].Replace("\"\"", "\"");;
+                    ++i;
+                    currStart = i + 1;
+                }
+            }
+            else
+            {
+                if (c == fieldSeparator)
+                {
+                    yield return line[currStart..i];
+                    currStart = i + 1;
+                }
+                else if (c == '"')
+                {
+                    if (currStart != i) throw new FormatException("Unsupported partially quoted field at " + line);
+                    insideQuotes = true;
+                    currStart = i + 1;
+                }
+            }
+        }
+        if (insideQuotes) throw new FormatException("Unsupported line break inside quoted string at " + line);
+        yield return line[currStart..];
     }
 }
