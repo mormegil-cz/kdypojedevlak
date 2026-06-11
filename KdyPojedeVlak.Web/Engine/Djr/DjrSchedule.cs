@@ -384,8 +384,11 @@ public static class DjrSchedule
         var locationIndex = 0;
         RoutingPoint? prevPoint = null;
         var passages = new Dictionary<string, List<Passage>>(message.CZPTTInformation.CZPTTLocation.Count);
-        foreach (var locationDirect in LinqExtensions.ConcatExisting<LocationBasicInfo>(message.CZPTTHeader?.CZForeignOriginLocation, message.CZPTTInformation.CZPTTLocation,
-                     message.CZPTTHeader?.CZForeignDestinationLocation))
+        foreach (var locationDirect in LinqExtensions.ConcatExisting<LocationBasicInfo>(
+                     message.CZPTTHeader?.CZForeignOriginLocation.Where(loc => loc.CountryCodeISO != "CZ"),
+                     message.CZPTTInformation.CZPTTLocation,
+                     message.CZPTTHeader?.CZForeignDestinationLocation.Where(loc => loc.CountryCodeISO != "CZ")
+                 ))
         {
             var locationData = locationDirect.Location ?? locationDirect;
             if (String.IsNullOrWhiteSpace(locationData.CountryCodeISO) || String.IsNullOrWhiteSpace(locationData.LocationPrimaryCode)) throw new FormatException("Missing location identifiers");
@@ -968,7 +971,6 @@ public static class DjrSchedule
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
-
 public enum TrainType
 {
     Unknown,
