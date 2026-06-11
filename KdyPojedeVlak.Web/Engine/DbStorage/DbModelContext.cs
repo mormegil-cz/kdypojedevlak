@@ -205,7 +205,11 @@ public class CalendarDefinition
 
     private static Guid BuildGuidFromHash(string data) => new(GuidEx.NewGuid(data, calendarNamespaceGuid).ToByteArray());
 
-    public string DescriptionWithParens => StartDate > DateTime.Today ? "(" + Description + ")" : Description;
+    public string DescriptionWithParens => StartDate > DateTime.Today ? "(" + DescriptionWithDateRange + ")" : Description;
+
+    public string DescriptionWithDateRange => IsSingleBlock ? Description : Description + " " + StartDate.ToShortDateString() + " – " + EndDate.ToShortDateString();
+
+    public bool IsSingleBlock => Bitmap.Take((int)(EndDate - StartDate).TotalDays + 1).All(b => b);
 }
 
 public class RoutingPoint

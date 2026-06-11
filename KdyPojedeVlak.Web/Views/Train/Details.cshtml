@@ -22,7 +22,7 @@
 }
 
 <h2 title="@DisplayConsts.TrafficTypeNames[Model.Train.TrafficType]">
-    Vlak @DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] @Model.Train.TrainNumber @Model.Train.Name @(Model.CompanyCodebookEntries == null ? "" : StringHelpers.Quote(String.Join(", ", Model.CompanyCodebookEntries.Select(c => c.ShortName)), "()"))@(Model.Train.YearId == DateTime.Now.Year ? "" : $" [JŘ {Model.Train.YearId}]")
+    Vlak @DisplayConsts.TrainCategoryNames[Model.Train.TrainCategory] @Model.Train.TrainNumber @Model.Train.Name @StringHelpers.Quote(String.Join(", ", Model.CompanyCodebookEntries.Select(c => c.ShortName)), "()")@(Model.Train.YearId == DateTime.Now.Year ? "" : $" [JŘ {Model.Train.YearId}]")
 </h2>
 <div class="row">
     <div class="col-md-9">
@@ -73,7 +73,7 @@
                             <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
                         </li>
                     }
-                    @if (Model.CompanyCodebookEntries != null && Model.CompanyCodebookEntries.Count > 0)
+                    @if (Model.CompanyCodebookEntries.Count > 0)
                     {
                         <li role="separator" class="divider"></li>
                         foreach (var company in Model.CompanyCodebookEntries)
@@ -145,7 +145,7 @@
                     </div>
                 }
                 <div class="calendar-def" title="@variant.Calendar.StartDate.ToShortDateString() – @variant.Calendar.EndDate.ToShortDateString()">@variant.Calendar.DescriptionWithParens</div>
-                @if (pttNotes.Count > 0 || (passengerServiceNumbers.Count  == 0 && publicTransportOrderingCompanies.Count > 0))
+                @if (pttNotes.Count > 0 || (passengerServiceNumbers.Count == 0 && publicTransportOrderingCompanies.Count > 0))
                 {
                     <div class="note-icons">
                         @foreach (var note in pttNotes.OfType<CentralPttNoteForVariant>())
@@ -254,7 +254,7 @@
                             @foreach (var cancellation in variant.Cancellations)
                             {
                                 // TODO: FIXME: Cancellation calendar descriptions
-                                <li>Ne@(cancellation.Calendar.Description.Replace("nejede", "kromě")) @cancellation.Calendar.StartDate.ToShortDateString() – @cancellation.Calendar.EndDate.ToShortDateString()</li>
+                                <li>Ne@(cancellation.Calendar.DescriptionWithDateRange.Replace("nejede", "kromě"))</li>
                             }
                         </ul>
                     }
