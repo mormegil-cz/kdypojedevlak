@@ -363,6 +363,7 @@ public class PointCodebook(string path)
 
             DebugLog.LogDebugMsg("Additional point in 2017 codebook: {0}", point.ID);
         }
+        /*
         foreach (var point in CodebookHelpers.LoadCsvData(path, @"SR70-2013-12-15.csv", ';', Encoding.GetEncoding(1250))
                      .Select(r => (ID: "CZ:" + r[0].Substring(0, r[0].Length - 1), Row: r)))
         {
@@ -378,9 +379,10 @@ public class PointCodebook(string path)
 
             DebugLog.LogDebugMsg("Additional point in 2013 codebook: {0}", point.ID);
         }
+        */
 
         var problematicPoints = new HashSet<string>();
-        foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2026-06-11.tsv", '\t', Encoding.UTF8)
+        foreach (var row in CodebookHelpers.LoadCsvData(path, @"Wikidata-stations-2026-08-02.tsv", '\t', Encoding.UTF8)
                      .Select(r => (ItemQ: r[0], Label: r[1], Latitude: r[3], Longitude: r[2], ID: r[4]))
                 )
         {
