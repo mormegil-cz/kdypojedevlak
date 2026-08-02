@@ -89,7 +89,7 @@ public class TransitsController(DbModelContext dbModelContext) : Controller
     private static List<NearestTransits.Transit> GetTrainList(DateTime now, IQueryable<Passage> passingTrainsCollection)
     {
         var allPassingTrains = passingTrainsCollection
-            .GroupBy(t => t.TrainTimetableVariant.Timetable.Id)
+            .GroupBy(t => t.TrainTimetableVariant.TrainVariantId)
             .Select(g => g
                 .Where(p => p.TrainTimetableVariant.Calendar.EndDate >= now)
                 .OrderByDescending(p => p.TrainTimetableVariant.ImportedFrom.CreationDate)
