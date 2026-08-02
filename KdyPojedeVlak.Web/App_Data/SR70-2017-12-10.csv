@@ -1,11 +1,11 @@
 SR70 ;Tarifní NAZEV;NAZEV20;ZKRATKA;KM_POL;KVALIFIKÁTOR-NAZEV;DDR;Oblastní øeditelství;Provozní oddíl;VLASTNIK;PROVOZ
-3012;Milotice nad Opavou-AWT;Milotice n.Op.-AWT;-;73,26;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Stát;AWT
-3020;Šumperk-SART;Šumperk-SART;-;43,807;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Desná;SART
-5017;Trutnov hlavní nádraží-PDV RAILWAY;Trutnov hl.n.-PDV R.;-;124,765;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Stát;PDV
-5041;Èeská Kamenice-KŽC;È.Kamenice-KŽC;-;24,959;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Stát;KPL
-7013;Jindøichùv Hradec-JHMD;Jindø.Hradec JHMD;-;?;Stanice (z pøepravního hlediska blíže neurèená);-;Plzeò;Neurèený;JHMD;JHMD
-7021;Obrataò-JHMD;Obrataò;-;45,963;Dopravna D3;-;nezadaná;Tábor;JHMD;JHMD
-7047;Sokolov-PDV RAILWAY;Sokolov-PDV RAILWAY;-;208,154;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Stát;PDV
+003012;Milotice nad Opavou-AWT;Milotice n.Op.-AWT;-;73,26;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Stát;AWT
+003020;Šumperk-SART;Šumperk-SART;-;43,807;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Desná;SART
+005017;Trutnov hlavní nádraží-PDV RAILWAY;Trutnov hl.n.-PDV R.;-;124,765;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Stát;PDV
+005041;Èeská Kamenice-KŽC;È.Kamenice-KŽC;-;24,959;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Stát;KPL
+007013;Jindøichùv Hradec-JHMD;Jindø.Hradec JHMD;-;?;Stanice (z pøepravního hlediska blíže neurèená);-;Plzeò;Neurèený;JHMD;JHMD
+007021;Obrataò-JHMD;Obrataò;-;45,963;Dopravna D3;-;nezadaná;Tábor;JHMD;JHMD
+007047;Sokolov-PDV RAILWAY;Sokolov-PDV RAILWAY;-;208,154;Stanice (z pøepravního hlediska blíže neurèená);-;nezadaná;Neurèený;Stát;PDV
 300004;hr. infr. Albrechtice u È. Tìšína;hi Albrechtice;-;10,462;Hranice infrastruktur;-;Ostrava;Èeský Tìšín;Stát;SŽDC
 300012;hr. infr. Bohumín pøednádraží;hi Bohumín pøedn.;-;348,667;Hranice infrastruktur;-;Ostrava;Ostrava;Stát;SŽDC
 300020;hr. infr. Havíøov;hi Havíøov;-;18,342;Hranice infrastruktur;-;Ostrava;Èeský Tìšín;Stát;SŽDC
