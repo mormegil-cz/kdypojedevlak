@@ -20,7 +20,7 @@ public class CompanyCodebook(string path)
                 ShortName = r[1],
                 LongName = r.Length >= 3 ? r[2] : r[1],
                 Country = r.Length >= 4 ? r[3] : null,
-                Web = r.Length >= 5 ? NormalizeUrl(r[4]) : null
+                Web = r.Length >= 5 ? NormalizeUrl(r[4]) : CreateFallbackUrl(r.Length >= 3 ? r[2] : r[1])
             });
     }
 
@@ -29,6 +29,8 @@ public class CompanyCodebook(string path)
         var basicUrlStr = urlStr.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) ? urlStr : "http://" + urlStr;
         return Uri.TryCreate(basicUrlStr, UriKind.Absolute, out _) ? basicUrlStr : null;
     }
+
+    private string CreateFallbackUrl(string name) => "https://duckduckgo.com/?q=" + Uri.EscapeDataString(name);
 
     public CompanyCodebookEntry? Find(string id)
     {

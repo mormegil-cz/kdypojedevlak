@@ -55,13 +55,16 @@
                     Nástroje <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
-                    <li>
-                        <a href="https://www.zelpage.cz/razeni/@(Model.Train.TimetableYear.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku (ŽelPage)</a>
-                    </li>
                     @if (Model.VagonWebCompanyId != null)
                     {
                         <li>
                             <a href="https://www.vagonweb.cz/razeni/vlak.php?zeme=@Model.VagonWebCompanyId&cislo=@Model.Train.TrainNumber&rok=@Model.Train.TimetableYear.Year">Řazení vlaku (vagonWEB)</a>
+                        </li>
+                    }
+                    @if (Model.Train.YearId <= 2025)
+                    {
+                        <li>
+                            <a href="https://www.zelpage.cz/razeni/@(Model.Train.TimetableYear.Year % 100)/vlaky/cd-@Model.Train.TrainNumber">Řazení vlaku (ŽelPage)</a>
                         </li>
                     }
                     @if (Model.VagonWebCompanyId == "CD")
@@ -70,7 +73,7 @@
                             <a href="https://www.cd.cz/vlak/@Model.Train.TrainNumber">Poloha vlaku (ČD)</a>
                         </li>
                         <li>
-                            <a href="http://kam.mff.cuni.cz/~babilon/cgi-bin/zpvlaku.cgi?@Model.Train.TrainNumber">Zpoždění vlaku</a>
+                            <a href="https://babitron.kam.mff.cuni.cz/cgi-bin/zpvlaku.cgi?d=28&v=@Model.Train.TrainNumber">Zpoždění vlaku</a>
                         </li>
                     }
                     @if (Model.CompanyCodebookEntries.Count > 0)
